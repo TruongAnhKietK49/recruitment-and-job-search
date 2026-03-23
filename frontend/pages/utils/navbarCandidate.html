@@ -1,0 +1,91 @@
+<nav class="navbar navbar-expand-lg navbar-dark job-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="#">JOB WEBSITE</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Việc làm</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Công ty</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Quản lý CV</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Cẩm nang</a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-2">
+        <a href="login.html" class="btn btn-nav-login">Đăng nhập</a>
+        <a href="register.html" class="btn btn-nav-register active">Đăng ký</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Navbar */
+  .job-navbar {
+    background: linear-gradient(90deg, #2f80ed 0%, #2778e5 100%);
+    box-shadow: 0 6px 22px rgba(47, 128, 237, 0.18);
+    padding: 14px 0;
+  }
+
+  .job-navbar .navbar-brand {
+    font-size: 1.1rem;
+    letter-spacing: 0.4px;
+    font-weight: 800;
+  }
+
+  .job-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+    padding: 10px 14px;
+    transition: 0.25s ease;
+  }
+
+  .job-navbar .nav-link:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .btn-nav-login,
+  .btn-nav-register {
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-weight: 600;
+    border: none;
+    transition: 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-nav-login {
+    color: #fff;
+    background: transparent;
+  }
+
+  .btn-nav-login:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+
+  .btn-nav-register {
+    background: var(--secondary);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(52, 199, 89, 0.26);
+  }
+
+  .btn-nav-register:hover,
+  .btn-nav-register.active {
+    background: var(--secondary-dark);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+</style>
