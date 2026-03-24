@@ -17,7 +17,6 @@ import applicationRoutes from "./src/routes/application.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
 import notificationRoutes from "./src/routes/notification.routes.js";
 
-
 const app = express();
 
 app.use(cors());
@@ -33,6 +32,4 @@ app.use("/api/skills", skillRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 connectDB();
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`),
-);
+app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));

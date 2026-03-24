@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý bài đăng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="../../css/HR css/jobManagement.css" />
+  </head>
+  <body>
+    <div class="dashboard-wrap">
+        <!-- Navbar -->
+      <div id="navbar"></div>
+
+      <!-- Main -->
+      <main class="main-content">
+        <div class="page-header">
+          <h1 class="page-title">Quản lý bài đăng</h1>
+          <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#createJobModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Tạo bài đăng</span>
+          </button>
+        </div>
+
+        <div class="search-box">
+          <i class="bi bi-funnel"></i>
+          <input type="text" placeholder="Tìm kiếm bài đăng, tiêu đề hoặc danh mục....." />
+          <i class="bi bi-search"></i>
+        </div>
+
+        <div class="job-card">
+          <div class="job-status status-open">Đang tuyển</div>
+          <div class="job-body">
+            <div class="company-logo">
+              <div class="logo-main">HP</div>
+              <div class="logo-sub">HÙNG PHÁT</div>
+              <div class="logo-desc">Transport</div>
+            </div>
+
+            <div class="job-content">
+              <div class="job-title">Trợ lý giám sát sản xuất</div>
+              <div class="job-description">
+                Hỗ trợ giám sát quy trình sản xuất, theo dõi tiến độ công việc, phối hợp với các bộ phận liên quan và
+                tổng hợp báo cáo hằng ngày.
+              </div>
+
+              <div class="job-fields">
+                <div class="job-field">
+                  <strong>category:</strong>
+                  Vận hành
+                </div>
+                <div class="job-field">
+                  <strong>experience:</strong>
+                  2 - 5 năm kinh nghiệm
+                </div>
+                <div class="job-field">
+                  <strong>jobType:</strong>
+                  full-time
+                </div>
+              </div>
+
+              <div class="job-meta">
+                <span class="badge-soft badge-category">Vận hành</span>
+                <span class="badge-soft badge-type">Full-time</span>
+              </div>
+
+              <div class="salary-range">
+                <strong>salaryMin:</strong>
+                15000000 -
+                <strong>salaryMax:</strong>
+                20000000
+              </div>
+
+              <div class="job-actions">
+                <button class="btn-action btn-edit">
+                  <i class="bi bi-pencil-square"></i>
+                  <span>Chỉnh sửa</span>
+                </button>
+                <button class="btn-action btn-delete">
+                  <i class="bi bi-trash"></i>
+                  <span>Xóa</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-status status-closed">Ngừng tuyển</div>
+          <div class="job-body">
+            <div class="company-logo">
+              <div class="logo-main">HP</div>
+              <div class="logo-sub">HÙNG PHÁT</div>
+              <div class="logo-desc">Transport</div>
+            </div>
+
+            <div class="job-content">
+              <div class="job-title">Nhân viên nhập liệu kho</div>
+              <div class="job-description">
+                Thực hiện nhập liệu chứng từ kho, kiểm tra thông tin hàng hóa, đối soát số liệu và hỗ trợ lập báo cáo
+                tồn kho định kỳ.
+              </div>
+
+              <div class="job-fields">
+                <div class="job-field">
+                  <strong>category:</strong>
+                  Hành chính
+                </div>
+                <div class="job-field">
+                  <strong>experience:</strong>
+                  6 tháng - 1 năm
+                </div>
+                <div class="job-field">
+                  <strong>jobType:</strong>
+                  part-time
+                </div>
+              </div>
+
+              <div class="job-meta">
+                <span class="badge-soft badge-category">Hành chính</span>
+                <span class="badge-soft badge-type">Part-time</span>
+              </div>
+
+              <div class="salary-range">
+                <strong>salaryMin:</strong>
+                7000000 -
+                <strong>salaryMax:</strong>
+                10000000
+              </div>
+
+              <div class="job-actions">
+                <button class="btn-action btn-edit">
+                  <i class="bi bi-pencil-square"></i>
+                  <span>Chỉnh sửa</span>
+                </button>
+                <button class="btn-action btn-delete">
+                  <i class="bi bi-trash"></i>
+                  <span>Xóa</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal create job -->
+    <div class="modal fade" id="createJobModal" tabindex="-1" aria-labelledby="createJobModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 pb-0">
+            <h4 class="modal-title fw-bold text-primary" id="createJobModalLabel">Tạo bài đăng tuyển dụng</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body pt-3">
+            <form id="createJobForm">
+              <div class="row g-3">
+                <div class="col-md-12">
+                  <label for="jobTitle" class="form-label fw-semibold">Tiêu đề</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="jobTitle"
+                    name="title"
+                    placeholder="Nhập tiêu đề công việc"
+                    required
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="jobDescription" class="form-label fw-semibold">Mô tả</label>
+                  <textarea
+                    class="form-control"
+                    id="jobDescription"
+                    name="description"
+                    rows="4"
+                    placeholder="Nhập mô tả công việc"
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="jobCategory" class="form-label fw-semibold">Danh mục</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="jobCategory"
+                    name="category"
+                    placeholder="Ví dụ: IT, Marketing, Kế toán..."
+                    required
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="jobExperience" class="form-label fw-semibold">Kinh nghiệm</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="jobExperience"
+                    name="experience"
+                    placeholder="Ví dụ: 1-2 năm"
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="salaryMin" class="form-label fw-semibold">Lương tối thiểu</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="salaryMin"
+                    name="salaryMin"
+                    placeholder="Ví dụ: 10000000"
+                    min="0"
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="salaryMax" class="form-label fw-semibold">Lương tối đa</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="salaryMax"
+                    name="salaryMax"
+                    placeholder="Ví dụ: 20000000"
+                    min="0"
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="jobType" class="form-label fw-semibold">Hình thức làm việc</label>
+                  <select class="form-select" id="jobType" name="jobType">
+                    <option value="">-- Chọn hình thức làm việc --</option>
+                    <option value="full-time">Full-time</option>
+                    <option value="part-time">Part-time</option>
+                    <option value="internship">Internship</option>
+                    <option value="remote">Remote</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary px-4" id="createJobBtn">Tạo bài đăng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/utils/loadNavbarHR.js"></script>
+  <script src="../../js/HR js/jobManagement.js"></script>
+</html>

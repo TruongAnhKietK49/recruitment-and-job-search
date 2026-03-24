@@ -149,16 +149,16 @@
     const role = data?.user?.role || data?.role || "";
 
     if (role.toLowerCase() === "hr") {
-      window.location.href = "../hr/dashboard.html";
+      window.location.href = "../../pages/HR Pages/dashboard.html";
       return;
     }
 
     if (role.toLowerCase() === "candidate") {
-      window.location.href = "../candidate/home.html";
+      window.location.href = "";
       return;
     }
 
-    window.location.href = "../../index.html";
+    window.location.href = "";
   }
 
   async function handleLogin() {
@@ -196,9 +196,9 @@
 
     showToast("Đăng nhập thành công. Chào mừng bạn quay trở lại!", true);
 
-    // setTimeout(() => {
-    //   redirectAfterLogin(data);
-    // }, 1000);
+    setTimeout(() => {
+      redirectAfterLogin(data);
+    }, 1000);
   }
 
   emailInput.addEventListener("blur", validateEmail);

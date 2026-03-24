@@ -1,0 +1,105 @@
+<aside class="sidebar">
+  <div class="brand">
+    <i class="bi bi-briefcase"></i>
+    <span>Job Website</span>
+  </div>
+
+  <nav>
+    <a href="../HR Pages/dashboard.html" class="menu-link">
+      <i class="bi bi-house-door"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="../HR Pages/jobManagement.html" class="menu-link">
+      <i class="bi bi-clipboard"></i>
+      <span>Quản lý bài đăng</span>
+    </a>
+    <a href="#" class="menu-link">
+      <i class="bi bi-people"></i>
+      <span>Quản lý ứng viên</span>
+    </a>
+    <a href="#" class="menu-link">
+      <i class="bi bi-display"></i>
+      <span>Thông tin công ty</span>
+    </a>
+    <a href="#" class="menu-link">
+      <i class="bi bi-person"></i>
+      <span>Nguyen Thi B</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a href="#" class="menu-link mb-0">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Đăng xuất</span>
+    </a>
+  </div>
+</aside>
+
+<style>
+  .sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--primary) 0%, #2b7ae4 100%);
+    color: #fff;
+    padding: 20px 18px;
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 26px;
+  }
+
+  .brand i {
+    font-size: 28px;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: 0.2s ease;
+  }
+
+  .menu-link:hover,
+  .menu-link.active {
+    background: rgba(69, 40, 197, 0.5);
+    color: #fff;
+  }
+
+  .menu-link i {
+    font-size: 22px;
+  }
+
+  .sidebar-bottom {
+    position: absolute;
+    bottom: 24px;
+    left: 18px;
+    right: 18px;
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar {
+      position: relative;
+      width: 100%;
+      min-height: auto;
+    }
+
+    .sidebar-bottom {
+      position: static;
+      margin-top: 24px;
+    }
+  }
+</style>
