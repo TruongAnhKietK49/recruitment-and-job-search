@@ -7,4 +7,6 @@ async function loadNavbar() {
     console.error("Lỗi load navbar:", error);
   }
 }
+
+
 loadNavbar();

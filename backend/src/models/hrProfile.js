@@ -12,6 +12,15 @@ const hrProfileSchema = new mongoose.Schema(
       ref: "Company",
       required: true,
     },
+    avatar: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    header: {
+      type: String,
+    },
     position: {
       type: String,
       required: true,

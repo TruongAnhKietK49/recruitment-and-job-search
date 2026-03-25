@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { email, password, fullName, phone, gender, role } = req.body;
+    const { email, password, fullName, phone, gender, birthday, role } = req.body;
 
     const allowedRoles = ["hr", "candidate"];
 
@@ -27,6 +27,7 @@ export const register = async (req, res) => {
       fullName,
       phone,
       gender,
+      birthday,
       role,
       status: "active",
     });

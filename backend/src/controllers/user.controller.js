@@ -74,14 +74,14 @@ export const updateMyProfile = async (req, res) => {
     if (userRole === "candidate") {
       updatedProfile = await candidateProfile
         .findOneAndUpdate({ userId }, req.body, {
-          new: true,
+          returnDocument: "after",
           runValidators: true,
           upsert: true,
         })
         .populate("skills", "skillName");
     } else if (userRole === "hr") {
       updatedProfile = await hrProfile.findOneAndUpdate({ userId }, req.body, {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
         upsert: true,
       });

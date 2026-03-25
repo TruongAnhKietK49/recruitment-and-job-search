@@ -7,7 +7,7 @@ import express from "express";
 
 const router = express.Router();
 
-router.get("/profile", authMiddleware, getProfile);
+router.get("/me", authMiddleware, getProfile);
 router.get("/", authMiddleware, authorizeRoles("admin"), getAllUsers);
 router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getProfileById);
 router.put("/", authMiddleware, updateMyProfile);

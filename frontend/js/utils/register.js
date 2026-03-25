@@ -10,6 +10,7 @@ const fullNameInput = document.getElementById("fullName");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const phoneInput = document.getElementById("phone");
+const birthdayInput = document.getElementById("birthday");
 
 const fullNameError = document.getElementById("fullNameError");
 const emailError = document.getElementById("emailError");
@@ -62,8 +63,9 @@ registerForm.addEventListener("submit", async (e) => {
     email: emailInput.value.trim(),
     password: passwordInput.value.trim(),
     phone: phoneInput.value.trim(),
+    birthday: birthdayInput.value,
     role: selectedRole,
-    gender: selectedGender,
+    gender: selectedGender.toLowerCase(),
   };
 
   console.log("Form data:", formData);

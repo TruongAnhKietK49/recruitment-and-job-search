@@ -120,10 +120,8 @@
 
   function saveAuth(data, rememberMe) {
     const storage = rememberMe ? localStorage : sessionStorage;
-
     if (data.token) {
       storage.setItem("token", data.token);
-      storage.setItem("user", data.user);
     }
 
     if (data.accessToken) {
@@ -168,8 +166,6 @@
       rememberMe: rememberMeInput ? rememberMeInput.checked : false,
     };
 
-    console.log("Dữ liệu đăng nhập:", loginData);
-
     const res = await fetch(`${URL}/api/auth/login`, {
       method: "POST",
       headers: {
@@ -191,7 +187,6 @@
     if (!res.ok) {
       throw new Error(data.message || "Đăng nhập thất bại.");
     }
-
     saveAuth(data, loginData.rememberMe);
 
     showToast("Đăng nhập thành công. Chào mừng bạn quay trở lại!", true);

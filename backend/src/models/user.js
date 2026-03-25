@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female"],
       default: "male",
     },
+    birthday: {
+      type: Date,
+      required: true,
+    },
     role: {
       type: String,
       enum: ["candidate", "hr", "admin"],
