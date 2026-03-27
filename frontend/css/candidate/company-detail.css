@@ -1,0 +1,203 @@
+body {
+  background-color: #f0f4f8; 
+}
+
+/* Banner tìm kiếm */
+.search-banner {
+  background-color: #8cb8ff;
+  padding: 20px 0;
+  margin-bottom: 2rem;
+}
+.search-box {
+  max-width: 800px;
+}
+.form-control:focus, .form-select:focus {
+  box-shadow: none;
+}
+
+.company-main-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  overflow: hidden;
+  padding-bottom: 3rem;
+}
+
+.company-cover-pattern {
+  height: 180px;
+  background: linear-gradient(135deg, #ffffff 0%, #fdfbfb 20%, #f6e3c5 50%, #f8c059 100%);
+  position: relative;
+}
+
+.company-content-inner {
+  padding: 0 50px;
+}
+
+/* Header Công ty (Logo + Tên) */
+.company-header-row {
+  display: flex;
+  align-items: flex-end;
+  margin-top: -60px;
+  margin-bottom: 30px;
+}
+.company-logo-box {
+  width: 130px;
+  height: 130px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #3182ce;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-right: 25px;
+  flex-shrink: 0;
+  z-index: 2;
+  position: relative;
+}
+.company-logo-box img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+.company-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
+  text-transform: uppercase;
+  margin-bottom: 20px; 
+}
+
+.meta-info-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 40px;
+}
+.meta-info-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  color: #4a5568;
+  font-size: 1.05rem;
+}
+.meta-info-list li i {
+  width: 30px;
+  font-size: 1.3rem;
+  color: #718096;
+}
+
+/* Section chung */
+.section-title {
+  color: #3182ce;
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+}
+.about-text p {
+  line-height: 1.8;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  text-align: justify;
+}
+.job-count-label {
+  color: #dd6b20; /* Màu cam */
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: block;
+  margin-top: -15px;
+  margin-bottom: 20px;
+}
+
+/* Job Card Ngang (Horizontal) */
+.job-card-h {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  background: white;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+.job-card-h:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+  border-color: #cbd5e0;
+}
+.job-logo-box {
+  width: 110px;
+  height: 110px;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #3182ce;
+  margin-right: 25px;
+  flex-shrink: 0;
+}
+.job-logo-box img {
+  max-width: 90%; max-height: 90%; object-fit: contain;
+}
+.job-info {
+  flex-grow: 1;
+}
+.job-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 6px;
+}
+.job-company-name {
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  color: #4a5568;
+  margin-bottom: 12px;
+}
+.job-meta-line {
+  color: #4a5568;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+.job-salary {
+  color: #3182ce;
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-top: 6px;
+}
+.job-date {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  color: #a0aec0;
+  font-size: 0.9rem;
+}
+.btn-save-job {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: #e53e3e;
+  font-size: 1.4rem;
+  padding: 0;
+}
+.btn-save-job:hover { color: #c53030; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .company-content-inner { padding: 0 20px; }
+  .company-header-row { flex-direction: column; align-items: center; text-align: center; }
+  .company-logo-box { margin-right: 0; margin-bottom: 15px; }
+  .company-title { margin-bottom: 0; }
+  .job-card-h { flex-direction: column; align-items: flex-start; }
+  .job-logo-box { margin-bottom: 15px; }
+  .job-date { position: static; display: block; margin-top: 15px; }
+}

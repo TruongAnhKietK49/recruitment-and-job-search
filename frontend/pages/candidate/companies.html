@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh sách công ty - JOB WEBSITE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../css/utils/style.css">
+  <link rel="stylesheet" href="../../css/candidate/companies.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="search-banner">
+    <div class="container">
+      <div class="search-box bg-white rounded-pill shadow-sm d-flex align-items-center p-2 mx-auto">
+        <div class="flex-grow-1 border-end px-3 d-flex align-items-center search-input-wrap">
+          <i class="bi bi-search text-muted me-2"></i>
+          <input type="text" id="searchInput" class="form-control border-0 shadow-none" placeholder="Tên công ty...">
+        </div>
+        <div class="flex-grow-1 px-3 d-flex align-items-center location-select-wrap">
+          <i class="bi bi-geo-alt text-muted me-2"></i>
+          <select id="locationSelect" class="form-select border-0 shadow-none text-muted">
+            <option value="">Địa điểm</option>
+            <option value="HN">Hà Nội</option>
+            <option value="HCM">TP.HCM</option>
+            <option value="BN">Bắc Ninh</option>
+          </select>
+        </div>
+        <button class="btn btn-primary rounded-pill px-4 py-2" id="searchBtn">Tìm kiếm</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container py-5">
+    <div id="companiesContainer" class="row g-4">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+      </div>
+    </div>
+
+    <nav aria-label="Page navigation" class="mt-5">
+      <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/utils/loadNavbar.js"></script>
+  <script src="../../js/utils/loadFooter.js"></script>
+  <script src="../../js/candidate/companies.js"></script>
+</body>
+</html>
