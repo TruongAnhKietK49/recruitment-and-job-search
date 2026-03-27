@@ -1,0 +1,10 @@
+.saved-job-card {
+  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: white;
+  margin-bottom: 1rem;
+}
+.saved-job-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}

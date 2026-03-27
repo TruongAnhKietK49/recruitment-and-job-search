@@ -1,0 +1,116 @@
+body {
+  background-color: #f8f9fa; /* Màu nền nhạt bên ngoài */
+}
+
+/* Khung chứa chính (Giống thiết kế) */
+.cv-management-container {
+  background-color: #ffffff;
+  border: 1px solid #b8daff;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  min-height: 60vh; 
+}
+
+.cv-card {
+  border: 1px solid transparent;
+  background: white;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-thumbnail-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1.414; 
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background-color: #f8f9fa;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.cv-card:hover .cv-thumbnail-wrap {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.cv-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top; 
+}
+
+.cv-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #adb5bd;
+  font-size: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cv-placeholder span {
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.cv-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+.cv-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+.cv-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Nút bấm hành động */
+.cv-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: auto;
+}
+.btn-action {
+  flex: 1; 
+  border-radius: 30px;
+  padding: 8px 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: white;
+  border: none;
+  transition: 0.2s;
+}
+.btn-action-edit {
+  background-color: #f07e26; /* Màu cam từ thiết kế */
+}
+.btn-action-edit:hover { background-color: #d96d1c; color: white;}
+
+.btn-action-delete {
+  background-color: #ff3b3b; /* Màu đỏ từ thiết kế */
+}
+.btn-action-delete:hover { background-color: #e63535; color: white;}
+
+/* Tùy chỉnh Nút Tạo CV */
+.btn-success {
+  background-color: #00d824;
+  border-color: #00d824;
+}
+.btn-success:hover { background-color: #00b81e; border-color: #00b81e;}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý CV - JOB WEBSITE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../css/utils/style.css">
+  <link rel="stylesheet" href="../../css/candidate/my-cvs.css">
+</head>
+<body class="bg-light"> <div id="navbar"></div>
+
+  <main class="container py-5">
+    <div class="cv-management-container">
+      
+      <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+        <h2 class="text-primary fw-bold mb-0">CV của tôi</h2>
+        <button class="btn btn-success rounded-pill px-4 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#createCVModal">
+          <i class="bi bi-plus-lg"></i> Tạo CV
+        </button>
+      </div>
+
+      <div id="cvsList" class="row g-4">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <div class="modal fade" id="createCVModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Thêm CV mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createCVForm">
+            <div class="mb-3">
+              <label class="form-label fw-medium">Tiêu đề CV</label>
+              <input type="text" class="form-control" name="title" placeholder="VD: CV AI Engineer" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">URL file CV (PDF/Image)</label>
+              <input type="url" class="form-control" name="fileUrl" placeholder="https://..." required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary px-4" id="saveCVBtn">Lưu CV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/utils/loadNavbar.js"></script>
+  <script src="../../js/utils/loadFooter.js"></script>
+  <script src="../../js/candidate/my-cvs.js"></script>
+</body>
+</html>

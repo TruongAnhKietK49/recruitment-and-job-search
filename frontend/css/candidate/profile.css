@@ -1,0 +1,133 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.sidebar-card {
+  border: 1px solid #a3c4f3; 
+  border-radius: 8px;
+  padding: 40px 20px 20px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #e2e8f0; 
+  border: 4px solid #fff;
+}
+
+.btn-camera {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  background: white;
+  border: 1px solid #0d6efd;
+  color: #0d6efd;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-camera:hover {
+  background: #0d6efd;
+  color: white;
+}
+
+.change-password-link {
+  color: #fd7e14; 
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.change-password-link:hover {
+  color: #e36a0b;
+  text-decoration: underline;
+}
+
+.sidebar-nav {
+  margin-top: 20px;
+  padding-left: 10px;
+}
+.sidebar-nav .nav-item {
+  display: block;
+  color: #212529;
+  font-style: italic; 
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+.sidebar-nav .nav-item:hover {
+  color: #0d6efd;
+}
+
+/* Form Container (Cột Phải) */
+.main-form-card {
+  border: 1px solid #a3c4f3;
+  border-radius: 8px;
+  padding: 40px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.section-title {
+  color: #0d6efd; 
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.form-control, .form-select {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 10px 15px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: #8cb8ff;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
+
+.input-group .form-control {
+  border-right: none;
+}
+.input-group .input-group-text {
+  background: white;
+  border-left: none;
+  color: #8cb8ff;
+  font-weight: 500;
+}
+
+.btn-save {
+  background-color: #198754; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 10px 30px;
+  transition: 0.2s;
+}
+.btn-save i {
+  margin-right: 6px;
+}
+.btn-save:hover {
+  background-color: #157347;
+  color: white;
+}

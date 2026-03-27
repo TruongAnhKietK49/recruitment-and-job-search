@@ -1,0 +1,18 @@
+.application-card {
+  border: 1px solid #e9ecef;
+  border-radius: 16px;
+  padding: 1rem;
+  background: white;
+  margin-bottom: 1rem;
+}
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.status-pending { background: #ffc10720; color: #ffc107; }
+.status-reviewing { background: #17a2b820; color: #17a2b8; }
+.status-accepted { background: #28a74520; color: #28a745; }
+.status-rejected { background: #dc354520; color: #dc3545; }
