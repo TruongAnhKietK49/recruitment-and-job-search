@@ -18,11 +18,6 @@
             <h1 class="page-title">Thông tin công ty</h1>
             <p class="page-subtitle">Xem công ty đang tham gia hoặc tìm kiếm và gửi yêu cầu tham gia công ty mới.</p>
           </div>
-
-          <div class="user-box">
-            <div class="avatar">B</div>
-            <div class="user-name">Nguyễn Thị B</div>
-          </div>
         </div>
 
         <div class="company-tabs-wrap">
@@ -93,53 +88,50 @@
               aria-labelledby="my-company-tab"
               tabindex="0"
             >
-              <div class="card-soft overflow-hidden">
+              <div class="card-soft overflow-hidden showMyCompany">
                 <div class="company-cover"></div>
                 <div class="company-profile">
-                  <div class="company-logo">HP</div>
+                  <div class="company-logo"></div>
 
                   <div class="company-header">
                     <div>
-                      <div class="company-name">Công ty Cổ phần Hùng Phát</div>
+                      <div class="company-name"></div>
                       <div class="company-meta">
                         <span class="meta-item">
-                          <i class="bi bi-geo-alt"></i>
-                          TP. Hồ Chí Minh
+                          <i class="bi bi-geo-alt mb-1"></i>
+                          <h6 class="company-address"></h6>
                         </span>
                         <span class="meta-item">
-                          <i class="bi bi-people"></i>
-                          100 - 300 nhân sự
+                          <i class="bi bi-briefcase mb-1"></i>
+                          <h6 class="company-category"></h6>
                         </span>
                         <span class="meta-item">
-                          <i class="bi bi-briefcase"></i>
-                          Logistics &amp; Vận tải
+                          <i class="bi bi-globe mb-1"></i>
+                          <h6 class="company-website"></h6>
                         </span>
                         <span class="meta-item">
-                          <i class="bi bi-globe"></i>
-                          hungphat.vn
-                        </span>
-                        <span class="meta-item">
-                          <i class="bi bi-person-badge"></i>
-                          Vai trò: Founder / HR
+                          <i class="bi bi-person-badge mb-1"></i>
+                          <h6>Vai trò:</h6>
+                          <h6 class="company-role"></h6>
                         </span>
                       </div>
                     </div>
 
                     <div class="company-actions">
-                      <button class="btn btn-primary-soft">
+                      <button class="btn btn-primary-soft" id="openEditCompanyModalBtn">
                         <i class="bi bi-pencil-square me-2"></i>
                         Chỉnh sửa thông tin
                       </button>
-                      <button class="btn btn-outline-soft">
-                        <i class="bi bi-box-arrow-left me-2"></i>
-                        Rời công ty
+                      <button class="btn btn-outline-soft" id="deleteCompanyBtn">
+                        <i class="bi bi-box-arrow-left"></i>
+                        <h6 class="deleteCompany"></h6>
                       </button>
                     </div>
                   </div>
 
                   <div class="section-box">
                     <div class="section-title">Giới thiệu công ty</div>
-                    <p class="section-text">
+                    <p class="section-text company-description">
                       Hùng Phát là doanh nghiệp hoạt động trong lĩnh vực logistics và vận tải, tập trung cung cấp giải
                       pháp giao nhận hàng hóa, quản lý kho bãi và tối ưu chuỗi cung ứng cho khách hàng doanh nghiệp.
                       Chúng tôi xây dựng môi trường làm việc chuyên nghiệp, minh bạch và định hướng phát triển bền vững
@@ -152,27 +144,23 @@
                     <div class="info-grid">
                       <div class="info-item">
                         <div class="info-label">Email liên hệ</div>
-                        <div class="info-value">hr@hungphat.vn</div>
+                        <div class="info-value company-email"></div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Số điện thoại</div>
-                        <div class="info-value">028 3888 9999</div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Mã công ty</div>
-                        <div class="info-value">HP-2026</div>
+                        <div class="info-value company-phone"></div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Địa chỉ</div>
-                        <div class="info-value">12 Nguyễn Văn Linh, Quận 7, TP.HCM</div>
+                        <div class="info-value company-addressDetail"></div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Ngày thành lập</div>
-                        <div class="info-value">15/08/2014</div>
+                        <div class="info-value company-founded"></div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Trạng thái</div>
-                        <div class="info-value">Đang hoạt động</div>
+                        <div class="info-value company-status"></div>
                       </div>
                     </div>
                   </div>
@@ -180,13 +168,8 @@
                   <div class="section-box">
                     <div class="section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
                       <span>Tổng quan quản trị</span>
-                      <span class="badge text-bg-primary rounded-pill px-3 py-2">3 yêu cầu chờ duyệt</span>
                     </div>
                     <div class="info-grid">
-                      <div class="info-item">
-                        <div class="info-label">Số phòng ban</div>
-                        <div class="info-value">06 phòng ban</div>
-                      </div>
                       <div class="info-item">
                         <div class="info-label">Nhân viên đang hoạt động</div>
                         <div class="info-value">124 thành viên</div>
@@ -200,7 +183,7 @@
                 </div>
               </div>
 
-              <div class="empty-state mt-4">
+              <div class="empty-state mt-4 showNotification">
                 <div class="empty-icon">
                   <i class="bi bi-buildings"></i>
                 </div>
@@ -345,43 +328,36 @@
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label fw-semibold">Tên công ty</label>
-                      <input type="text" class="form-control" placeholder="Nhập tên công ty" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Mã công ty</label>
-                      <input type="text" class="form-control" placeholder="Ví dụ: HP-2026" />
+                      <input type="text" class="form-control companyName" placeholder="Nhập tên công ty" />
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
-                      <input type="text" class="form-control" placeholder="Ví dụ: Công nghệ, Logistics..." />
+                      <input
+                        type="text"
+                        class="form-control companyCategory"
+                        placeholder="Ví dụ: Công nghệ, Logistics..."
+                      />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold">Quy mô nhân sự</label>
-                      <select class="form-select">
-                        <option>Chọn quy mô</option>
-                        <option>1 - 10 nhân sự</option>
-                        <option>10 - 50 nhân sự</option>
-                        <option>50 - 100 nhân sự</option>
-                        <option>100 - 300 nhân sự</option>
-                        <option>300+ nhân sự</option>
-                      </select>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Email liên hệ</label>
-                      <input type="email" class="form-control" placeholder="hr@company.com" />
+                      <label class="form-label fw-semibold">Website</label>
+                      <input type="text" class="form-control companyWebsite" placeholder="Nhập địa chỉ website" />
                     </div>
                     <div class="col-md-6">
                       <label class="form-label fw-semibold">Số điện thoại</label>
-                      <input type="text" class="form-control" placeholder="Nhập số điện thoại" />
+                      <input type="text" class="form-control companyPhone" placeholder="Nhập số điện thoại" />
                     </div>
                     <div class="col-md-12">
                       <label class="form-label fw-semibold">Địa chỉ</label>
-                      <input type="text" class="form-control" placeholder="Nhập địa chỉ công ty" />
+                      <input type="text" class="form-control companyAddress" placeholder="Nhập địa chỉ công ty" />
+                    </div>
+                    <div class="col-md-12">
+                      <label class="form-label fw-semibold">Logo công ty</label>
+                      <input type="text" class="form-control companyLogo" placeholder="Nhập logo dạng url" />
                     </div>
                     <div class="col-md-12">
                       <label class="form-label fw-semibold">Mô tả công ty</label>
                       <textarea
-                        class="form-control"
+                        class="form-control companyDescription"
                         rows="5"
                         placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"
                       ></textarea>
@@ -389,7 +365,7 @@
                   </div>
                   <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
                     <button type="button" class="btn btn-outline-soft">Lưu nháp</button>
-                    <button type="button" class="btn btn-primary-soft">Tạo công ty</button>
+                    <button type="button" class="btn btn-primary-soft" id="createCompanyBtn">Tạo công ty</button>
                   </div>
                 </form>
               </div>
@@ -421,7 +397,7 @@
                 </div>
               </div>
 
-              <div class="company-list">
+              <div class="company-list company-join-request-list">
                 <div class="join-card">
                   <div class="join-header">
                     <div class="join-logo"><i class="bi bi-person"></i></div>
@@ -515,7 +491,73 @@
       </main>
     </div>
 
+    <div
+      class="modal fade"
+      id="editCompanyModal"
+      tabindex="-1"
+      aria-labelledby="editCompanyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editCompanyModalLabel">Chỉnh sửa thông tin công ty</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editCompanyForm">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Tên công ty</label>
+                  <input type="text" class="form-control" id="editCompanyName" placeholder="Nhập tên công ty" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editCompanyCategory"
+                    placeholder="Ví dụ: Công nghệ, Logistics..."
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Website</label>
+                  <input type="text" class="form-control" id="editCompanyWebsite" placeholder="Nhập địa chỉ website" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Số điện thoại</label>
+                  <input type="text" class="form-control" id="editCompanyPhone" placeholder="Nhập số điện thoại" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-semibold">Địa chỉ</label>
+                  <input type="text" class="form-control" id="editCompanyAddress" placeholder="Nhập địa chỉ công ty" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-semibold">Logo công ty</label>
+                  <input type="text" class="form-control" id="editCompanyLogo" placeholder="Nhập logo dạng url" />
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label fw-semibold">Mô tả công ty</label>
+                  <textarea
+                    class="form-control"
+                    id="editCompanyDescription"
+                    rows="5"
+                    placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"
+                  ></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-soft" data-bs-dismiss="modal">Đóng</button>
+            <button type="button" class="btn btn-primary-soft" id="saveEditCompanyBtn">Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/utils/loadNavbarHR.js"></script>
-</body>
+    <script type="module" src="../../js/HR js/companyManagement.js"></script>
+  </body>
 </html>
