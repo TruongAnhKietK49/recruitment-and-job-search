@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ cá nhân - JOB WEBSITE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../css/utils/style.css">
+  <link rel="stylesheet" href="../../css/candidate/profile.css">
+</head>
+<body class="bg-light">
+  <div id="navbar"></div>
+
+  <main class="container py-5">
+    <div class="row g-4">
+      
+      <div class="col-lg-4 col-xl-3">
+        <div class="sidebar-card text-center mb-4">
+          <div class="avatar-wrapper mb-3" id="avatarWrapper">
+            <div class="profile-avatar d-flex align-items-center justify-content-center text-muted fs-1">
+              <i class="bi bi-person"></i> </div>
+            <button class="btn-camera"><i class="bi bi-camera"></i></button>
+          </div>
+          <h4 class="fw-bold mb-4" id="sidebarName">Đang tải...</h4>
+          <div class="text-start mt-4">
+            <a href="#" class="change-password-link"><i class="bi bi-key"></i> Đổi mật khẩu</a>
+          </div>
+        </div>
+
+        <div class="sidebar-nav">
+          <a href="my-cvs.html" class="nav-item">CV của tôi</a>
+          <a href="#" class="nav-item">Việc làm đã lưu</a>
+          <a href="#" class="nav-item">Việc làm đã ứng tuyển</a>
+        </div>
+      </div>
+
+      <div class="col-lg-8 col-xl-9">
+        <div class="main-form-card" id="profileData">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Đang tải...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/utils/loadNavbar.js"></script>
+  <script src="../../js/utils/loadFooter.js"></script>
+  <script src="../../js/candidate/profile.js"></script>
+</body>
+</html>
