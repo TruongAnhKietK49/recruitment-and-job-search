@@ -55,6 +55,24 @@ export const getAllJobs = async (req, res) => {
   }
 };
 
+export const getJobsByCompany = async (req, res) => {
+  try {
+    const jobs = await Job.find({ companyId: req.params.companyId }).populate(
+      "companyId",
+      "companyName logoUrl address website",
+    );
+    if (!jobs) {
+      return res.status(404).json({ message: "Jobs not found" });
+    }
+    res.status(200).json(jobs);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching jobs",
+      error: error.message,
+    });
+  }
+};
+
 export const getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id).populate(
@@ -100,6 +118,11 @@ export const createJob = async (req, res) => {
       experience,
       jobType,
       deadline,
+      workingTime,
+      location,
+      quantity,
+      requirements,
+      benefits,
     } = req.body;
 
     const company = await Company.findById(companyId);
@@ -125,6 +148,11 @@ export const createJob = async (req, res) => {
       experience,
       jobType,
       deadline,
+      workingTime,
+      location,
+      quantity,
+      requirements,
+      benefits,
       status: "pending",
     });
 
@@ -160,7 +188,7 @@ export const createJob = async (req, res) => {
 
 export const updateJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
     const updatedJob = await Job.findByIdAndUpdate(jobId, req.body, {
       new: true,
     });
@@ -259,8 +287,9 @@ export const rejectJob = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
     const deletedJob = await Job.findByIdAndDelete(jobId);
+    console.log(deletedJob);
     if (!deletedJob) {
       return res.status(404).json({ message: "Job not found" });
     }

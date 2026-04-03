@@ -5,6 +5,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 
 import {
   getAllJobs,
+  getJobsByCompany,
   getJobById,
   getPendingJobs,
   createJob,
@@ -20,63 +21,30 @@ import {
   deleteJobViewHistory,
 } from "../controllers/jobViewHistory.controller.js";
 
-import {
-  saveJob,
-  getMySavedJobs,
-  removeSavedJob,
-} from "../controllers/saveJob.controller.js";
+import { saveJob, getMySavedJobs, removeSavedJob } from "../controllers/saveJob.controller.js";
 
 const router = express.Router();
 
 router.get("/", authMiddleware, getAllJobs);
+router.get("/company/:companyId", authMiddleware, getJobsByCompany);
 router.get("/pending", authMiddleware, authorizeRoles("admin"), getPendingJobs);
 router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getJobById);
 
 router.post("/", authMiddleware, authorizeRoles("admin", "hr"), createJob);
-router.put("/:id", authMiddleware, authorizeRoles("admin", "hr"), updateJob);
-router.delete("/:id", authMiddleware, authorizeRoles("admin", "hr"), deleteJob);
+router.put("/:jobId", authMiddleware, authorizeRoles("admin", "hr"), updateJob);
+router.delete("/:jobId", authMiddleware, authorizeRoles("admin", "hr"), deleteJob);
 
-router.patch(
-  "/:id/approve",
-  authMiddleware,
-  authorizeRoles("admin"),
-  approveJob,
-);
+router.patch("/:id/approve", authMiddleware, authorizeRoles("admin"), approveJob);
 router.patch("/:id/reject", authMiddleware, authorizeRoles("admin"), rejectJob);
 
-router.post(
-  "/view-history",
-  authMiddleware,
-  authorizeRoles("candidate"),
-  addJobViewHistory,
-);
-router.get(
-  "/view-history/me",
-  authMiddleware,
-  authorizeRoles("candidate"),
-  getMyJobViewHistory,
-);
-router.delete(
-  "/view-history/:id",
-  authMiddleware,
-  authorizeRoles("candidate"),
-  deleteJobViewHistory,
-);
+router.post("/view-history", authMiddleware, authorizeRoles("candidate"), addJobViewHistory);
+router.get("/view-history/me", authMiddleware, authorizeRoles("candidate"), getMyJobViewHistory);
+router.delete("/view-history/:id", authMiddleware, authorizeRoles("candidate"), deleteJobViewHistory);
 
-router.get(
-  "/save-job/me",
-  authMiddleware,
-  authorizeRoles("candidate"),
-  getMySavedJobs,
-);
+router.get("/save-job/me", authMiddleware, authorizeRoles("candidate"), getMySavedJobs);
 
 router.post("/save-job", authMiddleware, authorizeRoles("candidate"), saveJob);
 
-router.delete(
-  "/save-job/:id",
-  authMiddleware,
-  authorizeRoles("candidate"),
-  removeSavedJob,
-);
+router.delete("/save-job/:id", authMiddleware, authorizeRoles("candidate"), removeSavedJob);
 
 export default router;

@@ -8,161 +8,542 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="../../css/HR css/jobManagement.css" />
   </head>
+
   <body>
     <div class="dashboard-wrap">
-        <!-- Navbar -->
       <div id="navbar"></div>
 
-      <!-- Main -->
       <main class="main-content">
-        <div class="page-header">
-          <h1 class="page-title">Quản lý bài đăng</h1>
-          <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#createJobModal">
-            <i class="bi bi-plus-lg"></i>
-            <span>Tạo bài đăng</span>
-          </button>
-        </div>
-
-        <div class="search-box">
-          <i class="bi bi-funnel"></i>
-          <input type="text" placeholder="Tìm kiếm bài đăng, tiêu đề hoặc danh mục....." />
-          <i class="bi bi-search"></i>
-        </div>
-
-        <div class="job-card">
-          <div class="job-status status-open">Đang tuyển</div>
-          <div class="job-body">
-            <div class="company-logo">
-              <div class="logo-main">HP</div>
-              <div class="logo-sub">HÙNG PHÁT</div>
-              <div class="logo-desc">Transport</div>
-            </div>
-
-            <div class="job-content">
-              <div class="job-title">Trợ lý giám sát sản xuất</div>
-              <div class="job-description">
-                Hỗ trợ giám sát quy trình sản xuất, theo dõi tiến độ công việc, phối hợp với các bộ phận liên quan và
-                tổng hợp báo cáo hằng ngày.
-              </div>
-
-              <div class="job-fields">
-                <div class="job-field">
-                  <strong>category:</strong>
-                  Vận hành
-                </div>
-                <div class="job-field">
-                  <strong>experience:</strong>
-                  2 - 5 năm kinh nghiệm
-                </div>
-                <div class="job-field">
-                  <strong>jobType:</strong>
-                  full-time
-                </div>
-              </div>
-
-              <div class="job-meta">
-                <span class="badge-soft badge-category">Vận hành</span>
-                <span class="badge-soft badge-type">Full-time</span>
-              </div>
-
-              <div class="salary-range">
-                <strong>salaryMin:</strong>
-                15000000 -
-                <strong>salaryMax:</strong>
-                20000000
-              </div>
-
-              <div class="job-actions">
-                <button class="btn-action btn-edit">
-                  <i class="bi bi-pencil-square"></i>
-                  <span>Chỉnh sửa</span>
-                </button>
-                <button class="btn-action btn-delete">
-                  <i class="bi bi-trash"></i>
-                  <span>Xóa</span>
-                </button>
-              </div>
-            </div>
+        <div class="topbar">
+          <div>
+            <h1 class="page-title">Quản lý bài đăng</h1>
+            <p class="page-subtitle">
+              Theo dõi các bài đăng tuyển dụng của công ty, tạo bài đăng mới và kiểm tra trạng thái duyệt.
+            </p>
           </div>
         </div>
 
-        <div class="job-card">
-          <div class="job-status status-closed">Ngừng tuyển</div>
-          <div class="job-body">
-            <div class="company-logo">
-              <div class="logo-main">HP</div>
-              <div class="logo-sub">HÙNG PHÁT</div>
-              <div class="logo-desc">Transport</div>
+        <div class="job-tabs-wrap">
+          <ul class="nav nav-tabs nav-job-tabs" id="jobTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="overview-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#overview-pane"
+                type="button"
+                role="tab"
+                aria-controls="overview-pane"
+                aria-selected="true"
+              >
+                Tổng quan
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="my-posts-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#my-posts-pane"
+                type="button"
+                role="tab"
+                aria-controls="my-posts-pane"
+                aria-selected="false"
+              >
+                Bài đăng của công ty
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="create-post-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#create-post-pane"
+                type="button"
+                role="tab"
+                aria-controls="create-post-pane"
+                aria-selected="false"
+              >
+                Tạo bài đăng
+              </button>
+            </li>
+
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="approval-status-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#approval-status-pane"
+                type="button"
+                role="tab"
+                aria-controls="approval-status-pane"
+                aria-selected="false"
+              >
+                Trạng thái duyệt
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="jobTabsContent">
+            <!-- TAB TONG QUAN -->
+            <div
+              class="tab-pane fade show active"
+              id="overview-pane"
+              role="tabpanel"
+              aria-labelledby="overview-tab"
+              tabindex="0"
+            >
+              <div class="card-soft p-4 mb-4">
+                <div class="section-title mb-3">Tổng quan bài đăng</div>
+
+                <div class="row g-3 overview-stats">
+                  <div class="col-md-3 col-sm-6">
+                    <div class="stat-card">
+                      <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-file-earmark-text"></i>
+                      </div>
+                      <div class="stat-label">Tổng bài đăng</div>
+                      <div class="stat-value total-post-count">12</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 col-sm-6">
+                    <div class="stat-card">
+                      <div class="stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-check-circle"></i>
+                      </div>
+                      <div class="stat-label">Đã duyệt</div>
+                      <div class="stat-value approved-post-count">07</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 col-sm-6">
+                    <div class="stat-card">
+                      <div class="stat-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-hourglass-split"></i>
+                      </div>
+                      <div class="stat-label">Chờ duyệt</div>
+                      <div class="stat-value pending-post-count">03</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 col-sm-6">
+                    <div class="stat-card">
+                      <div class="stat-icon bg-danger-subtle text-danger">
+                        <i class="bi bi-x-circle"></i>
+                      </div>
+                      <div class="stat-label">Bị từ chối</div>
+                      <div class="stat-value rejected-post-count">02</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-4">
+                <div class="col-lg-7">
+                  <div class="card-soft p-4 h-100">
+                    <div class="section-title d-flex justify-content-between align-items-center mb-3">
+                      <span>Bài đăng gần đây</span>
+                      <button
+                        class="btn btn-primary-soft btn-sm"
+                        data-bs-toggle="tab"
+                        data-bs-target="#my-posts-pane"
+                        type="button"
+                      >
+                        Xem tất cả
+                      </button>
+                    </div>
+
+                    <div class="recent-post-list">
+                      <div class="recent-post-item">
+                        <div>
+                          <div class="recent-post-title">Frontend Developer</div>
+                          <div class="recent-post-meta">Công nghệ • Full-time • Hạn nộp: 20/04/2026</div>
+                        </div>
+                        <span class="badge text-bg-success">Đã duyệt</span>
+                      </div>
+
+                      <div class="recent-post-item">
+                        <div>
+                          <div class="recent-post-title">Nhân viên Marketing</div>
+                          <div class="recent-post-meta">Marketing • Full-time • Hạn nộp: 18/04/2026</div>
+                        </div>
+                        <span class="badge text-bg-warning">Chờ duyệt</span>
+                      </div>
+
+                      <div class="recent-post-item">
+                        <div>
+                          <div class="recent-post-title">Kế toán tổng hợp</div>
+                          <div class="recent-post-meta">Kế toán • Full-time • Hạn nộp: 15/04/2026</div>
+                        </div>
+                        <span class="badge text-bg-danger">Từ chối</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-5">
+                  <div class="card-soft p-4 h-100">
+                    <div class="section-title mb-3">Gợi ý quản lý</div>
+                    <div class="tips-list">
+                      <div class="tip-item">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Nên viết tiêu đề rõ vị trí tuyển dụng để tăng khả năng được duyệt nhanh.</span>
+                      </div>
+                      <div class="tip-item">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Thêm mức lương và hình thức làm việc giúp bài đăng thu hút ứng viên hơn.</span>
+                      </div>
+                      <div class="tip-item">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Kiểm tra lý do từ chối ở tab trạng thái để chỉnh sửa và gửi lại.</span>
+                      </div>
+                    </div>
+
+                    <div class="quick-actions mt-4">
+                      <button
+                        class="btn btn-primary-soft w-100 mb-2"
+                        data-bs-toggle="tab"
+                        data-bs-target="#create-post-pane"
+                        type="button"
+                      >
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Tạo bài đăng mới
+                      </button>
+                      <button
+                        class="btn btn-outline-soft w-100"
+                        data-bs-toggle="tab"
+                        data-bs-target="#approval-status-pane"
+                        type="button"
+                      >
+                        <i class="bi bi-clipboard-check me-2"></i>
+                        Xem trạng thái duyệt
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="job-content">
-              <div class="job-title">Nhân viên nhập liệu kho</div>
-              <div class="job-description">
-                Thực hiện nhập liệu chứng từ kho, kiểm tra thông tin hàng hóa, đối soát số liệu và hỗ trợ lập báo cáo
-                tồn kho định kỳ.
-              </div>
+            <!-- TAB BAI DANG CUA CONG TY -->
+            <div class="tab-pane fade" id="my-posts-pane" role="tabpanel" aria-labelledby="my-posts-tab" tabindex="0">
+              <div class="search-panel mb-4">
+                <div class="row g-3">
+                  <div class="col-lg-5">
+                    <div class="search-box">
+                      <i class="bi bi-search"></i>
+                      <input
+                        type="text"
+                        class="search-input post-search-input"
+                        placeholder="Tìm theo tiêu đề, danh mục hoặc loại công việc"
+                      />
+                    </div>
+                  </div>
 
-              <div class="job-fields">
-                <div class="job-field">
-                  <strong>category:</strong>
-                  Hành chính
+                  <div class="col-lg-3">
+                    <select class="form-select search-input ps-3 post-status-filter text-black">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="approved">Đã duyệt</option>
+                      <option value="pending">Chờ duyệt</option>
+                      <option value="rejected">Từ chối</option>
+                    </select>
+                  </div>
+
+                  <div class="col-lg-2">
+                    <select class="form-select search-input ps-3 post-type-filter text-black">
+                      <option value="">Tất cả hình thức</option>
+                      <option value="full-time">Full-time</option>
+                      <option value="part-time">Part-time</option>
+                      <option value="internship">Internship</option>
+                      <option value="remote">Remote</option>
+                    </select>
+                  </div>
+
+                  <div class="col-lg-2">
+                    <button class="btn btn-primary-soft w-100" id="filterPostsBtn">
+                      <i class="bi bi-funnel me-2"></i>
+                      Lọc bài đăng
+                    </button>
+                  </div>
                 </div>
-                <div class="job-field">
-                  <strong>experience:</strong>
-                  6 tháng - 1 năm
+              </div>
+
+              <div class="company-post-list" id="jobList"></div>
+
+              <div class="empty-state mt-4 d-none no-posts-state">
+                <div class="empty-icon">
+                  <i class="bi bi-file-earmark-text"></i>
                 </div>
-                <div class="job-field">
-                  <strong>jobType:</strong>
-                  part-time
+                <div class="empty-title">Chưa có bài đăng nào</div>
+                <div class="empty-text">
+                  Bạn chưa tạo bài đăng tuyển dụng nào. Hãy chuyển sang tab
+                  <strong>Tạo bài đăng</strong>
+                  để bắt đầu đăng tin tuyển dụng.
                 </div>
-              </div>
-
-              <div class="job-meta">
-                <span class="badge-soft badge-category">Hành chính</span>
-                <span class="badge-soft badge-type">Part-time</span>
-              </div>
-
-              <div class="salary-range">
-                <strong>salaryMin:</strong>
-                7000000 -
-                <strong>salaryMax:</strong>
-                10000000
-              </div>
-
-              <div class="job-actions">
-                <button class="btn-action btn-edit">
-                  <i class="bi bi-pencil-square"></i>
-                  <span>Chỉnh sửa</span>
-                </button>
-                <button class="btn-action btn-delete">
-                  <i class="bi bi-trash"></i>
-                  <span>Xóa</span>
-                </button>
+                <div class="d-flex justify-content-center">
+                  <button
+                    class="btn btn-primary-soft"
+                    data-bs-toggle="tab"
+                    data-bs-target="#create-post-pane"
+                    type="button"
+                  >
+                    Tạo bài đăng mới
+                  </button>
+                </div>
               </div>
             </div>
+
+            <!-- TAB TAO BAI DANG -->
+            <div
+              class="tab-pane fade"
+              id="create-post-pane"
+              role="tabpanel"
+              aria-labelledby="create-post-tab"
+              tabindex="0"
+            >
+              <div class="card-soft p-4">
+                <div class="section-title mb-3">Tạo bài đăng tuyển dụng</div>
+                <p class="page-subtitle mb-4">
+                  Điền đầy đủ thông tin để gửi bài đăng lên hệ thống. Sau khi tạo, bài đăng sẽ ở trạng thái chờ duyệt.
+                </p>
+
+                <form id="createJobForm">
+                  <div class="row g-3">
+                    <div class="col-md-12">
+                      <label for="jobTitle" class="form-label fw-semibold">Tiêu đề</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="jobTitle"
+                        name="title"
+                        placeholder="Nhập tiêu đề công việc"
+                        required
+                      />
+                    </div>
+
+                    <div class="col-md-12">
+                      <label for="jobDescription" class="form-label fw-semibold">Mô tả</label>
+                      <textarea
+                        class="form-control"
+                        id="jobDescription"
+                        name="description"
+                        rows="5"
+                        placeholder="Nhập mô tả công việc"
+                        required
+                      ></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="jobCategory" class="form-label fw-semibold">Danh mục</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="jobCategory"
+                        name="category"
+                        placeholder="Ví dụ: IT, Marketing, Kế toán..."
+                        required
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="jobExperience" class="form-label fw-semibold">Kinh nghiệm</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="jobExperience"
+                        name="experience"
+                        placeholder="Ví dụ: 1-2 năm"
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="salaryMin" class="form-label fw-semibold">Lương tối thiểu</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="salaryMin"
+                        name="salaryMin"
+                        placeholder="Ví dụ: 10000000"
+                        min="0"
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="salaryMax" class="form-label fw-semibold">Lương tối đa</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="salaryMax"
+                        name="salaryMax"
+                        placeholder="Ví dụ: 20000000"
+                        min="0"
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="deadline" class="form-label fw-semibold">Hạn khóa</label>
+                      <input type="date" class="form-control" id="deadline" name="deadline" required />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="jobType" class="form-label fw-semibold">Hình thức làm việc</label>
+                      <select class="form-select" id="jobType" name="jobType">
+                        <option value="">-- Chọn hình thức làm việc --</option>
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="internship">Internship</option>
+                        <option value="remote">Remote</option>
+                      </select>
+                    </div>
+
+                    <!-- Thời gian làm việc -->
+                    <div class="col-md-6">
+                      <label for="jobWorkingTime" class="form-label fw-semibold">Thời gian làm việc</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="jobWorkingTime"
+                        name="workingTime"
+                        placeholder="Ví dụ: Thứ 2 - Thứ 6 (8 giờ/ngày)"
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label for="vacancyCount" class="form-label fw-semibold">Số lượng tuyển</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="vacancyCount"
+                        name="vacancyCount"
+                        min="1"
+                        placeholder="Ví dụ: 3"
+                      />
+                    </div>
+
+                    <div class="col-md-12">
+                      <label for="jobLocation" class="form-label fw-semibold">Địa điểm làm việc</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="jobLocation"
+                        name="location"
+                        placeholder="Ví dụ: TP.HCM, Hà Nội, Remote"
+                      />
+                    </div>
+
+                    <div class="col-md-12">
+                      <label for="jobRequirement" class="form-label fw-semibold">Yêu cầu ứng viên</label>
+                      <textarea
+                        class="form-control"
+                        id="jobRequirement"
+                        name="requirements"
+                        rows="4"
+                        placeholder="Ví dụ: kỹ năng chuyên môn, kỹ năng mềm, bằng cấp..."
+                      ></textarea>
+                    </div>
+
+                    <div class="col-md-12">
+                      <label for="jobBenefit" class="form-label fw-semibold">Quyền lợi</label>
+                      <textarea
+                        class="form-control"
+                        id="jobBenefit"
+                        name="benefits"
+                        rows="4"
+                        placeholder="Ví dụ: BHXH, thưởng KPI, du lịch, thiết bị làm việc..."
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+                    <button type="button" class="btn btn-outline-soft">Lưu nháp</button>
+                    <button type="button" class="btn btn-primary-soft" id="createJobBtn">Tạo bài đăng</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- TAB TRANG THAI DUYET -->
+            <div
+              class="tab-pane fade"
+              id="approval-status-pane"
+              role="tabpanel"
+              aria-labelledby="approval-status-tab"
+              tabindex="0"
+            >
+              <div class="search-panel mb-4">
+                <div class="row g-3">
+                  <div class="col-lg-6">
+                    <div class="search-box">
+                      <i class="bi bi-search"></i>
+                      <input
+                        class="search-input approval-search-input"
+                        type="text"
+                        placeholder="Tìm theo tiêu đề bài đăng"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-lg-3">
+                    <select class="form-select search-input ps-3 approval-filter-status">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="pending">Chờ duyệt</option>
+                      <option value="approved">Đã duyệt</option>
+                      <option value="rejected">Bị từ chối</option>
+                    </select>
+                  </div>
+
+                  <div class="col-lg-3">
+                    <button class="btn btn-primary-soft w-100" id="filterApprovalBtn">
+                      <i class="bi bi-funnel me-2"></i>
+                      Lọc trạng thái
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="approval-list" id="approvalList">
+                <div class="empty-state mt-4 d-none no-approval-state">
+                  <div class="empty-icon">
+                    <i class="bi bi-clipboard-check"></i>
+                  </div>
+                  <div class="empty-title">Chưa có dữ liệu trạng thái</div>
+                  <div class="empty-text">
+                    Hiện chưa có bài đăng nào được gửi xét duyệt. Hãy tạo bài đăng mới để bắt đầu quy trình duyệt.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
           </div>
         </div>
       </main>
     </div>
 
-    <!-- Modal create job -->
-    <div class="modal fade" id="createJobModal" tabindex="-1" aria-labelledby="createJobModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-          <div class="modal-header border-0 pb-0">
-            <h4 class="modal-title fw-bold text-primary" id="createJobModalLabel">Tạo bài đăng tuyển dụng</h4>
+    <div class="modal fade" id="editJobModal" tabindex="-1" aria-labelledby="editJobModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content edit-job-modal">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="editJobModalLabel">
+              <i class="bi bi-pencil-square me-2"></i>
+              Chỉnh sửa bài đăng
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
-          <div class="modal-body pt-3">
-            <form id="createJobForm">
+          <div class="modal-body">
+            <form id="editJobForm">
+              <input type="hidden" id="editJobId" name="_id" />
+
               <div class="row g-3">
                 <div class="col-md-12">
-                  <label for="jobTitle" class="form-label fw-semibold">Tiêu đề</label>
+                  <label for="editJobTitle" class="form-label fw-semibold">Tiêu đề</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="jobTitle"
+                    id="editJobTitle"
                     name="title"
                     placeholder="Nhập tiêu đề công việc"
                     required
@@ -170,67 +551,72 @@
                 </div>
 
                 <div class="col-md-12">
-                  <label for="jobDescription" class="form-label fw-semibold">Mô tả</label>
+                  <label for="editJobDescription" class="form-label fw-semibold">Mô tả</label>
                   <textarea
                     class="form-control"
-                    id="jobDescription"
+                    id="editJobDescription"
                     name="description"
-                    rows="4"
+                    rows="5"
                     placeholder="Nhập mô tả công việc"
                     required
                   ></textarea>
                 </div>
 
                 <div class="col-md-6">
-                  <label for="jobCategory" class="form-label fw-semibold">Danh mục</label>
+                  <label for="editJobCategory" class="form-label fw-semibold">Danh mục</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="jobCategory"
+                    id="editJobCategory"
                     name="category"
-                    placeholder="Ví dụ: IT, Marketing, Kế toán..."
+                    placeholder="Ví dụ: IT, Marketing..."
                     required
                   />
                 </div>
 
                 <div class="col-md-6">
-                  <label for="jobExperience" class="form-label fw-semibold">Kinh nghiệm</label>
+                  <label for="editJobExperience" class="form-label fw-semibold">Kinh nghiệm</label>
                   <input
                     type="text"
                     class="form-control"
-                    id="jobExperience"
+                    id="editJobExperience"
                     name="experience"
                     placeholder="Ví dụ: 1-2 năm"
                   />
                 </div>
 
                 <div class="col-md-6">
-                  <label for="salaryMin" class="form-label fw-semibold">Lương tối thiểu</label>
+                  <label for="editSalaryMin" class="form-label fw-semibold">Lương tối thiểu</label>
                   <input
                     type="number"
                     class="form-control"
-                    id="salaryMin"
+                    id="editSalaryMin"
                     name="salaryMin"
-                    placeholder="Ví dụ: 10000000"
                     min="0"
+                    placeholder="Ví dụ: 10000000"
                   />
                 </div>
 
                 <div class="col-md-6">
-                  <label for="salaryMax" class="form-label fw-semibold">Lương tối đa</label>
+                  <label for="editSalaryMax" class="form-label fw-semibold">Lương tối đa</label>
                   <input
                     type="number"
                     class="form-control"
-                    id="salaryMax"
+                    id="editSalaryMax"
                     name="salaryMax"
-                    placeholder="Ví dụ: 20000000"
                     min="0"
+                    placeholder="Ví dụ: 20000000"
                   />
                 </div>
 
-                <div class="col-md-12">
-                  <label for="jobType" class="form-label fw-semibold">Hình thức làm việc</label>
-                  <select class="form-select" id="jobType" name="jobType">
+                <div class="col-md-6">
+                  <label for="editDeadline" class="form-label fw-semibold">Hạn khóa</label>
+                  <input type="date" class="form-control" id="editDeadline" name="deadline" required />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="editJobType" class="form-label fw-semibold">Hình thức làm việc</label>
+                  <select class="form-select" id="editJobType" name="jobType">
                     <option value="">-- Chọn hình thức làm việc --</option>
                     <option value="full-time">Full-time</option>
                     <option value="part-time">Part-time</option>
@@ -238,20 +624,79 @@
                     <option value="remote">Remote</option>
                   </select>
                 </div>
+
+                <div class="col-md-6">
+                  <label for="editWorkingTime" class="form-label fw-semibold">Thời gian làm việc</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editWorkingTime"
+                    name="workingTime"
+                    placeholder="Ví dụ: Thứ 2 - Thứ 6"
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="editQuantity" class="form-label fw-semibold">Số lượng tuyển</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="editQuantity"
+                    name="quantity"
+                    min="1"
+                    placeholder="Ví dụ: 3"
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="editLocation" class="form-label fw-semibold">Địa điểm làm việc</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editLocation"
+                    name="location"
+                    placeholder="Ví dụ: TP.HCM, Hà Nội, Remote"
+                  />
+                </div>
+
+                <div class="col-md-12">
+                  <label for="editRequirements" class="form-label fw-semibold">Yêu cầu ứng viên</label>
+                  <textarea
+                    class="form-control"
+                    id="editRequirements"
+                    name="requirements"
+                    rows="4"
+                    placeholder="Nhập yêu cầu ứng viên"
+                  ></textarea>
+                </div>
+
+                <div class="col-md-12">
+                  <label for="editBenefits" class="form-label fw-semibold">Quyền lợi</label>
+                  <textarea
+                    class="form-control"
+                    id="editBenefits"
+                    name="benefits"
+                    rows="4"
+                    placeholder="Nhập quyền lợi"
+                  ></textarea>
+                </div>
               </div>
             </form>
           </div>
 
-          <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Hủy</button>
-            <button type="button" class="btn btn-primary px-4" id="createJobBtn">Tạo bài đăng</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-soft" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary-soft" id="saveEditJobBtn">
+              <i class="bi bi-check-circle me-2"></i>
+              Lưu thay đổi
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </body>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../../js/utils/loadNavbarHR.js"></script>
-  <script src="../../js/HR js/jobManagement.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/utils/loadNavbarHR.js"></script>
+    <script type="module" src="../../js/HR js/jobManagement.js"></script>
+  </body>
 </html>
