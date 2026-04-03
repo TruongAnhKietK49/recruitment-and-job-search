@@ -99,7 +99,7 @@ previewBtn.addEventListener("click", () => {
 
 async function fillInfo() {
   const data = await loadInfo();
-  let status = data.profileData.verifiedStatus;
+  let status = data.profileData?.verifiedStatus || "pending";
   if (status == "pending") {
     status = "Chưa xác thực";
     document.querySelector(".profile-verified").classList.add("badge-pending");
@@ -110,7 +110,7 @@ async function fillInfo() {
   document.querySelector(".profile-verified").textContent = status;
 
   const avatarImg = document.getElementById("avatarImg");
-  avatarImg.src = data.profileData.avatar;
+  avatarImg.src = data.profileData?.avatar || "";
   document.querySelector(".profile-name").textContent = data.user.fullName;
   document.querySelector(".profile-position").textContent = data.profileData?.position || "";
   document.querySelector(".profile-email").textContent = data.user.email;
