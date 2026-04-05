@@ -75,10 +75,7 @@ export const getJobsByCompany = async (req, res) => {
 
 export const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "companyId",
-      "companyName logoUrl address website",
-    );
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName logoUrl address website");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
@@ -131,10 +128,7 @@ export const createJob = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    if (
-      req.user.role === "hr" &&
-      company.createdBy.toString() !== req.user.userId
-    ) {
+    if (req.user.role === "hr" && company.createdBy.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -158,9 +152,7 @@ export const createJob = async (req, res) => {
 
     const savedJob = await newJob.save();
 
-    const admins = await User.find({ role: "admin", status: "active" }).select(
-      "_id",
-    );
+    const admins = await User.find({ role: "admin", status: "active" }).select("_id");
 
     if (admins.length > 0) {
       const notifications = admins.map((admin) => ({
@@ -204,10 +196,7 @@ export const updateJob = async (req, res) => {
 
 export const approveJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "companyId",
-      "companyName",
-    );
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName");
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -253,10 +242,7 @@ export const approveJob = async (req, res) => {
 
 export const rejectJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "companyId",
-      "companyName",
-    );
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName");
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -297,5 +283,68 @@ export const deleteJob = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getJobSummary = async (req, res) => {
+  try {
+    const { companyId } = req.query;
+
+    const matchStage = {};
+    if (companyId) {
+      matchStage.companyId = companyId;
+    }
+
+    const result = await Job.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          totalPosts: { $sum: 1 },
+          approved: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "approved"] }, 1, 0],
+            },
+          },
+          pending: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
+            },
+          },
+          rejected: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "rejected"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalPosts: 1,
+          approved: 1,
+          pending: 1,
+          rejected: 1,
+        },
+      },
+    ]);
+
+    const summary = result[0] || {
+      totalPosts: 0,
+      approved: 0,
+      pending: 0,
+      rejected: 0,
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: summary,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching job summary",
+      error: error.message,
+    });
   }
 };

@@ -105,7 +105,7 @@
                         <i class="bi bi-file-earmark-text"></i>
                       </div>
                       <div class="stat-label">Tổng bài đăng</div>
-                      <div class="stat-value total-post-count">12</div>
+                      <div class="stat-value total-post-count"></div>
                     </div>
                   </div>
 
@@ -115,7 +115,7 @@
                         <i class="bi bi-check-circle"></i>
                       </div>
                       <div class="stat-label">Đã duyệt</div>
-                      <div class="stat-value approved-post-count">07</div>
+                      <div class="stat-value approved-post-count"></div>
                     </div>
                   </div>
 
@@ -125,7 +125,7 @@
                         <i class="bi bi-hourglass-split"></i>
                       </div>
                       <div class="stat-label">Chờ duyệt</div>
-                      <div class="stat-value pending-post-count">03</div>
+                      <div class="stat-value pending-post-count"></div>
                     </div>
                   </div>
 
@@ -135,7 +135,7 @@
                         <i class="bi bi-x-circle"></i>
                       </div>
                       <div class="stat-label">Bị từ chối</div>
-                      <div class="stat-value rejected-post-count">02</div>
+                      <div class="stat-value rejected-post-count"></div>
                     </div>
                   </div>
                 </div>
@@ -147,40 +147,16 @@
                     <div class="section-title d-flex justify-content-between align-items-center mb-3">
                       <span>Bài đăng gần đây</span>
                       <button
+                        id="btn-view-all-posts"
                         class="btn btn-primary-soft btn-sm"
-                        data-bs-toggle="tab"
-                        data-bs-target="#my-posts-pane"
                         type="button"
+                        data-tab-target="my-posts-tab"
                       >
                         Xem tất cả
                       </button>
                     </div>
 
-                    <div class="recent-post-list">
-                      <div class="recent-post-item">
-                        <div>
-                          <div class="recent-post-title">Frontend Developer</div>
-                          <div class="recent-post-meta">Công nghệ • Full-time • Hạn nộp: 20/04/2026</div>
-                        </div>
-                        <span class="badge text-bg-success">Đã duyệt</span>
-                      </div>
-
-                      <div class="recent-post-item">
-                        <div>
-                          <div class="recent-post-title">Nhân viên Marketing</div>
-                          <div class="recent-post-meta">Marketing • Full-time • Hạn nộp: 18/04/2026</div>
-                        </div>
-                        <span class="badge text-bg-warning">Chờ duyệt</span>
-                      </div>
-
-                      <div class="recent-post-item">
-                        <div>
-                          <div class="recent-post-title">Kế toán tổng hợp</div>
-                          <div class="recent-post-meta">Kế toán • Full-time • Hạn nộp: 15/04/2026</div>
-                        </div>
-                        <span class="badge text-bg-danger">Từ chối</span>
-                      </div>
-                    </div>
+                    <div class="recent-post-list"></div>
                   </div>
                 </div>
 
@@ -204,19 +180,19 @@
 
                     <div class="quick-actions mt-4">
                       <button
+                        id="btn-view-create-job"
                         class="btn btn-primary-soft w-100 mb-2"
-                        data-bs-toggle="tab"
-                        data-bs-target="#create-post-pane"
                         type="button"
+                        data-tab-target="create-post-tab"
                       >
                         <i class="bi bi-plus-circle me-2"></i>
                         Tạo bài đăng mới
                       </button>
                       <button
+                        id="btn-view-approval"
                         class="btn btn-outline-soft w-100"
-                        data-bs-toggle="tab"
-                        data-bs-target="#approval-status-pane"
                         type="button"
+                        data-tab-target="approval-status-tab"
                       >
                         <i class="bi bi-clipboard-check me-2"></i>
                         Xem trạng thái duyệt
@@ -293,6 +269,8 @@
                   </button>
                 </div>
               </div>
+
+              <div id="postPagination" class="d-flex justify-content-center mt-4"></div>
             </div>
 
             <!-- TAB TAO BAI DANG -->
@@ -486,7 +464,7 @@
                   </div>
 
                   <div class="col-lg-3">
-                    <select class="form-select search-input ps-3 approval-filter-status">
+                    <select class="form-select search-input ps-3 text-black approval-filter-status">
                       <option value="">Tất cả trạng thái</option>
                       <option value="pending">Chờ duyệt</option>
                       <option value="approved">Đã duyệt</option>
@@ -515,8 +493,8 @@
                 </div>
               </div>
 
+              <div id="approvalPagination" class="d-flex justify-content-center mt-4"></div>
             </div>
-            
           </div>
         </div>
       </main>
