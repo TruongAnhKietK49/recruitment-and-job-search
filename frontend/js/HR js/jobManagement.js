@@ -1,7 +1,20 @@
 import URL from "../utils/url.js";
 
+let dataSummary = null;
 let dataJobs = [];
 let dataCompany = null;
+
+const approvalState = {
+  currentPage: 1,
+  pageSize: 5,
+  filteredJobs: [],
+};
+
+const postState = {
+  currentPage: 1,
+  pageSize: 6,
+  filteredPosts: [],
+};
 
 const token = sessionStorage.getItem("token") || localStorage.getItem("token") || null;
 
@@ -97,6 +110,73 @@ async function deleteJobAPI(jobId) {
   }
 }
 
+async function getJobSummary() {
+  try {
+    const res = await fetch(`${URL}/api/jobs/summary`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    return data.data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+// Fill summary info
+function fillJobSummary(data) {
+  console.log(data);
+  const totalPosts = document.querySelector(".total-post-count");
+  const approved = document.querySelector(".approved-post-count");
+  const pending = document.querySelector(".pending-post-count");
+  const rejected = document.querySelector(".rejected-post-count");
+
+  totalPosts.textContent = data.totalPosts;
+  approved.textContent = data.approved;
+  pending.textContent = data.pending;
+  rejected.textContent = data.rejected;
+}
+
+function renderPostCard(post) {
+  const status = getStatusInfo(post.status);
+  return `
+    <div class="recent-post-item">
+      <div>
+        <div class="recent-post-title">${post.title}</div>
+        <div class="recent-post-meta">${post.category} • ${post.jobType} • Hạn nộp: ${post.deadline}</div>
+      </div>
+      <span class="badge ${status.badgeClass}">${status.label}</span>
+    </div>
+  `;
+}
+
+document.querySelectorAll("[data-tab-target]").forEach((button) => {
+  button.addEventListener("click", function () {
+    const tabId = this.dataset.tabTarget;
+    const tabTrigger = document.getElementById(tabId);
+
+    if (!tabTrigger) return;
+
+    const tab = bootstrap.Tab.getOrCreateInstance(tabTrigger);
+    tab.show();
+  });
+});
+
+// Render current posts
+function renderCurrentPosts(posts) {
+  const currentPosts = document.querySelector(".recent-post-list");
+  currentPosts.innerHTML = "";
+
+  if (!posts.length) return;
+
+  currentPosts.innerHTML = posts.map((post) => renderPostCard(post)).join("");
+}
+
 function setManagePostsMenuDisabled(disabled) {
   const menuManagePosts = document.getElementById("menu-manage-posts");
   if (!menuManagePosts) return;
@@ -147,13 +227,39 @@ function formatDate(dateString) {
 }
 
 function getStatusInfo(status) {
-  const map = {
-    pending: { label: "Chờ duyệt", className: "status-pending" },
-    approved: { label: "Đã duyệt", className: "status-approved" },
-    rejected: { label: "Từ chối", className: "status-rejected" },
-    closed: { label: "Đã đóng", className: "status-closed" },
+  const statusMap = {
+    pending: {
+      cardClass: "pending",
+      badgeClass: "text-bg-warning",
+      label: "Chờ duyệt",
+      metaLabel: "Gửi lúc",
+      message: "Bài đăng đang được hệ thống hoặc quản trị viên kiểm tra nội dung trước khi hiển thị công khai.",
+    },
+    approved: {
+      cardClass: "approved",
+      badgeClass: "text-bg-success",
+      label: "Đã duyệt",
+      metaLabel: "Duyệt lúc",
+      message: "Bài đăng đã được duyệt và hiện đang hiển thị trên hệ thống tuyển dụng.",
+    },
+    rejected: {
+      cardClass: "rejected",
+      badgeClass: "text-bg-danger",
+      label: "Từ chối",
+      metaLabel: "Từ chối lúc",
+      message: "Lý do: Nội dung chưa phù hợp. Vui lòng chỉnh sửa và gửi lại.",
+    },
   };
-  return map[status] || { label: status || "Không rõ", className: "status-pending" };
+
+  return (
+    statusMap[status] || {
+      cardClass: "pending",
+      badgeClass: "text-bg-warning",
+      label: "Chờ duyệt",
+      metaLabel: "Gửi lúc",
+      message: "Bài đăng đang được hệ thống hoặc quản trị viên kiểm tra nội dung trước khi hiển thị công khai.",
+    }
+  );
 }
 
 function parseBenefits(benefits) {
@@ -231,7 +337,7 @@ function renderJobCard(job) {
           <div class="job-main">
             <div class="job-title-row">
               <h3 class="job-title">${job.title || "Chưa có tiêu đề"}</h3>
-              <span class="job-status ${statusInfo.className}">
+              <span class="job-status ${statusInfo.badgeClass}">
                 ${statusInfo.label}
               </span>
             </div>
@@ -309,34 +415,203 @@ function renderJobs(jobs) {
   jobList.innerHTML = jobs.map((job) => renderJobCard(job)).join("");
 }
 
+function getPostFilterValues() {
+  const keyword = document.querySelector(".post-search-input")?.value?.trim().toLowerCase() || "";
+
+  const status = document.querySelector(".post-status-filter")?.value?.trim().toLowerCase() || "";
+
+  const jobType = document.querySelector(".post-type-filter")?.value?.trim().toLowerCase() || "";
+
+  return {
+    keyword,
+    status,
+    jobType,
+  };
+}
+
+function filterPostsByKeyword(posts, keyword) {
+  if (!keyword) return posts;
+
+  return posts.filter((job) => {
+    const title = job.title?.toLowerCase() || "";
+    const category = job.category?.toLowerCase() || "";
+    const type = job.jobType?.toLowerCase() || "";
+
+    return title.includes(keyword) || category.includes(keyword) || type.includes(keyword);
+  });
+}
+
+function filterPostsByStatus(posts, status) {
+  if (!status) return posts;
+
+  return posts.filter((job) => {
+    const jobStatus = job.status?.toLowerCase() || "";
+    return jobStatus === status;
+  });
+}
+
+function filterPostsByType(posts, jobType) {
+  if (!jobType) return posts;
+
+  return posts.filter((job) => {
+    const type = job.jobType?.toLowerCase() || "";
+    return type === jobType;
+  });
+}
+
+function filterPostPipeline(posts, filters) {
+  let result = [...posts];
+
+  result = filterPostsByKeyword(result, filters.keyword);
+  result = filterPostsByStatus(result, filters.status);
+  result = filterPostsByType(result, filters.jobType);
+
+  return result;
+}
+
+function paginatePosts(posts, currentPage, pageSize) {
+  const totalItems = posts.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  return {
+    currentPage: safePage,
+    totalPages,
+    totalItems,
+    paginatedItems: posts.slice(startIndex, endIndex),
+  };
+}
+
+function renderPostPagination(totalPages, currentPage) {
+  const paginationContainer = document.getElementById("postPagination");
+  if (!paginationContainer) return;
+
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = "";
+    return;
+  }
+
+  const maxVisiblePages = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+  if (endPage - startPage < maxVisiblePages - 1) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  let html = `<nav><ul class="pagination mb-0">`;
+
+  html += `
+    <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
+        Trước
+      </button>
+    </li>
+  `;
+
+  if (startPage > 1) {
+    html += `
+      <li class="page-item">
+        <button class="page-link" data-page="1">1</button>
+      </li>
+    `;
+
+    if (startPage > 2) {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+  }
+
+  for (let page = startPage; page <= endPage; page++) {
+    html += `
+      <li class="page-item ${page === currentPage ? "active" : ""}">
+        <button class="page-link" data-page="${page}">
+          ${page}
+        </button>
+      </li>
+    `;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+
+    html += `
+      <li class="page-item">
+        <button class="page-link" data-page="${totalPages}">
+          ${totalPages}
+        </button>
+      </li>
+    `;
+  }
+
+  html += `
+    <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
+        Sau
+      </button>
+    </li>
+  `;
+
+  html += `</ul></nav>`;
+
+  paginationContainer.innerHTML = html;
+
+  paginationContainer.querySelectorAll(".page-link[data-page]").forEach((button) => {
+    button.addEventListener("click", function () {
+      const page = Number(this.dataset.page);
+      if (!page || page === postState.currentPage) return;
+
+      postState.currentPage = page;
+      applyPostFilters(false);
+    });
+  });
+}
+
+function applyPostFilters(resetPage = true) {
+  const filters = getPostFilterValues();
+
+  postState.filteredPosts = filterPostPipeline(dataJobs, filters);
+
+  if (resetPage) {
+    postState.currentPage = 1;
+  }
+
+  const { currentPage, totalPages, paginatedItems } = paginatePosts(
+    postState.filteredPosts,
+    postState.currentPage,
+    postState.pageSize,
+  );
+
+  postState.currentPage = currentPage;
+
+  renderJobs(paginatedItems);
+  renderPostPagination(totalPages, currentPage);
+}
+
+function initPostFilters(posts) {
+  dataJobs = posts || [];
+  postState.currentPage = 1;
+  postState.filteredPosts = [...dataJobs];
+
+  document.getElementById("filterPostsBtn")?.addEventListener("click", () => applyPostFilters(true));
+
+  document.querySelector(".post-status-filter")?.addEventListener("change", () => applyPostFilters(true));
+
+  document.querySelector(".post-type-filter")?.addEventListener("change", () => applyPostFilters(true));
+
+  document.querySelector(".post-search-input")?.addEventListener("input", () => applyPostFilters(true));
+
+  applyPostFilters(true);
+}
+
 function renderApprovalCard(job) {
   const status = job.status || "pending";
 
-  const statusMap = {
-    pending: {
-      cardClass: "pending",
-      badgeClass: "text-bg-warning",
-      label: "Chờ duyệt",
-      metaLabel: "Gửi lúc",
-      message: "Bài đăng đang được hệ thống hoặc quản trị viên kiểm tra nội dung trước khi hiển thị công khai.",
-    },
-    approved: {
-      cardClass: "approved",
-      badgeClass: "text-bg-success",
-      label: "Đã duyệt",
-      metaLabel: "Duyệt lúc",
-      message: "Bài đăng đã được duyệt và hiện đang hiển thị trên hệ thống tuyển dụng.",
-    },
-    rejected: {
-      cardClass: "rejected",
-      badgeClass: "text-bg-danger",
-      label: "Từ chối",
-      metaLabel: "Từ chối lúc",
-      message: job.rejectionReason || "Lý do: Nội dung chưa phù hợp. Vui lòng chỉnh sửa và gửi lại.",
-    },
-  };
-
-  const info = statusMap[status] || statusMap.pending;
+  const info = getStatusInfo(status);
   const displayDate = formatDate(job.updatedAt || job.createdAt || job.submittedAt || job.date);
 
   return `
@@ -417,6 +692,7 @@ async function reloadMyJobs() {
   }
 
   dataJobs = await loadMyCompanyJobs(dataCompany._id);
+  renderCurrentPosts(dataJobs);
   renderJobs(dataJobs);
   renderApprovalList(dataJobs);
 }
@@ -564,12 +840,147 @@ function bindEvents() {
   });
 }
 
+// Xử lý filter trạng thái
+function getApprovalFilterValues() {
+  const status = document.querySelector(".approval-filter-status")?.value?.trim() || "";
+
+  const keyword = document.querySelector(".approval-search-input")?.value?.trim().toLowerCase() || "";
+
+  return {
+    status,
+    keyword,
+  };
+}
+
+function filterApprovalPipeline(jobs, filters) {
+  return jobs.filter((job) => {
+    const jobStatus = job.status?.toLowerCase() || "";
+    const jobTitle = job.title?.toLowerCase() || "";
+
+    const matchStatus = !filters.status || jobStatus === filters.status;
+    const matchKeyword = !filters.keyword || jobTitle.includes(filters.keyword);
+
+    return matchStatus && matchKeyword;
+  });
+}
+
+function paginateJobs(jobs, currentPage, pageSize) {
+  const totalItems = jobs.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  return {
+    currentPage: safePage,
+    totalPages,
+    totalItems,
+    paginatedItems: jobs.slice(startIndex, endIndex),
+  };
+}
+
+function renderApprovalPagination(totalPages, currentPage) {
+  const paginationContainer = document.getElementById("approvalPagination");
+  if (!paginationContainer) return;
+
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = "";
+    return;
+  }
+
+  let html = `<nav><ul class="pagination mb-0">`;
+
+  html += `
+    <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
+        Trước
+      </button>
+    </li>
+  `;
+
+  for (let page = 1; page <= totalPages; page++) {
+    html += `
+      <li class="page-item ${page === currentPage ? "active" : ""}">
+        <button class="page-link" data-page="${page}">
+          ${page}
+        </button>
+      </li>
+    `;
+  }
+
+  html += `
+    <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
+        Sau
+      </button>
+    </li>
+  `;
+
+  html += `</ul></nav>`;
+
+  paginationContainer.innerHTML = html;
+
+  paginationContainer.querySelectorAll(".page-link[data-page]").forEach((button) => {
+    button.addEventListener("click", function () {
+      const page = Number(this.dataset.page);
+      if (!page || page === approvalState.currentPage) return;
+
+      approvalState.currentPage = page;
+      applyApprovalFilters(false);
+    });
+  });
+}
+
+function applyApprovalFilters(resetPage = true) {
+  const filters = getApprovalFilterValues();
+
+  approvalState.filteredJobs = filterApprovalPipeline(dataJobs, filters);
+
+  if (resetPage) {
+    approvalState.currentPage = 1;
+  }
+
+  const { currentPage, totalPages, paginatedItems } = paginateJobs(
+    approvalState.filteredJobs,
+    approvalState.currentPage,
+    approvalState.pageSize,
+  );
+
+  approvalState.currentPage = currentPage;
+
+  renderApprovalList(paginatedItems);
+  renderApprovalPagination(totalPages, currentPage);
+}
+
+function initApprovalFilters(jobs) {
+  dataJobs = jobs || [];
+  approvalState.currentPage = 1;
+  approvalState.filteredJobs = [...dataJobs];
+
+  document.getElementById("filterApprovalBtn")?.addEventListener("click", () => applyApprovalFilters(true));
+
+  document.querySelector(".approval-filter-status")?.addEventListener("change", () => applyApprovalFilters(true));
+
+  document.querySelector(".approval-search-input")?.addEventListener("input", () => applyApprovalFilters(true));
+
+  applyApprovalFilters(true);
+}
+
 async function initPage() {
-  guardManagePostsMenu();
   bindEvents();
+
+  dataSummary = await getJobSummary();
+  fillJobSummary(dataSummary);
 
   dataCompany = await loadMyCompany();
   setManagePostsMenuDisabled(!dataCompany?._id);
+
+  dataJobs = await loadMyCompanyJobs(dataCompany?._id);
+
+  renderCurrentPosts(dataJobs);
+  initPostFilters(dataJobs);
+  initApprovalFilters(dataJobs);
 
   if (!dataCompany?._id) {
     alert("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.");

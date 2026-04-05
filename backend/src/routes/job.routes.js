@@ -13,6 +13,7 @@ import {
   approveJob,
   rejectJob,
   deleteJob,
+  getJobSummary,
 } from "../controllers/job.controller.js";
 
 import {
@@ -26,6 +27,7 @@ import { saveJob, getMySavedJobs, removeSavedJob } from "../controllers/saveJob.
 const router = express.Router();
 
 router.get("/", authMiddleware, getAllJobs);
+router.get("/summary", authMiddleware, authorizeRoles("admin", "hr"), getJobSummary);
 router.get("/company/:companyId", authMiddleware, getJobsByCompany);
 router.get("/pending", authMiddleware, authorizeRoles("admin"), getPendingJobs);
 router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getJobById);
