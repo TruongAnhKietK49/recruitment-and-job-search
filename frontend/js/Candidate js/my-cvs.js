@@ -1,14 +1,10 @@
 const API_URL = 'http://localhost:5000/api';
 const token = localStorage.getItem('token');
 
-if (!token) {
-  window.location.href = '../utils/login.html';
-}
-
 let cvs = [];
 
 function fetchCVs() {
-  // GIẢ LẬP DỮ LIỆU ĐỂ TEST GIAO DIỆN 
+  // TEST GIAO DIỆN 
   cvs = [
     { _id: '1', title: 'CV AI Engineer', fileUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=600&auto=format&fit=crop', createdAt: '2026-02-19' },
     { _id: '2', title: 'CV AI Engineer', fileUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=600&auto=format&fit=crop', createdAt: '2026-02-19' }

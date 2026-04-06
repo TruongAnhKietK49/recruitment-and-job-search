@@ -32,7 +32,32 @@ const jobSchema = new mongoose.Schema(
       enum: ["full-time", "part-time", "internship", "remote"],
     },
 
+    // Thời gian làm việc
+    workingTime: {
+      type: String,
+    },
+
     deadline: Date,
+
+    // Địa điểm làm việc
+    location: {
+      type: String,
+    },
+
+    // Số lượng
+    quantity: {
+      type: Number,
+    },
+
+    // Yêu cầu
+    requirements: {
+      type: String,
+    },
+
+    // Quyền lợi
+    benefits: {
+      type: String,
+    },
 
     status: {
       type: String,

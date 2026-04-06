@@ -9,7 +9,7 @@
       <i class="bi bi-house-door"></i>
       <span>Dashboard</span>
     </a>
-    <a href="../HR Pages/jobManagement.html" class="menu-link">
+    <a href="../HR Pages/jobManagement.html" class="menu-link" id="menu-manage-posts">
       <i class="bi bi-clipboard"></i>
       <span>Quản lý bài đăng</span>
     </a>
@@ -23,7 +23,7 @@
     </a>
     <a href="../HR Pages/profile.html" class="menu-link">
       <i class="bi bi-person"></i>
-      <span id="userName">Nguyen Thi B</span>
+      <span id="userName"></span>
     </a>
   </nav>
 
@@ -81,6 +81,12 @@
 
   .menu-link i {
     font-size: 22px;
+  }
+
+  .disabled-menu {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
   .sidebar-bottom {

@@ -3,16 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Việc đã lưu</title>
+  <title>Việc đã lưu - JOB WEBSITE</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="../../css/Candidate css/saved-jobs.css">
-</head>
-<body>
+  
+  <link rel="stylesheet" href="../../css/utils/style.css">
+  
+  </head>
+<body class="bg-light">
   <div id="navbar"></div>
 
-  <main class="container py-4">
-    <h2 class="mb-4">Việc làm đã lưu</h2>
+  <main class="container py-5 min-vh-100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold text-primary mb-0"><i class="bi bi-bookmark-heart me-2"></i>Việc làm đã lưu</h2>
+    </div>
+
     <div id="savedJobsList">
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
@@ -27,6 +32,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../js/utils/loadNavbar.js"></script>
   <script src="../../js/utils/loadFooter.js"></script>
-  <script src="../../js/Candidate js/saved-jobs.js"></script>
+  
+  <script type="module" src="../../js/Candidate js/saved-jobs.js"></script>
 </body>
 </html>

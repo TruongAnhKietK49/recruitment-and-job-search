@@ -192,12 +192,34 @@ body {
 .btn-save-job:hover { color: #c53030; }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .company-content-inner { padding: 0 20px; }
-  .company-header-row { flex-direction: column; align-items: center; text-align: center; }
-  .company-logo-box { margin-right: 0; margin-bottom: 15px; }
-  .company-title { margin-bottom: 0; }
-  .job-card-h { flex-direction: column; align-items: flex-start; }
-  .job-logo-box { margin-bottom: 15px; }
-  .job-date { position: static; display: block; margin-top: 15px; }
+
+@media (min-width: 768px) {
+  .border-md-end {
+    border-right: 1px solid #dee2e6 !important;
+  }
+  .border-md-bottom-0 {
+    border-bottom: 0 !important;
+  }
+  .rounded-md-pill {
+    border-radius: 50rem !important;
+  }
+  .w-md-auto {
+    width: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .search-banner .rounded-4 {
+    border-radius: 20px !important;
+    padding: 15px !important;
+  }
+  .search-banner .search-input-wrap,
+  .search-banner .location-select-wrap {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+  .job-card-h .text-end {
+    text-align: left !important;
+    margin-top: 15px;
+  }
 }

@@ -18,17 +18,15 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 const router = express.Router();
 
 router.post("/", authMiddleware, authorizeRoles("admin", "hr"), createCompany);
-router.post("/:id/join-request", authMiddleware, createJoinRequest);
+router.post("/:companyId/join-request", authMiddleware, createJoinRequest);
 router.get("/my/join-requests", authMiddleware, getMyCompanyJoinRequests);
-router.patch("/join-requests/:id/approve", authMiddleware, approveJoinRequest);
-router.patch("/join-requests/:id/reject", authMiddleware, rejectJoinRequest);
+router.patch("/join-requests/:requestId/approve", authMiddleware, approveJoinRequest);
+router.patch("/join-requests/:requestId/reject", authMiddleware, rejectJoinRequest);
 
-router.get("/", getAllCompanies);
-// router.get("/", authMiddleware, getAllCompanies);
+router.get("/", authMiddleware, getAllCompanies);
 router.get("/me", authMiddleware, getMyCompany);
-// router.get("/:id", authMiddleware, getCompanyById);
-router.get("/:id", getCompanyById);
+router.get("/:companyId", authMiddleware, getCompanyById);
 
-router.put("/:id", authMiddleware, authorizeRoles("admin", "hr"), updateCompany);
-router.delete("/:id", authMiddleware, authorizeRoles("admin", "hr"), deleteCompany);
+router.put("/:companyId", authMiddleware, authorizeRoles("admin", "hr"), updateCompany);
+router.delete("/:companyId", authMiddleware, authorizeRoles("admin", "hr"), deleteCompany);
 export default router;

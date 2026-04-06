@@ -2,6 +2,8 @@ import Company from "../models/company.js";
 import Job from "../models/job.js";
 import joinRequest from "../models/joinRequest.js";
 
+import mongoose from "mongoose";
+
 // Create a new company
 export const createCompany = async (req, res) => {
   try {
@@ -50,41 +52,53 @@ export const createCompany = async (req, res) => {
 // Get all companies
 export const getAllCompanies = async (req, res) => {
   try {
-    const pageNumber = Number.parseInt(req.query.page, 10) || 1;
-    const limitNumber = Number.parseInt(req.query.limit, 10) || 10;
+    const pageNumber = parseInt(req.query.page, 10) || 1;
+    const limitNumber = parseInt(req.query.limit, 10) || 10;
     const { keyword, status } = req.query;
 
     const query = {};
 
-    if (keyword) {
-      query.companyName = { $regex: keyword, $options: "i" };
+    if (keyword && keyword.trim()) {
+      query.$or = [
+        { companyName: { $regex: keyword.trim(), $options: "i" } },
+        { category: { $regex: keyword.trim(), $options: "i" } },
+        { address: { $regex: keyword.trim(), $options: "i" } },
+        { phoneCompany: { $regex: keyword.trim(), $options: "i" } },
+        { website: { $regex: keyword.trim(), $options: "i" } },
+      ];
     }
 
-    if (status) {
-      query.status = status;
+    if (status && status.trim()) {
+      query.status = status.trim();
     }
 
-    if (req.user && req.user.role === "hr") {
-          query.createdBy = req.user.userId;
-        }
+    const myCompany = await Company.findOne({ createdBy: req.user.userId }).select("_id");
+
+    if (myCompany) {
+      query.createdBy = req.user.userId;
+    }
 
     const companies = await Company.find(query)
       .populate("createdBy", "fullName email role")
-      .populate("members", "fullName email role status")
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const total = await Company.countDocuments(query);
 
     res.status(200).json({
+      success: true,
       total,
       page: pageNumber,
       totalPages: Math.ceil(total / limitNumber),
       companies,
     });
   } catch (error) {
+    console.error("Error fetching companies:", error);
+
     res.status(500).json({
+      success: false,
       message: "Error fetching companies",
       error: error.message,
     });
@@ -123,15 +137,15 @@ export const getMyCompany = async (req, res) => {
 // Get a company by ID
 export const getCompanyById = async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id).populate("createdBy", "fullName email role");
+    const company = await Company.findById(req.params.companyId).populate("createdBy", "fullName email role");
 
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
     if (req.user && req.user.role === "hr" && company.createdBy._id.toString() !== req.user.userId) {
-          return res.status(403).json({ message: "Forbidden" });
-        }
+      return res.status(403).json({ message: "Forbidden" });
+    }
 
     const jobs = await Job.find({ companyId: company._id })
       .select("title category salaryMin salaryMax experience jobType deadline status createdAt")
@@ -152,12 +166,12 @@ export const getCompanyById = async (req, res) => {
 // Update company info (ONLY OWNER)
 export const updateCompany = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { companyId } = req.params;
     const userId = req.user.userId || req.user._id;
 
     const { companyName, address, category, website, description, phoneCompany, logoUrl, status } = req.body;
 
-    const company = await Company.findById(id);
+    const company = await Company.findById(companyId);
 
     if (!company) {
       return res.status(404).json({
@@ -193,7 +207,7 @@ export const updateCompany = async (req, res) => {
 
     await company.save();
 
-    const updatedCompany = await Company.findById(id)
+    const updatedCompany = await Company.findById(companyId)
       .populate("createdBy", "fullName email role")
       .populate("members.user", "fullName email role status");
 
@@ -212,16 +226,36 @@ export const updateCompany = async (req, res) => {
 // Delete a company by ID
 export const deleteCompany = async (req, res) => {
   try {
-    const deletedCompany = await Company.findByIdAndDelete(req.params.id);
-    console.log(deletedCompany);
-    if (!deletedCompany) {
+    const companyId = req.params.companyId;
+    const userId = req.user.userId;
+
+    const company = await Company.findById(companyId);
+
+    if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    res.status(200).json({ message: "Company deleted successfully" });
+    const isOwner = company.createdBy?.toString() === userId;
+
+    if (isOwner) {
+      await Job.deleteMany({ company: companyId });
+      await Company.findByIdAndDelete(companyId);
+
+      return res.status(200).json({
+        message: "Company deleted successfully",
+      });
+    }
+
+    company.members = company.members.filter((member) => member.user?.toString() !== userId);
+
+    await company.save();
+
+    return res.status(200).json({
+      message: "You have left the company successfully",
+    });
   } catch (error) {
-    res.status(500).json({
-      message: "Error deleting company",
+    return res.status(500).json({
+      message: "Error processing company action",
       error: error.message,
     });
   }
@@ -258,7 +292,7 @@ export const createJoinRequest = async (req, res) => {
       });
     }
 
-    const existingPendingRequest = await JoinRequest.findOne({
+    const existingPendingRequest = await joinRequest.findOne({
       company: companyId,
       user: userId,
       status: "pending",
@@ -270,7 +304,7 @@ export const createJoinRequest = async (req, res) => {
       });
     }
 
-    const request = await JoinRequest.create({
+    const request = await joinRequest.create({
       company: companyId,
       user: userId,
       requestedRole: roleToRequest,
@@ -311,10 +345,11 @@ export const getMyCompanyJoinRequests = async (req, res) => {
       });
     }
 
-    const requests = await joinRequest.find({
-      company: company._id,
-      status: "pending",
-    })
+    const requests = await joinRequest
+      .find({
+        company: company._id,
+        status: "pending",
+      })
       .populate("user", "fullName email role status")
       .populate("company", "companyName")
       .sort({ createdAt: -1 });
@@ -333,7 +368,10 @@ export const approveJoinRequest = async (req, res) => {
     const { requestId } = req.params;
     const userId = req.user.userId || req.user._id;
 
-    const request = await joinRequest.findById(requestId)
+    console.log(requestId, userId);
+
+    const request = await joinRequest
+      .findById(requestId)
       .populate("user", "fullName email role status")
       .populate("company");
 

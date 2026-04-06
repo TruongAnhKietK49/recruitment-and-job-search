@@ -27,33 +27,33 @@ export const getAllJobs = async (req, res) => {
       query.companyId = companyId;
     }
 
-    if (!req.user || req.user.role === "candidate") {
-          query.status = "approved";
-        } else if (status) {
-          query.status = status;
-        }
+    // if (req.user.role === "candidate") {
+    //   query.status = "approved";
+    // } else if (status) {
+    //   query.status = status;
+    // }
     
 
     if (experience) {
-      let expString = "";
-      if (experience === "0-1") expString = "Dưới 1 năm";
-      else if (experience === "1-3") expString = "1 - 3 năm";
-      else if (experience === "3-5") expString = "3 - 5 năm";
-      else if (experience === "5+") expString = "Trên 5 năm";
-      
-      if (expString) query.experience = expString;
+      if (experience === "0-1") query.experience = { $regex: /dưới 1|0|không|chưa/i };
+      else if (experience === "1-3") query.experience = { $regex: /1|2|3/i };
+      else if (experience === "3-5") query.experience = { $regex: /3|4|5/i };
+      else if (experience === "5+") query.experience = { $regex: /trên 5|5|6|7|8|9|10/i };
     }
 
     // Xử lý lọc theo Mức lương
     if (salaryRange) {
-          if (salaryRange === "50+") {
-            query.salaryMin = { $gte: 50 };
-          } else {
-            const [min, max] = salaryRange.split("-");
-            if (min && max) {
-              query.salaryMin = { $gte: Number(min), $lte: Number(max) };
-            }
-          }
+      if (salaryRange === "50+") {
+        query.salaryMin = { $gte: 50000000 }; 
+      } else {
+        const [min, max] = salaryRange.split("-");
+        if (min && max) {
+          query.salaryMin = { 
+            $gte: Number(min) * 1000000, 
+            $lt: Number(max) * 1000000 
+          };
+        }
+      }
     }
 
     // Xử lý lọc theo Địa điểm 
@@ -68,7 +68,11 @@ export const getAllJobs = async (req, res) => {
         }).select("_id");
         
         const companyIds = companiesInLocation.map(c => c._id);
-        query.companyId = { $in: companyIds }; 
+        
+        query.$or = [
+          { location: { $regex: locString, $options: "i" } },
+          { companyId: { $in: companyIds } }
+        ];
       }
     }
 
@@ -94,12 +98,27 @@ export const getAllJobs = async (req, res) => {
   }
 };
 
-export const getJobById = async (req, res) => {
+export const getJobsByCompany = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
+    const jobs = await Job.find({ companyId: req.params.companyId }).populate(
       "companyId",
       "companyName logoUrl address website",
     );
+    if (!jobs) {
+      return res.status(404).json({ message: "Jobs not found" });
+    }
+    res.status(200).json(jobs);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching jobs",
+      error: error.message,
+    });
+  }
+};
+
+export const getJobById = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName logoUrl address website");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
@@ -139,6 +158,11 @@ export const createJob = async (req, res) => {
       experience,
       jobType,
       deadline,
+      workingTime,
+      location,
+      quantity,
+      requirements,
+      benefits,
     } = req.body;
 
     const company = await Company.findById(companyId);
@@ -147,10 +171,7 @@ export const createJob = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    if (
-      req.user.role === "hr" &&
-      company.createdBy.toString() !== req.user.userId
-    ) {
+    if (req.user.role === "hr" && company.createdBy.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -164,14 +185,17 @@ export const createJob = async (req, res) => {
       experience,
       jobType,
       deadline,
+      workingTime,
+      location,
+      quantity,
+      requirements,
+      benefits,
       status: "pending",
     });
 
     const savedJob = await newJob.save();
 
-    const admins = await User.find({ role: "admin", status: "active" }).select(
-      "_id",
-    );
+    const admins = await User.find({ role: "admin", status: "active" }).select("_id");
 
     if (admins.length > 0) {
       const notifications = admins.map((admin) => ({
@@ -199,7 +223,7 @@ export const createJob = async (req, res) => {
 
 export const updateJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
     const updatedJob = await Job.findByIdAndUpdate(jobId, req.body, {
       new: true,
     });
@@ -215,10 +239,7 @@ export const updateJob = async (req, res) => {
 
 export const approveJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "companyId",
-      "companyName",
-    );
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName");
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -264,10 +285,7 @@ export const approveJob = async (req, res) => {
 
 export const rejectJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate(
-      "companyId",
-      "companyName",
-    );
+    const job = await Job.findById(req.params.id).populate("companyId", "companyName");
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -298,8 +316,9 @@ export const rejectJob = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
   try {
-    const jobId = req.params.id;
+    const jobId = req.params.jobId;
     const deletedJob = await Job.findByIdAndDelete(jobId);
+    console.log(deletedJob);
     if (!deletedJob) {
       return res.status(404).json({ message: "Job not found" });
     }
@@ -307,5 +326,68 @@ export const deleteJob = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getJobSummary = async (req, res) => {
+  try {
+    const { companyId } = req.query;
+
+    const matchStage = {};
+    if (companyId) {
+      matchStage.companyId = companyId;
+    }
+
+    const result = await Job.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          totalPosts: { $sum: 1 },
+          approved: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "approved"] }, 1, 0],
+            },
+          },
+          pending: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
+            },
+          },
+          rejected: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "rejected"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalPosts: 1,
+          approved: 1,
+          pending: 1,
+          rejected: 1,
+        },
+      },
+    ]);
+
+    const summary = result[0] || {
+      totalPosts: 0,
+      approved: 0,
+      pending: 0,
+      rejected: 0,
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: summary,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching job summary",
+      error: error.message,
+    });
   }
 };

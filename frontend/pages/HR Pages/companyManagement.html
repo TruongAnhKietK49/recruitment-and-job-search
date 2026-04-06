@@ -131,12 +131,7 @@
 
                   <div class="section-box">
                     <div class="section-title">Giới thiệu công ty</div>
-                    <p class="section-text company-description">
-                      Hùng Phát là doanh nghiệp hoạt động trong lĩnh vực logistics và vận tải, tập trung cung cấp giải
-                      pháp giao nhận hàng hóa, quản lý kho bãi và tối ưu chuỗi cung ứng cho khách hàng doanh nghiệp.
-                      Chúng tôi xây dựng môi trường làm việc chuyên nghiệp, minh bạch và định hướng phát triển bền vững
-                      cho nhân sự.
-                    </p>
+                    <p class="section-text company-description"></p>
                   </div>
 
                   <div class="section-box">
@@ -171,12 +166,12 @@
                     </div>
                     <div class="info-grid">
                       <div class="info-item">
-                        <div class="info-label">Nhân viên đang hoạt động</div>
-                        <div class="info-value">124 thành viên</div>
+                        <div class="info-label">Nhân viên công ty</div>
+                        <div class="info-value employees-count"></div>
                       </div>
                       <div class="info-item">
                         <div class="info-label">Yêu cầu tham gia mới</div>
-                        <div class="info-value">03 yêu cầu</div>
+                        <div class="info-value requests-count"></div>
                       </div>
                     </div>
                   </div>
@@ -230,13 +225,14 @@
                       <i class="bi bi-search"></i>
                       <input
                         type="text"
+                        id="company-search-input"
                         class="search-input"
                         placeholder="Tìm theo tên công ty, mã công ty hoặc lĩnh vực hoạt động"
                       />
                     </div>
                   </div>
                   <div class="col-lg-4">
-                    <button class="btn btn-primary-soft w-100">
+                    <button id="btn-search-company" class="btn btn-primary-soft w-100">
                       <i class="bi bi-search me-2"></i>
                       Tìm công ty
                     </button>
@@ -247,65 +243,51 @@
               <div class="company-list">
                 <div class="join-card">
                   <div class="join-header">
-                    <div class="join-logo">HM</div>
+                    <div class="join-logo"></div>
                     <div>
-                      <div class="join-name">Công ty TNHH Hami Tech</div>
-                      <div class="join-sub">Mã công ty: HMT-1024</div>
+                      <div class="join-name"></div>
+                      <div class="join-sub"></div>
                     </div>
                   </div>
-                  <div class="join-desc">
-                    Chuyên phát triển phần mềm doanh nghiệp, hệ thống quản trị nội bộ và giải pháp chuyển đổi số cho
-                    doanh nghiệp vừa và lớn.
-                  </div>
+                  <div class="join-desc"></div>
                   <div class="tag-list">
                     <span class="tag-item">
                       <i class="bi bi-geo-alt"></i>
-                      Hà Nội
                     </span>
                     <span class="tag-item">
                       <i class="bi bi-briefcase"></i>
-                      Công nghệ
                     </span>
                     <span class="tag-item">
                       <i class="bi bi-people"></i>
-                      50 - 100 nhân sự
                     </span>
                   </div>
                   <button class="btn btn-primary-soft w-100">
                     <i class="bi bi-person-plus me-2"></i>
-                    Gửi yêu cầu tham gia
                   </button>
                 </div>
 
                 <div class="join-card">
                   <div class="join-header">
-                    <div class="join-logo">SG</div>
+                    <div class="join-logo"></div>
                     <div>
-                      <div class="join-name">Saigon Retail Group</div>
-                      <div class="join-sub">Mã công ty: SRG-8891</div>
+                      <div class="join-name"></div>
+                      <div class="join-sub"></div>
                     </div>
                   </div>
-                  <div class="join-desc">
-                    Vận hành chuỗi bán lẻ đa ngành, tập trung vào trải nghiệm khách hàng, tối ưu vận hành cửa hàng và
-                    phát triển đội ngũ kinh doanh.
-                  </div>
+                  <div class="join-desc"></div>
                   <div class="tag-list">
                     <span class="tag-item">
                       <i class="bi bi-geo-alt"></i>
-                      TP. Hồ Chí Minh
                     </span>
                     <span class="tag-item">
                       <i class="bi bi-briefcase"></i>
-                      Bán lẻ
                     </span>
                     <span class="tag-item">
                       <i class="bi bi-people"></i>
-                      300+ nhân sự
                     </span>
                   </div>
                   <button class="btn btn-primary-soft w-100">
                     <i class="bi bi-person-plus me-2"></i>
-                    Gửi yêu cầu tham gia
                   </button>
                 </div>
               </div>
@@ -374,22 +356,14 @@
             <div class="tab-pane fade" id="requests-pane" role="tabpanel" aria-labelledby="requests-tab" tabindex="0">
               <div class="search-panel">
                 <div class="row g-3">
-                  <div class="col-lg-6">
+                  <div class="col-lg-8">
                     <div class="search-box">
                       <i class="bi bi-search"></i>
-                      <input class="search-input" type="text" placeholder="Tìm theo tên ứng viên hoặc email" />
+                      <input id="join-request-search-input" class="search-input" type="text" placeholder="Tìm theo tên ứng viên hoặc email" />
                     </div>
                   </div>
-                  <div class="col-lg-3">
-                    <select class="form-select search-input ps-3">
-                      <option>Tất cả trạng thái</option>
-                      <option>Chờ duyệt</option>
-                      <option>Đã chấp nhận</option>
-                      <option>Đã từ chối</option>
-                    </select>
-                  </div>
-                  <div class="col-lg-3">
-                    <button class="btn btn-primary-soft w-100">
+                  <div class="col-lg-4">
+                    <button id="btn-filter-join-request" class="btn btn-primary-soft w-100">
                       <i class="bi bi-funnel me-2"></i>
                       Lọc yêu cầu
                     </button>
@@ -397,94 +371,7 @@
                 </div>
               </div>
 
-              <div class="company-list company-join-request-list">
-                <div class="join-card">
-                  <div class="join-header">
-                    <div class="join-logo"><i class="bi bi-person"></i></div>
-                    <div>
-                      <div class="join-name">Trần Văn Nam</div>
-                      <div class="join-sub">nam.tran@gmail.com</div>
-                    </div>
-                  </div>
-                  <div class="join-desc">
-                    Ứng viên gửi yêu cầu tham gia công ty với vai trò HR. Kinh nghiệm 3 năm tuyển dụng mass, từng làm
-                    việc tại công ty logistics và bán lẻ.
-                  </div>
-                  <div class="tag-list">
-                    <span class="tag-item">
-                      <i class="bi bi-calendar-event"></i>
-                      Gửi lúc: 09:30 24/03/2026
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-person-badge"></i>
-                      Vai trò mong muốn: HR
-                    </span>
-                  </div>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary-soft flex-fill">
-                      <i class="bi bi-check2-circle me-2"></i>
-                      Chấp nhận
-                    </button>
-                    <button class="btn btn-outline-soft flex-fill">
-                      <i class="bi bi-x-circle me-2"></i>
-                      Từ chối
-                    </button>
-                    <button class="btn btn-outline-soft flex-fill">
-                      <i class="bi bi-eye me-2"></i>
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </div>
-
-                <div class="join-card">
-                  <div class="join-header">
-                    <div class="join-logo"><i class="bi bi-person"></i></div>
-                    <div>
-                      <div class="join-name">Nguyễn Thị Lan</div>
-                      <div class="join-sub">lan.nguyen@gmail.com</div>
-                    </div>
-                  </div>
-                  <div class="join-desc">
-                    Gửi yêu cầu tham gia công ty với vai trò Nhân viên tuyển dụng. Có kinh nghiệm 2 năm sourcing ứng
-                    viên và quản lý dữ liệu tuyển dụng.
-                  </div>
-                  <div class="tag-list">
-                    <span class="tag-item">
-                      <i class="bi bi-calendar-event"></i>
-                      Gửi lúc: 14:10 23/03/2026
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-person-badge"></i>
-                      Vai trò mong muốn: Recruiter
-                    </span>
-                  </div>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button class="btn btn-primary-soft flex-fill">
-                      <i class="bi bi-check2-circle me-2"></i>
-                      Chấp nhận
-                    </button>
-                    <button class="btn btn-outline-soft flex-fill">
-                      <i class="bi bi-x-circle me-2"></i>
-                      Từ chối
-                    </button>
-                    <button class="btn btn-outline-soft flex-fill">
-                      <i class="bi bi-eye me-2"></i>
-                      Xem chi tiết
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="empty-state mt-4">
-                <div class="empty-icon">
-                  <i class="bi bi-inboxes"></i>
-                </div>
-                <div class="empty-title">Chưa có yêu cầu tham gia mới</div>
-                <div class="empty-text">
-                  Khi có người dùng gửi yêu cầu tham gia công ty, danh sách sẽ hiển thị tại tab này để HR hoặc founder
-                  duyệt.
-                </div>
-              </div>
+              <div class="company-list company-join-request-list"></div>
             </div>
           </div>
         </div>
