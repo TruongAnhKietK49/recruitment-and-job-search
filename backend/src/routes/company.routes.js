@@ -23,9 +23,11 @@ router.get("/my/join-requests", authMiddleware, getMyCompanyJoinRequests);
 router.patch("/join-requests/:id/approve", authMiddleware, approveJoinRequest);
 router.patch("/join-requests/:id/reject", authMiddleware, rejectJoinRequest);
 
-router.get("/", authMiddleware, getAllCompanies);
+router.get("/", getAllCompanies);
+// router.get("/", authMiddleware, getAllCompanies);
 router.get("/me", authMiddleware, getMyCompany);
-router.get("/:id", authMiddleware, getCompanyById);
+// router.get("/:id", authMiddleware, getCompanyById);
+router.get("/:id", getCompanyById);
 
 router.put("/:id", authMiddleware, authorizeRoles("admin", "hr"), updateCompany);
 router.delete("/:id", authMiddleware, authorizeRoles("admin", "hr"), deleteCompany);

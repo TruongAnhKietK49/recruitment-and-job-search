@@ -7,7 +7,7 @@ export const getAllJobs = async (req, res) => {
   try {
     const pageNumber = Number.parseInt(req.query.page, 10) || 1;
     const limitNumber = Number.parseInt(req.query.limit, 10) || 10;
-    const { keyword, category, status, jobType, companyId } = req.query;
+    const { keyword, category, status, jobType, companyId, salaryRange, experience, location } = req.query;
 
     const query = {};
 
@@ -27,10 +27,49 @@ export const getAllJobs = async (req, res) => {
       query.companyId = companyId;
     }
 
-    if (req.user.role === "candidate") {
-      query.status = "approved";
-    } else if (status) {
-      query.status = status;
+    if (!req.user || req.user.role === "candidate") {
+          query.status = "approved";
+        } else if (status) {
+          query.status = status;
+        }
+    
+
+    if (experience) {
+      let expString = "";
+      if (experience === "0-1") expString = "Dưới 1 năm";
+      else if (experience === "1-3") expString = "1 - 3 năm";
+      else if (experience === "3-5") expString = "3 - 5 năm";
+      else if (experience === "5+") expString = "Trên 5 năm";
+      
+      if (expString) query.experience = expString;
+    }
+
+    // Xử lý lọc theo Mức lương
+    if (salaryRange) {
+          if (salaryRange === "50+") {
+            query.salaryMin = { $gte: 50 };
+          } else {
+            const [min, max] = salaryRange.split("-");
+            if (min && max) {
+              query.salaryMin = { $gte: Number(min), $lte: Number(max) };
+            }
+          }
+    }
+
+    // Xử lý lọc theo Địa điểm 
+    if (location) {
+      let locString = "";
+      if (location === "HN") locString = "Hà Nội";
+      else if (location === "HCM") locString = "Hồ Chí Minh";
+
+      if (locString) {
+        const companiesInLocation = await Company.find({
+          address: { $regex: locString, $options: "i" }
+        }).select("_id");
+        
+        const companyIds = companiesInLocation.map(c => c._id);
+        query.companyId = { $in: companyIds }; 
+      }
     }
 
     const jobs = await Job.find(query)

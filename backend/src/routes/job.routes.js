@@ -27,10 +27,11 @@ import {
 } from "../controllers/saveJob.controller.js";
 
 const router = express.Router();
-
-router.get("/", authMiddleware, getAllJobs);
+router.get("/", getAllJobs);
+// router.get("/", authMiddleware, getAllJobs);
 router.get("/pending", authMiddleware, authorizeRoles("admin"), getPendingJobs);
-router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getJobById);
+// router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getJobById);
+router.get("/:id", getJobById);
 
 router.post("/", authMiddleware, authorizeRoles("admin", "hr"), createJob);
 router.put("/:id", authMiddleware, authorizeRoles("admin", "hr"), updateJob);

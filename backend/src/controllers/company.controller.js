@@ -64,9 +64,9 @@ export const getAllCompanies = async (req, res) => {
       query.status = status;
     }
 
-    if (req.user.role === "hr") {
-      query.createdBy = req.user.userId;
-    }
+    if (req.user && req.user.role === "hr") {
+          query.createdBy = req.user.userId;
+        }
 
     const companies = await Company.find(query)
       .populate("createdBy", "fullName email role")
@@ -129,9 +129,9 @@ export const getCompanyById = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    if (req.user.role === "hr" && company.createdBy._id.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
+    if (req.user && req.user.role === "hr" && company.createdBy._id.toString() !== req.user.userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
 
     const jobs = await Job.find({ companyId: company._id })
       .select("title category salaryMin salaryMax experience jobType deadline status createdAt")
