@@ -1,3 +1,4 @@
+import URL from "../utils/url.js";
 const user = sessionStorage.getItem("user")
   ? JSON.parse(sessionStorage.getItem("user"))
   : localStorage.getItem("user")
@@ -11,13 +12,20 @@ if (!token) {
 console.log(user);
 async function loadNavbar() {
   try {
-
-
     const res = await fetch("../../pages/utils/navbarHR.html");
     const data = await res.text();
 
     document.getElementById("navbar").innerHTML = data;
     document.getElementById("userName").innerHTML = user.fullName;
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        logOut();
+      });
+    }
+
     setTimeout(() => {
       setActiveSidebar();
     }, 0);
@@ -75,24 +83,47 @@ async function loadMyCompany() {
   }
 }
 
-async function guardManagePostsMenuOnLogin() {
+function disableManagePostsMenu(message = "Bạn cần tạo hoặc tham gia công ty trước") {
   const menuManagePosts = document.getElementById("menu-manage-posts");
   if (!menuManagePosts) return;
 
-  const company = await loadMyCompany();
-
-  if (company?._id) return;
-
   menuManagePosts.classList.add("disabled-menu");
   menuManagePosts.setAttribute("aria-disabled", "true");
-  menuManagePosts.setAttribute("title", "Bạn cần tạo hoặc tham gia công ty trước");
+  menuManagePosts.setAttribute("title", message);
 
-  menuManagePosts.addEventListener("click", function (e) {
+  menuManagePosts.onclick = function (e) {
     e.preventDefault();
     alert("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.");
-  });
+  };
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  guardManagePostsMenuOnLogin();
+function enableManagePostsMenu() {
+  const menuManagePosts = document.getElementById("menu-manage-posts");
+  if (!menuManagePosts) return;
+
+  menuManagePosts.classList.remove("disabled-menu");
+  menuManagePosts.removeAttribute("aria-disabled");
+  menuManagePosts.removeAttribute("title");
+  menuManagePosts.onclick = null;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const cachedHasCompany = localStorage.getItem("hasCompany");
+
+  if (cachedHasCompany === "true") {
+    enableManagePostsMenu();
+  } else if (cachedHasCompany === "false") {
+    disableManagePostsMenu();
+  } else {
+    disableManagePostsMenu();
+  }
+  const company = await loadMyCompany();
+
+  if (company) {
+    localStorage.setItem("hasCompany", "true");
+    enableManagePostsMenu();
+  } else {
+    localStorage.setItem("hasCompany", "false");
+    disableManagePostsMenu();
+  }
 });
