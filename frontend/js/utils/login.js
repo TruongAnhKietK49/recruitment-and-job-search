@@ -152,7 +152,7 @@
     }
 
     if (role.toLowerCase() === "candidate") {
-      window.location.href = "";
+      window.location.href = "../../pages/Candidate Pages/index.html";
       return;
     }
 

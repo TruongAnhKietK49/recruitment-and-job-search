@@ -1,0 +1,132 @@
+<aside class="admin-sidebar">
+  <div class="sidebar-header">
+    <i class="bi bi-briefcase"></i>
+    <span>Job Website</span>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link active" href="../Admin Pages/dashboard.html">
+        <i class="bi bi-house-door"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="../Admin Pages/users.html">
+        <i class="bi bi-people"></i> Quản lý người dùng
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="../Admin Pages/admin-companies.html">
+        <i class="bi bi-clipboard"></i> Quản lý công ty
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="../Admin Pages/admin-jobs.html">
+        <i class="bi bi-display"></i> Quản lý việc làm
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="../Admin Pages/reports.html">
+        <i class="bi bi-display"></i> Báo cáo thống kê
+      </a>
+    </li>
+    <li class="nav-item mt-2 border-top pt-2 border-light border-opacity-25">
+      <a class="nav-link" href="#">
+        <i class="bi bi-person"></i> <span id="adminName">Nguyen Thi B</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="btn-logout" id="logoutBtn">
+      <i class="bi bi-box-arrow-right"></i> Đăng xuất
+    </button>
+  </div>
+</aside>
+
+<style>
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: #2f80ed; 
+    color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+  }
+
+  .sidebar-header {
+    padding: 20px 24px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 10px;
+  }
+  .sidebar-header i {
+    font-size: 2rem;
+  }
+
+  .sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; 
+    overflow-y: auto;
+  }
+  .sidebar-nav .nav-item {
+    margin-bottom: 4px;
+  }
+  .sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  .sidebar-nav .nav-link i {
+    font-size: 1.3rem;
+    width: 24px;
+    text-align: center;
+  }
+  .sidebar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .sidebar-nav .nav-link.active {
+    background-color: #1a5cbd; 
+    border-left: 4px solid white;
+    padding-left: 20px; 
+  }
+
+  .sidebar-footer {
+    padding: 20px 24px;
+    margin-top: auto; 
+  }
+  .btn-logout {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .btn-logout i {
+    font-size: 1.4rem;
+  }
+  .btn-logout:hover {
+    color: #ffc107; 
+  }
+</style>

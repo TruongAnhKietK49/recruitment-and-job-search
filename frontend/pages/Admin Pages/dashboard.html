@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Job Website</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../css/Admin css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+  <div id="navbar"></div>
+
+  <main class="admin-content">
+    
+    <div class="d-flex justify-content-between align-items-start mb-4 pb-2 border-bottom">
+      <div>
+        <h1 class="text-primary fw-bold fst-italic mb-2">Chào mừng quay trở lại 👋</h1>
+        <p class="text-muted fst-italic mb-0" id="currentDate">Hôm nay là thứ 2, ngày 19/2/2026</p>
+      </div>
+      <div class="text-primary fw-medium fs-5" id="adminNameDisplay">Nguyễn Thị B</div>
+    </div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Tin tuyển dụng</div>
+          <div class="stat-value"><i class="bi bi-bag"></i> <span id="statJobs">1590</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Ứng viên</div>
+          <div class="stat-value"><i class="bi bi-person"></i> <span id="statCandidates">10000</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Hồ sơ ứng tuyển</div>
+          <div class="stat-value"><i class="bi bi-file-earmark-text"></i> <span id="statApplications">1900</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Công ty</div>
+          <div class="stat-value"><i class="bi bi-briefcase"></i> <span id="statCompanies">190</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Nhà tuyển dụng</div>
+          <div class="stat-value"><i class="bi bi-person"></i> <span id="statEmployers">2300</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-title">Tài khoản bị khóa</div>
+          <div class="stat-value"><i class="bi bi-file-earmark-lock"></i> <span id="statLocked">10</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card bg-white p-4 rounded-3 shadow-sm border border-light">
+      <div class="mb-4">
+        <h4 class="fw-bold mb-1">Biến động nhân sự</h4>
+        <p class="text-muted mb-0">Công ty cổ phần Himy</p>
+      </div>
+      <canvas id="hrChart" height="100"></canvas>
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/utils/loadNavbarAdmin.js"></script>
+  <script src="../../js/Admin js/dashboard.js"></script>
+</body>
+</html>

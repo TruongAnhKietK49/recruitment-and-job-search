@@ -27,21 +27,27 @@
 
     <div class="hero-content container position-relative text-center text-white" style="z-index: 2;">
       <h1 class="hero-title text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Tìm kiếm công việc mơ ước của bạn ngay hôm nay</h1>
-      <div class="hero-search mx-auto mt-5" style="max-width: 800px;">
-        <div class="d-flex bg-white rounded-pill p-2 shadow align-items-center flex-wrap">
-          <div class="flex-grow-1 border-end px-3 d-flex align-items-center search-input-wrap">
-            <i class="bi bi-search text-muted me-2"></i>
-            <input type="text" id="heroSearchInput" class="form-control border-0 shadow-none form-control-lg" placeholder="Vị trí tuyển dụng, tên công việc...">
+      <div class="hero-search mx-auto mt-5" style="max-width: 850px;">
+        <div class="d-flex flex-column flex-md-row bg-white rounded-4 rounded-md-pill p-2 shadow align-items-stretch align-items-md-center">
+          
+          <div class="border-md-end border-bottom border-md-bottom-0 px-3 py-2 d-flex align-items-center" style="flex: 2;">
+            <i class="bi bi-search text-muted me-2 fs-5"></i>
+            <input type="text" id="heroSearchInput" class="form-control border-0 shadow-none bg-transparent px-0" placeholder="Vị trí tuyển dụng, tên công việc...">
           </div>
-          <div class="flex-grow-1 px-3 d-flex align-items-center location-select-wrap">
-            <i class="bi bi-geo-alt text-muted me-2"></i>
-            <select class="form-select border-0 shadow-none text-muted form-select-lg">
-              <option value="">Địa điểm</option>
+          
+          <div class="px-3 py-2 d-flex align-items-center" style="flex: 1;">
+            <i class="bi bi-geo-alt text-muted me-2 fs-5"></i>
+            <select id="locationFilter" class="form-select border-0 shadow-none text-muted bg-transparent px-0">
+              <option value="">Tất cả địa điểm</option>
               <option value="HN">Hà Nội</option>
-              <option value="HCM">TP.HCM</option>
+              <option value="HCM">TP Hồ Chí Minh</option>
             </select>
           </div>
-          <button class="btn btn-primary rounded-pill px-4 py-2 btn-lg" id="heroSearchBtn">Tìm kiếm</button>
+          
+          <button class="btn btn-primary rounded-pill px-5 py-3 mt-2 mt-md-0 fw-bold flex-shrink-0" id="heroSearchBtn" style="white-space: nowrap;">
+            Tìm kiếm
+          </button>
+          
         </div>
       </div>
     </div>
@@ -56,28 +62,35 @@
     </button>
   </section>
 
-  <div class="filter-bar">
+  <div class="filter-bar mt-4">
     <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted fw-bold">Bộ lọc tìm kiếm</span>
+        <button id="clearFiltersBtn" class="btn btn-sm btn-outline-danger shadow-sm rounded-pill px-3">
+          <i class="bi bi-x-circle me-1"></i> Xóa bộ lọc
+        </button>
+      </div>
       <div class="row g-3">
         <div class="col-md-3">
           <label class="form-label text-uppercase text-muted fw-500 fs-sm mb-1">Danh mục</label>
           <select id="categoryFilter" class="form-select form-select-lg">
             <option value="">Tất cả ngành nghề</option>
             <option value="IT">Công nghệ thông tin</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Kế toán">Kế toán</option>
-            <option value="Hành chính">Hành chính</option>
-            <option value="Vận hành">Vận hành</option>
+            <option value="Design">Thiết kế đồ họa</option>
+            <option value="Marketing">Digital Marketing</option>
+            <option value="Media">Video & Media</option>
+            <option value="Business">Kinh doanh</option>
+            <option value="Content">Viết lách / Dịch thuật</option>
           </select>
         </div>
         <div class="col-md-3">
           <label class="form-label text-uppercase text-muted fw-500 fs-sm mb-1">Hình thức làm việc</label>
           <select id="typeFilter" class="form-select form-select-lg">
             <option value="">Tất cả</option>
-            <option value="full-time">Full-time</option>
-            <option value="part-time">Part-time</option>
-            <option value="internship">Internship</option>
-            <option value="remote">Remote</option>
+            <option value="full-time">Toàn thời gian</option>
+            <option value="part-time">Bán thời gian</option>
+            <option value="internship">Thực tập sinh</option>
+            <option value="remote">Làm từ xa</option>
           </select>
         </div>
         <div class="col-md-3">
@@ -106,16 +119,99 @@
   </div>
 
   <main class="container py-5">
+    <div class="mb-5 pb-3">
+      <h2 class="section-title text-primary mb-4">Việc làm theo ngành nghề</h2>
+      <div class="row g-3">
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="IT" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-pc-display mb-2 fs-4"></i>
+            <span class="fw-semibold text-dark">Công nghệ thông tin</span>
+          </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="Design" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-palette mb-2 fs-4 text-success"></i>
+            <span class="fw-semibold text-dark">Thiết kế đồ họa</span>
+          </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="Marketing" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-megaphone mb-2 fs-4 text-warning"></i>
+            <span class="fw-semibold text-dark">Digital Marketing</span>
+          </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="Media" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-camera-video mb-2 fs-4 text-info"></i>
+            <span class="fw-semibold text-dark">Video & Media</span>
+          </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="Business" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-briefcase mb-2 fs-4 text-success"></i>
+            <span class="fw-semibold text-dark">Kinh doanh</span>
+          </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <a href="#" data-category="Content" class="category-card d-flex flex-column justify-content-center p-3 text-decoration-none rounded-3">
+            <i class="bi bi-translate mb-2 fs-4 text-success"></i>
+            <span class="fw-semibold text-dark">Viết lách / Dịch thuật</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-      <h2 class="section-title text-primary">Việc làm nổi bật</h2>
+      <h2 class="section-title text-primary">Danh sách việc làm</h2>
       <a href="#" class="view-all-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
     </div>
 
     <div id="jobsContainer">
       <div id="noJobsFound" class="alert alert-info text-center d-none">Không tìm thấy việc làm phù hợp.</div>
       <div id="jobsGrid" class="row">
-          </div>
+        </div>
     </div>
+
+    <div class="mt-5 pt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title text-primary">Cẩm nang tìm việc</h2>
+        <a href="blog.html" class="view-all-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+      </div>
+      
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
+            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
+            <div class="p-4">
+              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
+              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
+              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
+            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
+            <div class="p-4">
+              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
+              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
+              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
+            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
+            <div class="p-4">
+              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
+              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
+              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <div id="footer"></div>
@@ -123,6 +219,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../js/utils/loadNavbar.js"></script>
   <script src="../../js/utils/loadFooter.js"></script>
-  <script src="../../js/Candidate js/home.js"></script>
+  <script type="module" src="../../js/Candidate js/home.js"></script>
 </body>
 </html>
