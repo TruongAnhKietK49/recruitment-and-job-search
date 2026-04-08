@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý ứng viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="../../css/HR css/candidateManagement.css" />
+  </head>
+
+  <body>
+    <div id="navbar"></div>
+
+    <main class="main-content">
+      <div class="container-fluid">
+        <div class="page-shell mx-auto">
+          <!-- Header -->
+          <div class="mb-4">
+            <h1 class="page-title display-5 fw-bold mb-2">Quản lý ứng viên</h1>
+            <p class="text-secondary fs-5 mb-0">Theo dõi ứng viên ứng tuyển vào các bài đăng, lọc hồ sơ và cập nhật trạng thái xử lý.</p>
+          </div>
+
+          <!-- Tabs -->
+          <ul class="nav nav-pills gap-2 gap-md-3 mb-4" id="candidateTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="overview-tab-btn" data-bs-toggle="pill" data-bs-target="#overview-tab" type="button" role="tab">
+                Tổng quan
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="list-tab-btn" data-bs-toggle="pill" data-bs-target="#candidate-list-tab" type="button" role="tab">
+                Danh sách ứng viên
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="status-tab-btn" data-bs-toggle="pill" data-bs-target="#status-tab" type="button" role="tab">
+                Trạng thái xử lý
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- TAB 1 -->
+            <div class="tab-pane fade show active" id="overview-tab" role="tabpanel">
+              <!-- Stats -->
+              <div class="card soft-card border-0 mb-4">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h3 fw-bold mb-0">Tổng quan ứng viên</h2>
+                  </div>
+
+                  <div class="row g-3 g-xl-4">
+                    <div class="col-12 col-sm-6 col-xl-3">
+                      <div class="soft-card h-100 bg-white p-4">
+                        <div class="stat-icon icon-blue mb-3">
+                          <i class="bi bi-people"></i>
+                        </div>
+                        <div class="muted-text mb-2">Tổng ứng viên</div>
+                        <div class="display-5 fw-bold" id="totalCandidates">0</div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                      <div class="soft-card h-100 bg-white p-4">
+                        <div class="stat-icon icon-yellow mb-3">
+                          <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div class="muted-text mb-2">Chờ xử lý</div>
+                        <div class="display-5 fw-bold" id="pendingCandidates">0</div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                      <div class="soft-card h-100 bg-white p-4">
+                        <div class="stat-icon icon-green mb-3">
+                          <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="muted-text mb-2">Đã nhận</div>
+                        <div class="display-5 fw-bold" id="acceptedCandidates">0</div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-3">
+                      <div class="soft-card h-100 bg-white p-4">
+                        <div class="stat-icon icon-red mb-3">
+                          <i class="bi bi-x-circle"></i>
+                        </div>
+                        <div class="muted-text mb-2">Đã từ chối</div>
+                        <div class="display-5 fw-bold" id="rejectedCandidates">0</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Overview body -->
+              <div class="row g-4">
+                <div class="col-12 col-xl-8">
+                  <div class="card soft-card border-0 h-100">
+                    <div class="card-body p-4">
+                      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                        <h2 class="h3 fw-bold mb-0">Ứng viên gần đây</h2>
+                        <button class="btn btn-primary rounded-pill px-4" id="goToCandidateListBtn" type="button">Xem tất cả</button>
+                      </div>
+
+                      <div id="recentCandidates" class="d-flex flex-column gap-3"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                  <div class="card soft-card border-0 h-100">
+                    <div class="card-body p-4">
+                      <h2 class="h3 fw-bold mb-4">Gợi ý quản lý</h2>
+
+                      <div class="d-flex flex-column gap-3 mb-4">
+                        <div class="soft-card p-3 bg-white">Ưu tiên xem các ứng viên mới nộp để phản hồi nhanh và tăng trải nghiệm ứng tuyển.</div>
+                        <div class="soft-card p-3 bg-white">
+                          Dùng bộ lọc theo vị trí tuyển dụng để xử lý ứng viên theo từng bài đăng hiệu quả hơn.
+                        </div>
+                        <div class="soft-card p-3 bg-white">Ghi chú kết quả phỏng vấn và cập nhật trạng thái ngay để tránh bỏ sót hồ sơ.</div>
+                      </div>
+
+                      <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="goToStatusBtn" type="button">Xem trạng thái xử lý</button>
+                        <button class="btn btn-outline-primary" id="refreshCandidatesBtn" type="button">Làm mới dữ liệu</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2 -->
+            <div class="tab-pane fade" id="candidate-list-tab" role="tabpanel">
+              <div class="card soft-card border-0">
+                <div class="card-body p-4">
+                  <div class="d-flex flex-warp gap-2 justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                      <h2 class="h3 fw-bold mb-0">Danh sách ứng viên</h2>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2">
+                      <select class="form-select form-select-lg" id="applicantsFilter">
+                        <option value="allApplicants">Tất cả ứng viên</option>
+                        <option value="myApplicants">Ứng viên của bạn</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Filters -->
+                  <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-4">
+                      <input
+                        id="searchCandidateInput"
+                        type="text"
+                        class="form-control form-control-lg"
+                        id="searchKeyword"
+                        placeholder="Tìm theo tên, email, số điện thoại..."
+                      />
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-3">
+                      <select id="jobFilter" class="form-select form-select-lg"></select>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-3">
+                      <select class="form-select form-select-lg" id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="reviewing">Đang xem</option>
+                        <option value="interview">Phỏng vấn</option>
+                        <option value="accepted">Đã nhận</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2">
+                      <select class="form-select form-select-lg" id="sortFilter">
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                        <option value="name_asc">Tên A-Z</option>
+                        <option value="name_desc">Tên Z-A</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Main list/detail -->
+                  <div class="row g-4 align-items-start">
+                    <div class="col-12 col-xl-7">
+                      <div id="candidateList" class="d-flex flex-column gap-3"></div>
+                    </div>
+
+                    <div class="col-12 col-xl-5">
+                      <div id="candidateDetail" class="detail-panel p-4">
+                        <div class="text-center text-secondary py-5">
+                          <i class="bi bi-person-vcard fs-1 d-block mb-3"></i>
+                          Chọn một ứng viên để xem chi tiết.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3 -->
+            <div class="tab-pane fade" id="status-tab" role="tabpanel">
+              <div class="card soft-card border-0">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                      <h2 class="h3 fw-bold mb-1">Bảng trạng thái ứng viên</h2>
+                      <p class="text-secondary mb-0">Theo dõi nhanh tiến độ xử lý hồ sơ theo từng giai đoạn.</p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-outline-primary btn-sm rounded-pill">
+                        <i class="bi bi-funnel me-1"></i>
+                        Lọc
+                      </button>
+                      <button class="btn btn-primary btn-sm rounded-pill" id="refreshBtn">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Làm mới
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="row g-3" id="statusBoard">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="../../js/utils/loadNavbarHR.js"></script>
+    <script type="module" src="../../js/HR js/candidateManagement.js"></script>
+  </body>
+</html>

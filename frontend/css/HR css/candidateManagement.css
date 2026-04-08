@@ -1,0 +1,369 @@
+:root {
+  --sidebar-width: 260px;
+  --primary: #2f80ed;
+  --app-primary: #2f80ed;
+  --primary-dark: #1f6fdb;
+  --app-primary-soft: #eef5ff;
+  --app-border: #dbe7f6;
+  --app-bg: #f4f7fb;
+  --app-text-soft: #6b7280;
+}
+
+body {
+  background-color: var(--app-bg);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 22px 28px 36px;
+}
+
+.page-title {
+  color: #2f6fe4;
+  letter-spacing: -0.02em;
+}
+
+.soft-card {
+  border: 1px solid var(--app-border);
+  border-radius: 1.25rem;
+  box-shadow: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.04);
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  font-size: 1.25rem;
+}
+
+.icon-blue {
+  background: #e8f1ff;
+  color: #2563eb;
+}
+
+.icon-yellow {
+  background: #fff4db;
+  color: #d97706;
+}
+
+.icon-green {
+  background: #e8f8ee;
+  color: #16a34a;
+}
+
+.icon-red {
+  background: #fdeaea;
+  color: #dc2626;
+}
+
+.nav-pills .nav-link {
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  color: #374151;
+  font-weight: 600;
+  background: #fff;
+  padding: 0.8rem 1.4rem;
+}
+
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #4e97ff, #2f6fe4);
+  border-color: transparent;
+}
+
+/* Candidate card style */
+.candidate-card {
+  border-radius: 18px;
+  background: #fff;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.candidate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.active-candidate {
+  border-left: 4px solid #0d6efd;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  box-shadow: 0 0.5rem 1.4rem rgba(13, 110, 253, 0.12) !important;
+}
+
+.candidate-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e5eefc;
+  background: #f8f9fa;
+}
+
+.candidate-name {
+  color: #0f172a;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.candidate-job {
+  font-size: 0.95rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.candidate-meta-list div {
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+.candidate-meta-list i,
+.candidate-job i,
+.candidate-date i {
+  color: #64748b;
+}
+
+.candidate-date {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.candidate-view-btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.candidate-tags-row {
+  padding-top: 4px;
+}
+
+.location-badge {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+}
+
+.skill-badge {
+  background: #e7f1ff;
+  color: #0d6efd;
+  border: 1px solid #cfe2ff;
+  font-weight: 500;
+}
+
+.status-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* Gợi ý màu theo status */
+.status-badge.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.reviewing {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+.status-badge.interview {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.accepted {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-badge.rejected {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.empty-state-bootstrap {
+  border-radius: 16px;
+  background: #f8f9fa;
+}
+
+.candidate-detail-card {
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.detail-avatar-wrap {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.detail-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e9f2ff;
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.12);
+  background: #f8f9fa;
+}
+
+.detail-name {
+  color: #1f2937;
+  font-size: 1.45rem;
+  line-height: 1.25;
+}
+
+.detail-sub {
+  color: #6b7280;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.detail-sub i {
+  color: #6c757d;
+}
+
+.info-card {
+  height: 100%;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  padding: 16px 18px;
+  transition: all 0.2s ease;
+}
+
+.info-card:hover {
+  background: #f4f9ff;
+  border-color: #dbeafe;
+}
+
+.info-card label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.info-card p {
+  margin: 0;
+  color: #1f2937;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.detail-section {
+  background: #ffffff;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+.section-title i {
+  color: #0d6efd;
+}
+
+.content-box {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: #4b5563;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.skill-badge {
+  background: #e7f1ff;
+  color: #0d6efd;
+  border: 1px solid #cfe2ff;
+  font-weight: 500;
+}
+
+.status-action-btn {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 10px 16px;
+}
+
+.detail-empty-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 1.8rem;
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-pending {
+  background: #fff4db;
+  color: #92400e;
+}
+
+.status-reviewing {
+  background: #e8f1ff;
+  color: #1d4ed8;
+}
+
+.status-interview {
+  background: #f1ebff;
+  color: #6d28d9;
+}
+
+.status-accepted {
+  background: #e8f8ee;
+  color: #166534;
+}
+
+.status-rejected {
+  background: #fdeaea;
+  color: #b91c1c;
+}
+
+.kanban-col {
+  min-height: 420px;
+  max-height: 620px;
+  overflow-y: auto;
+  background: #f8fbff;
+  border: 1px solid #dbe7f6;
+  border-radius: 1rem;
+}
+
+.mini-card {
+  border: 1px solid #e6eefb;
+  border-radius: 0.9rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(15, 23, 42, 0.04);
+}
+
+.muted-text {
+  color: var(--app-text-soft);
+}
+
+@media (max-width: 991.98px) {
+  .main-content {
+    margin-left: 0;
+  }
+}

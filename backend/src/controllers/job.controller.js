@@ -57,10 +57,7 @@ export const getAllJobs = async (req, res) => {
 
 export const getJobsByCompany = async (req, res) => {
   try {
-    const jobs = await Job.find({ companyId: req.params.companyId }).populate(
-      "companyId",
-      "companyName logoUrl address website",
-    );
+    const jobs = await Job.find({ companyId: req.params.companyId }).populate("companyId", "companyName logoUrl address website");
     if (!jobs) {
       return res.status(404).json({ message: "Jobs not found" });
     }
@@ -90,9 +87,7 @@ export const getJobById = async (req, res) => {
 
 export const getPendingJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ status: "pending" })
-      .populate("companyId", "companyName logoUrl")
-      .sort({ createdAt: -1 });
+    const jobs = await Job.find({ status: "pending" }).populate("companyId", "companyName logoUrl").sort({ createdAt: -1 });
 
     res.status(200).json(jobs);
   } catch (error) {
@@ -105,6 +100,7 @@ export const getPendingJobs = async (req, res) => {
 
 export const createJob = async (req, res) => {
   try {
+    const userId = req.user.userId;
     const {
       companyId,
       title,
@@ -128,8 +124,15 @@ export const createJob = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    if (req.user.role === "hr" && company.createdBy.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Forbidden" });
+    if (!["hr", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Only HR or Admin can create jobs" });
+    }
+
+    const isOwner = company.createdBy.toString() === req.user.userId;
+    const isMember = company.members?.some((member) => member.toString() === req.user.userId);
+
+    if (!isOwner && !isMember) {
+      return res.status(403).json({ message: "You are not a member of this company" });
     }
 
     const newJob = new Job({
@@ -148,6 +151,7 @@ export const createJob = async (req, res) => {
       requirements,
       benefits,
       status: "pending",
+      createdBy: userId,
     });
 
     const savedJob = await newJob.save();
