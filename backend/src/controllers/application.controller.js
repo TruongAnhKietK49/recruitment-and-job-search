@@ -1,4 +1,5 @@
 import Application from "../models/application.js";
+import CandidateProfile from "../models/candidateProfile.js";
 import Job from "../models/job.js";
 import Resume from "../models/resume.js";
 import Notification from "../models/notification.js";
@@ -6,7 +7,12 @@ import Notification from "../models/notification.js";
 // Create application
 export const createApplication = async (req, res) => {
   try {
-    const { jobId, resumeId } = req.body;
+    const { candidateProfileId, jobId, resumeId } = req.body;
+
+    const candidateProfile = await CandidateProfile.findById(candidateProfileId);
+    if (!candidateProfile) {
+      return res.status(404).json({ message: "Candidate profile not found" });
+    }
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -36,6 +42,7 @@ export const createApplication = async (req, res) => {
     const newApplication = new Application({
       jobId,
       userId: req.user.userId,
+      candidateProfileId: candidateProfileId,
       resumeId,
       applyDate: new Date(),
       status: "pending",
@@ -43,9 +50,7 @@ export const createApplication = async (req, res) => {
 
     const savedApplication = await newApplication.save();
 
-    const populatedApplication = await Application.findById(
-      savedApplication._id,
-    )
+    const populatedApplication = await Application.findById(savedApplication._id)
       .populate("jobId", "title category status")
       .populate("userId", "fullName email")
       .populate("resumeId", "title fileUrl");
@@ -104,6 +109,72 @@ export const getAllApplications = async (req, res) => {
   }
 };
 
+// Get company applications
+export const getCompanyApplications = async (req, res) => {
+  try {
+    const pageNumber = Number.parseInt(req.query.page, 10) || 1;
+    const limitNumber = Number.parseInt(req.query.limit, 10) || 10;
+    const { status, jobId } = req.query;
+
+    const companyId = req.params.companyId;
+
+    if (!req.user || !["hr", "admin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    if (!companyId) {
+      return res.status(400).json({ message: "User does not belong to any company" });
+    }
+
+    const companyJobs = await Job.find({ companyId: companyId }).select("_id");
+    const companyJobIds = companyJobs.map((job) => job._id.toString());
+
+    if (jobId && !companyJobIds.includes(jobId)) {
+      return res.status(403).json({ message: "You cannot access applications for this job" });
+    }
+
+    const query = {
+      jobId: {
+        $in: jobId ? [jobId] : companyJobIds,
+      },
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    const applications = await Application.find(query)
+      .populate("jobId", "title category status companyId createdBy")
+      .populate("userId", "fullName email phone gender")
+      .populate({
+        path: "candidateProfileId",
+        select: "avatar education expSummary expectedSalary address skills",
+        populate: {
+          path: "skills",
+          select: "skillName", // 👈 lấy tên skill
+        },
+      })
+      .populate("resumeId", "title fileUrl")
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber)
+      .sort({ createdAt: -1 });
+
+    const total = await Application.countDocuments(query);
+
+    res.status(200).json({
+      total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
+      applications,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching company applications",
+      error: error.message,
+    });
+  }
+};
+
 // Get application by ID
 export const getApplicationById = async (req, res) => {
   try {
@@ -116,10 +187,7 @@ export const getApplicationById = async (req, res) => {
       return res.status(404).json({ message: "Application not found" });
     }
 
-    if (
-      req.user.role === "candidate" &&
-      application.userId._id.toString() !== req.user.userId
-    ) {
+    if (req.user.role === "candidate" && application.userId._id.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -138,30 +206,28 @@ export const updateApplicationStatus = async (req, res) => {
     const { status } = req.body;
     const { id } = req.params;
 
+    const validStatus = ["pending", "reviewing", "interview", "accepted", "rejected"];
+
     const application = await Application.findById(id).populate({
       path: "jobId",
-      select: "title companyId", // Lấy title để làm nội dung thông báo
-      populate: {
-        path: "companyId",
-        select: "createdBy",
-      },
+      select: "title companyId createdBy",
     });
 
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
 
-    const job = application.jobId;
-    if (!job || !job.companyId) {
-      return res
-        .status(400)
-        .json({ message: "Job or Company data is missing" });
+    if (!validStatus.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
     }
 
-    if (job.companyId.createdBy.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to update this" });
+    const job = application.jobId;
+    if (!job || !job.companyId) {
+      return res.status(400).json({ message: "Job or Company data is missing" });
+    }
+
+    if (job.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ message: "You are not authorized to update this" });
     }
 
     application.status = status;
@@ -197,10 +263,7 @@ export const deleteApplication = async (req, res) => {
       return res.status(404).json({ message: "Application not found" });
     }
 
-    if (
-      req.user.role === "candidate" &&
-      application.userId.toString() !== req.user.userId
-    ) {
+    if (req.user.role === "candidate" && application.userId.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
 

@@ -9,7 +9,6 @@ if (!token) {
   window.location.href = "../../pages/utils/login.html";
 }
 
-console.log(user);
 async function loadNavbar() {
   try {
     const res = await fetch("../../pages/utils/navbarHR.html");

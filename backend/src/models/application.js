@@ -4,11 +4,12 @@ const ApplicationSchema = new mongoose.Schema(
   {
     jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job" },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    candidateProfileId: { type: mongoose.Schema.Types.ObjectId, ref: "CandidateProfile" },
     resumeId: { type: mongoose.Schema.Types.ObjectId, ref: "Resume" },
 
     status: {
       type: String,
-      enum: ["pending", "reviewing", "accepted", "rejected"],
+      enum: ["pending", "reviewing", "interview", "accepted", "rejected"],
       default: "pending",
     },
 

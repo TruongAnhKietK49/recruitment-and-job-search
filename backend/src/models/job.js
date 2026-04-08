@@ -4,6 +4,8 @@ const jobSchema = new mongoose.Schema(
   {
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
 
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
+
     title: {
       type: String,
       required: true,
@@ -20,7 +22,7 @@ const jobSchema = new mongoose.Schema(
     salaryMin: {
       type: Number,
     },
-    salaryMax: {    
+    salaryMax: {
       type: Number,
     },
 

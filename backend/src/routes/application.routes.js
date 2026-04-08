@@ -5,6 +5,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import {
   createApplication,
   getAllApplications,
+  getCompanyApplications,
   getApplicationById,
   updateApplicationStatus,
   deleteApplication,
@@ -13,8 +14,12 @@ import {
 const router = express.Router();
 
 router.post("/", authMiddleware, authorizeRoles("candidate"), createApplication);
+
 router.get("/", authMiddleware, getAllApplications);
+router.get("/company/:companyId", authMiddleware, authorizeRoles("admin", "hr"), getCompanyApplications);
 router.get("/:id", authMiddleware, getApplicationById);
+
+
 router.patch("/:id/status", authMiddleware, authorizeRoles("admin", "hr"), updateApplicationStatus);
 router.delete("/:id", authMiddleware, authorizeRoles("admin", "candidate"), deleteApplication);
 
