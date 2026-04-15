@@ -147,12 +147,12 @@
     const role = data?.user?.role || data?.role || "";
 
     if (role.toLowerCase() === "hr") {
-      window.location.href = "../../pages/HR Pages/dashboard.html";
+      window.location.href = "../../pages/HR Pages/candidateManagement.html";
       return;
     }
 
     if (role.toLowerCase() === "candidate") {
-      window.location.href = "";
+      window.location.href = "../../pages/Candidate Pages/index.html";
       return;
     }
 
