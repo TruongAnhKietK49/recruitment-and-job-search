@@ -7,7 +7,7 @@ export const getAllJobs = async (req, res) => {
   try {
     const pageNumber = Number.parseInt(req.query.page, 10) || 1;
     const limitNumber = Number.parseInt(req.query.limit, 10) || 10;
-    const { keyword, category, status, jobType, companyId } = req.query;
+    const { keyword, category, status, jobType, companyId, salaryRange, experience, location } = req.query;
 
     const query = {};
 
@@ -27,10 +27,53 @@ export const getAllJobs = async (req, res) => {
       query.companyId = companyId;
     }
 
-    if (req.user.role === "candidate") {
-      query.status = "approved";
-    } else if (status) {
-      query.status = status;
+    // if (req.user.role === "candidate") {
+    //   query.status = "approved";
+    // } else if (status) {
+    //   query.status = status;
+    // }
+    
+
+    if (experience) {
+      if (experience === "0-1") query.experience = { $regex: /dưới 1|0|không|chưa/i };
+      else if (experience === "1-3") query.experience = { $regex: /1|2|3/i };
+      else if (experience === "3-5") query.experience = { $regex: /3|4|5/i };
+      else if (experience === "5+") query.experience = { $regex: /trên 5|5|6|7|8|9|10/i };
+    }
+
+    // Xử lý lọc theo Mức lương
+    if (salaryRange) {
+      if (salaryRange === "50+") {
+        query.salaryMin = { $gte: 50000000 }; 
+      } else {
+        const [min, max] = salaryRange.split("-");
+        if (min && max) {
+          query.salaryMin = { 
+            $gte: Number(min) * 1000000, 
+            $lt: Number(max) * 1000000 
+          };
+        }
+      }
+    }
+
+    // Xử lý lọc theo Địa điểm 
+    if (location) {
+      let locString = "";
+      if (location === "HN") locString = "Hà Nội";
+      else if (location === "HCM") locString = "Hồ Chí Minh";
+
+      if (locString) {
+        const companiesInLocation = await Company.find({
+          address: { $regex: locString, $options: "i" }
+        }).select("_id");
+        
+        const companyIds = companiesInLocation.map(c => c._id);
+        
+        query.$or = [
+          { location: { $regex: locString, $options: "i" } },
+          { companyId: { $in: companyIds } }
+        ];
+      }
     }
 
     const jobs = await Job.find(query)

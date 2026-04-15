@@ -20,10 +20,10 @@ async function fetchUserAppliedJobs() {
     });
     if (res.ok) {
       const data = await res.json();
-      appliedJobIds = data.applications.map(app => app.jobId?._id || app.jobId);
+      appliedJobIds = data.applications.map(app => String(app.jobId?._id || app.jobId));
     }
   } catch (err) {
-    console.error("Lỗi:", err);
+    console.error("Lỗi lấy danh sách ứng tuyển:", err);
   }
 }
 
@@ -46,21 +46,22 @@ function getDaysLeft(deadline) {
   return diffDays > 0 ? `Còn ${diffDays} ngày` : 'Đã hết hạn';
 }
 
-async function fetchSavedJobs() {
-  const container = document.getElementById('savedJobsList');
+// Lấy lịch sử xem
+async function fetchViewedJobs() {
+  const container = document.getElementById('viewedJobsList');
   container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
   try {
-    if (token) await fetchUserAppliedJobs();
-    const res = await fetch(`${API_URL}/jobs/save-job/me`, {
+    await fetchUserAppliedJobs();
+    const res = await fetch(`${API_URL}/jobs/view-history/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     
     if (res.ok) {
       const data = await res.json();
-      renderSavedJobs(data);
+      renderViewedJobs(data);
     } else {
-      container.innerHTML = '<div class="alert alert-danger">Lỗi khi tải dữ liệu việc làm đã lưu.</div>';
+      container.innerHTML = '<div class="alert alert-danger">Lỗi khi tải dữ liệu lịch sử xem.</div>';
     }
   } catch (err) {
     console.error(err);
@@ -68,33 +69,33 @@ async function fetchSavedJobs() {
   }
 }
 
-function renderSavedJobs(savedJobs) {
-  const container = document.getElementById('savedJobsList');
+function renderViewedJobs(historyData) {
+  const container = document.getElementById('viewedJobsList');
   
-  if (!savedJobs || savedJobs.length === 0) {
+  if (!historyData || historyData.length === 0) {
     container.innerHTML = `
       <div class="alert bg-white border-0 shadow-sm text-center py-5 rounded-4 mt-3">
-        <i class="bi bi-folder-x text-muted" style="font-size: 3rem;"></i>
-        <h5 class="mt-3 text-muted">Bạn chưa lưu việc làm nào</h5>
+        <i class="bi bi-eye-slash text-muted" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">Bạn chưa xem việc làm nào gần đây</h5>
         <a href="index.html" class="btn btn-primary mt-2 rounded-pill px-4">Tìm việc ngay</a>
       </div>`;
     return;
   }
   
-  container.innerHTML = savedJobs.map(item => {
+  container.innerHTML = historyData.map(item => {
     const job = item.jobId;
     if (!job) return ''; 
 
     const companyName = job.companyId?.companyName || 'Công ty ẩn danh';
     const jobLocation = job.location || job.companyId?.address || 'Chưa cập nhật';
+    const viewDateFormatted = new Date(item.viewDate).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
 
-    const isApplied = appliedJobIds.includes(job._id);
-
+    const isApplied = appliedJobIds.includes(String(job._id));
     let isExpired = false;
-      if (job.deadline) {
-        const diffDays = Math.ceil((new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24));
-        isExpired = diffDays <= 0;
-      }
+    if (job.deadline) {
+      const diffDays = Math.ceil((new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+      isExpired = diffDays <= 0;
+    }
 
     let actionButton = '';
     if (isApplied) {
@@ -102,7 +103,7 @@ function renderSavedJobs(savedJobs) {
     } else if (isExpired) {
       actionButton = `<button class="btn btn-secondary disabled px-4 shadow-sm" style="border-radius: 10px;"><i class="bi bi-clock-history me-1"></i>Đã hết hạn</button>`;
     } else {
-      actionButton = `<button class="btn btn-primary px-4 shadow-sm" style="border-radius: 10px;" onclick="event.stopPropagation(); window.openApplyModal('${job._id}');">Ứng tuyển</button>`;
+      actionButton = `<button class="btn btn-primary px-4 shadow-sm" id="btnApply_${job._id}" style="border-radius: 10px;" onclick="event.stopPropagation(); window.openApplyModal('${job._id}');">Ứng tuyển</button>`;
     }
 
     return `
@@ -123,16 +124,15 @@ function renderSavedJobs(savedJobs) {
                 <div class="d-flex gap-2 flex-wrap" style="font-size: 0.85rem;">
                   <span class="badge bg-light text-success border px-2 py-1"><i class="bi bi-cash-coin me-1"></i>${formatSalary(job.salaryMin, job.salaryMax)}</span>
                   <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-geo-alt me-1"></i>${jobLocation.split(',')[0]}</span>
-                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-briefcase me-1"></i>${job.experience || 'Không yêu cầu'}</span>
-                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1"><i class="bi bi-clock-history me-1"></i>${getDaysLeft(job.deadline)}</span>
+                  <span class="badge bg-light text-muted border px-2 py-1"><i class="bi bi-eye me-1"></i>Xem lúc: ${viewDateFormatted}</span>
                 </div>
               </div>
             </div>
 
             <div class="d-flex gap-2 ms-auto mt-3 mt-md-0">
               ${actionButton}
-              <button class="btn btn-outline-danger btn-unsave shadow-sm" data-id="${job._id}" title="Bỏ lưu" style="border-radius: 10px;" onclick="event.stopPropagation(); window.unsaveJob('${job._id}');">
-                <i class="bi bi-trash3"></i> Bỏ lưu
+              <button class="btn btn-outline-secondary shadow-sm" title="Xóa khỏi lịch sử" style="border-radius: 10px;" onclick="event.stopPropagation(); window.deleteViewHistory('${item._id}');">
+                <i class="bi bi-x-lg"></i>
               </button>
             </div>
 
@@ -143,19 +143,19 @@ function renderSavedJobs(savedJobs) {
   }).join('');
 }
 
-window.unsaveJob = async function(jobId) {
-  if(confirm('Bạn có chắc chắn muốn bỏ lưu việc làm này?')) {
+window.deleteViewHistory = async function(historyId) {
+  if(confirm('Xóa công việc này khỏi lịch sử xem?')) {
     try {
-      const res = await fetch(`${API_URL}/jobs/save-job/${jobId}`, {
+      const res = await fetch(`${API_URL}/jobs/view-history/${historyId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (res.ok) {
-        fetchSavedJobs(); 
+        fetchViewedJobs(); 
       } else {
         const err = await res.json();
-        alert('Lỗi: ' + (err.message || 'Không thể bỏ lưu'));
+        alert('Lỗi: ' + (err.message || 'Không thể xóa lịch sử'));
       }
     } catch (err) {
       alert('Lỗi kết nối: ' + err.message);
@@ -163,15 +163,10 @@ window.unsaveJob = async function(jobId) {
   }
 }
 
-// ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
 let currentApplyJobId = null;
 
 window.openApplyModal = async function(jobId) {
-  if (!token) {
-    alert('Vui lòng đăng nhập để ứng tuyển!');
-    window.location.href = '../../pages/utils/login.html';
-    return;
-  }
+  if (!token) return;
   currentApplyJobId = jobId;
 
   const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
@@ -199,33 +194,11 @@ window.openApplyModal = async function(jobId) {
     console.error("Lỗi lấy danh sách CV", err);
   }
 
-
   new bootstrap.Modal(document.getElementById('applyModal')).show();
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-  const uploadInput = document.getElementById('uploadCvInput');
-  const existingSelect = document.getElementById('existingCvSelect');
   const submitBtn = document.getElementById('submitApplicationBtn');
-
-  if (uploadInput) {
-    uploadInput.addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        document.getElementById('uploadCvName').innerHTML = `<i class="bi bi-file-earmark-check me-1"></i> Đã chọn: ${this.files[0].name}`;
-        if (existingSelect) existingSelect.value = ""; 
-      }
-    });
-  }
-
-  if (existingSelect) {
-    existingSelect.addEventListener('change', function() {
-      if (this.value) {
-        if (uploadInput) uploadInput.value = ""; 
-        document.getElementById('uploadCvName').innerText = "";
-      }
-    });
-  }
 
   if (submitBtn) {
     submitBtn.addEventListener('click', async () => {
@@ -237,24 +210,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 1. Hiển thị trạng thái Loading
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang nộp...';
       submitBtn.disabled = true;
 
       try {
-        // 2. Chuẩn bị dữ liệu dạng JSON (Gọn nhẹ và không gây lỗi 500)
         const payload = {
           jobId: currentApplyJobId,
           resumeId: selectedCvId,
           coverLetter: coverLetter
         };
 
-        // 3. Gọi API nộp hồ sơ
         const res = await fetch(`${API_URL}/applications`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json' // QUAN TRỌNG: Phải có dòng này
+            'Content-Type': 'application/json' 
           },
           body: JSON.stringify(payload)
         });
@@ -265,12 +235,16 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(data.message || 'Có lỗi xảy ra khi nộp đơn');
         }
 
-        // 4. Thành công: Ẩn Modal nộp, hiện Modal thành công (Popup xanh lá)
         const applyModalEl = document.getElementById('applyModal');
         bootstrap.Modal.getInstance(applyModalEl).hide();
         
         const successModalEl = document.getElementById('successApplyModal');
         new bootstrap.Modal(successModalEl).show();
+
+        const applyBtn = document.getElementById(`btnApply_${currentApplyJobId}`);
+        if (applyBtn) {
+          applyBtn.outerHTML = `<button class="btn btn-success disabled px-4 shadow-sm" style="border-radius: 10px;"><i class="bi bi-check-circle me-1"></i>Đã ứng tuyển</button>`;
+        }
 
       } catch (err) {
         alert("Lỗi ứng tuyển: " + err.message);
@@ -282,5 +256,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
-document.addEventListener('DOMContentLoaded', fetchSavedJobs);
+document.addEventListener('DOMContentLoaded', fetchViewedJobs);

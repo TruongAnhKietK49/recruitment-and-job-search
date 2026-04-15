@@ -1,0 +1,113 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.admin-content {
+  margin-left: 280px; 
+  padding: 40px;
+  min-height: 100vh;
+}
+
+.table {
+  font-size: 0.95rem;
+}
+.table-light th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+.table td {
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+
+.badge {
+  padding: 6px 10px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.btn-sm {
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+@media (max-width: 992px) {
+  .admin-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+.search-container {
+  position: relative;
+}
+.search-container input {
+  height: 50px;
+  border: 1px solid #a3c4f3;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+.search-container input:focus {
+  border-color: #2f80ed;
+  box-shadow: 0 4px 10px rgba(47, 128, 237, 0.1);
+}
+.search-container .search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2f80ed;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.user-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  position: relative;
+  transition: all 0.2s;
+}
+.user-card:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  border-color: #cbd5e0;
+}
+.user-card.active-card {
+  border: 2px solid #a3c4f3; 
+}
+.user-avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.status-text {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 120px;
+}
+.btn-orange { background-color: #f2994a; color: white; font-weight: 500; }
+.btn-orange:hover { background-color: #e68a3b; color: white; }
+
+.btn-green { background-color: #27ae60; color: white; font-weight: 500; }
+.btn-green:hover { background-color: #219653; color: white; }
+
+.btn-red { background-color: #eb5757; color: white; font-weight: 500; }
+.btn-red:hover { background-color: #d14949; color: white; }
+
+.pagination { gap: 8px; }
+.page-item .page-link { border: none; color: #4a5568; background: transparent; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: 500; }
+.page-item.active .page-link { background-color: #1a202c; color: white; }
