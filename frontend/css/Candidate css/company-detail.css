@@ -173,11 +173,9 @@ body {
   margin-top: 6px;
 }
 .job-date {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
   color: #a0aec0;
   font-size: 0.9rem;
+  margin-top: 10px; 
 }
 .btn-save-job {
   position: absolute;

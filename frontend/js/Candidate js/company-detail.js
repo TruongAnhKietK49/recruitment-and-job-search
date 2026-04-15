@@ -9,6 +9,8 @@ const companyId = urlParams.get('id');
 
 let savedJobIds = [];
 
+let appliedJobIds = [];
+
 if (!companyId) {
   window.location.href = 'companies.html';
 }
@@ -16,8 +18,23 @@ if (!companyId) {
 async function initPage() {
   if (token) {
     await fetchUserSavedJobs();
+    await fetchUserAppliedJobs();
   }
   fetchCompanyDetail();
+}
+
+async function fetchUserAppliedJobs() {
+  try {
+    const res = await fetch(`${API_URL}/applications`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      appliedJobIds = data.applications.map(app => app.jobId?._id || app.jobId);
+    }
+  } catch (err) {
+    console.error("Lỗi lấy danh sách ứng tuyển:", err);
+  }
 }
 
 async function fetchUserSavedJobs() {
@@ -99,6 +116,23 @@ function renderCompanyAndJobs(company, jobs) {
       const jobTypeMap = { 'full-time': 'Toàn thời gian', 'part-time': 'Bán thời gian', 'internship': 'Thực tập sinh', 'remote': 'Làm từ xa' };
       const displayJobType = jobTypeMap[job.jobType] || job.jobType || 'Không rõ';
 
+      const isApplied = appliedJobIds.includes(job._id);
+
+      let isExpired = false;
+      if (job.deadline) {
+        const diffDays = Math.ceil((new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+        isExpired = diffDays <= 0; 
+      }
+
+      let actionButton = '';
+      if (isApplied) {
+        actionButton = `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 w-100"><i class="bi bi-check2-all me-1"></i>Đã ứng tuyển</span>`;
+      } else if (isExpired) {
+        actionButton = `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 w-100"><i class="bi bi-clock-history me-1"></i>Đã hết hạn</span>`;
+      } else {
+        actionButton = `<button class="btn btn-primary btn-sm px-3 py-2 w-100 shadow-sm" style="border-radius: 8px;" onclick="event.stopPropagation(); window.openApplyModal('${job._id}');">Ứng tuyển ngay</button>`;
+      }
+
       return `
         <div class="job-card-h flex-column flex-md-row position-relative p-4 border rounded-4 shadow-sm mb-3 bg-white d-flex align-items-md-center" onclick="window.location.href='job-detail.html?id=${job._id}'" style="cursor: pointer; transition: 0.3s;" onmouseover="this.classList.add('shadow')" onmouseout="this.classList.remove('shadow')">
 
@@ -123,6 +157,11 @@ function renderCompanyAndJobs(company, jobs) {
 
           <div class="text-end d-flex flex-column justify-content-between mt-3 mt-md-0 pe-4 pt-2" style="min-width: 170px; min-height: 80px;">
             <div class="job-salary text-success fw-bold fs-6 mb-2"><i class="bi bi-cash-coin me-1"></i>${formatSalary(job.salaryMin, job.salaryMax)}</div>
+            
+            <div class="mt-2 mb-2">
+              ${actionButton}
+            </div>
+
             <div class="job-date text-muted small mt-auto">Ngày đăng: ${postDate}</div>
           </div>
         </div>
@@ -133,9 +172,7 @@ function renderCompanyAndJobs(company, jobs) {
   wrapper.innerHTML = `
     <div class="company-main-card">
       <div class="company-cover-pattern" style="height: 200px; background: linear-gradient(135deg, #3182ce 0%, #63b3ed 100%);"></div>
-
       <div class="company-content-inner position-relative px-4 pb-4 bg-white">
-        
         <div class="company-header-row d-flex flex-column flex-md-row align-items-center align-items-md-end mb-4" style="margin-top: -70px;">
           <div class="company-logo-box bg-white p-2 rounded-4 shadow me-md-4 mb-3 mb-md-0" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: bold; color: #0d6efd; border: 4px solid white; z-index: 2;">
             ${logoContent}
@@ -144,14 +181,12 @@ function renderCompanyAndJobs(company, jobs) {
             <h1 class="company-title fs-2 fw-bold mb-2 text-dark">${company.companyName}</h1>
             <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
               <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6 fw-medium"><i class="bi bi-tag me-1"></i>${category}</span>
-              <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6 fw-medium"><i class="bi bi-people me-1"></i>Quy mô: ${memberCount} nhân sự</span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6 fw-medium"><i class="bi bi-people me-1"></i>Thành viên: ${memberCount} nhân sự</span>
               <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 fs-6 fw-medium"><i class="bi bi-calendar-check me-1"></i>Thành lập: ${foundedDate}</span>
             </div>
           </div>
         </div>
-
         <div class="row mt-5">
-          
           <div class="col-lg-7 col-xl-8 mb-4">
             <div class="about-section h-100">
               <h3 class="section-title border-bottom pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Về công ty</h3>
@@ -160,11 +195,9 @@ function renderCompanyAndJobs(company, jobs) {
               </div>
             </div>
           </div>
-
           <div class="col-lg-5 col-xl-4 mb-4">
             <h3 class="section-title border-bottom pb-2 mb-4"><i class="bi bi-person-lines-fill me-2"></i>Thông tin liên hệ</h3>
             <div class="contact-info-grid" style="display: flex; flex-direction: column; gap: 1.2rem; background: #f8f9fa; padding: 1.8rem; border-radius: 16px; border: 1px solid #edf2f7;">
-
               <div class="contact-item d-flex align-items-center">
                 <div class="contact-icon bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;">
                   <i class="bi bi-geo-alt-fill"></i>
@@ -174,7 +207,6 @@ function renderCompanyAndJobs(company, jobs) {
                   <div class="contact-text-value fw-semibold text-dark">${company.address || 'Chưa cập nhật'}</div>
                 </div>
               </div>
-
               <div class="contact-item d-flex align-items-center">
                 <div class="contact-icon bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center text-success" style="width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;">
                   <i class="bi bi-telephone-fill"></i>
@@ -184,7 +216,6 @@ function renderCompanyAndJobs(company, jobs) {
                   <div class="contact-text-value fw-semibold text-dark">${phone}</div>
                 </div>
               </div>
-
               <div class="contact-item d-flex align-items-center">
                 <div class="contact-icon bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center text-danger" style="width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;">
                   <i class="bi bi-envelope-fill"></i>
@@ -194,7 +225,6 @@ function renderCompanyAndJobs(company, jobs) {
                   <div class="contact-text-value fw-semibold text-dark">${ownerEmail}</div>
                 </div>
               </div>
-
               <div class="contact-item d-flex align-items-center">
                 <div class="contact-icon bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center text-info" style="width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;">
                   <i class="bi bi-globe"></i>
@@ -206,7 +236,6 @@ function renderCompanyAndJobs(company, jobs) {
                   </div>
                 </div>
               </div>
-
               <div class="contact-item d-flex align-items-center">
                 <div class="contact-icon bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center text-warning" style="width: 45px; height: 45px; font-size: 1.2rem; flex-shrink: 0; margin-right: 15px;">
                   <i class="bi bi-person-badge-fill"></i>
@@ -216,18 +245,15 @@ function renderCompanyAndJobs(company, jobs) {
                   <div class="contact-text-value fw-semibold text-dark">${ownerName}</div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-
         <div class="jobs-section mt-5 pt-4 border-top">
           <h3 class="section-title mb-4"><i class="bi bi-briefcase-fill me-2"></i>Việc đang tuyển <span class="badge bg-primary ms-2 rounded-pill fs-6 align-middle">${jobs.length}</span></h3>
           <div class="jobs-list">
             ${jobsHtml}
           </div>
         </div>
-
       </div>
     </div>
   `;
