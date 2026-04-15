@@ -10,8 +10,22 @@ const urlParams = new URLSearchParams(window.location.search);
 const jobId = urlParams.get('id');
 
 let savedJobIds = [];
+let appliedJobIds = [];
 
 // --- CÁC HÀM HELPER FORMAT ---
+async function fetchUserAppliedJobs() {
+  try {
+    const res = await fetch(`${API_URL}/applications`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      appliedJobIds = data.applications.map(app => String(app.jobId?._id || app.jobId));
+    }
+  } catch (err) {
+    console.error("Lỗi lấy danh sách ứng tuyển:", err);
+  }
+}
 function formatSalary(min, max) {
   const formatNum = (num) => num >= 1000000 ? (num / 1000000) + ' triệu' : num.toLocaleString();
   if (min && max) return `${formatNum(min)} - ${formatNum(max)}`;
@@ -29,7 +43,7 @@ function getDaysLeft(deadline) {
 
 function formatTextToList(text) {
   if (!text) return '<p>Đang cập nhật...</p>';
-  if (text.includes('<ul>') || text.includes('<p>')) return text; 
+  if (text.includes('<ul>') || text.includes('<p>')) return text;
   const items = text.split('\n').filter(item => item.trim() !== '');
   return `<ul class="desc-list">` + items.map(item => `<li>${item.replace(/^- /, '').trim()}</li>`).join('') + `</ul>`;
 }
@@ -38,8 +52,9 @@ function formatTextToList(text) {
 async function initPage() {
   if (token) {
     await fetchUserSavedJobs();
+    await fetchUserAppliedJobs();
   }
-  
+
   if (jobId) {
     fetchJobDetail();
   } else {
@@ -90,7 +105,7 @@ async function fetchJobDetail() {
 function renderJobDetail(job) {
   const container = document.getElementById('jobDetailContainer');
   const postDate = job.createdAt ? new Date(job.createdAt).toLocaleDateString('vi-VN') : 'Đang cập nhật';
-  
+
   const isSaved = savedJobIds.includes(job._id);
   const heartIconClass = isSaved ? 'bi-heart-fill text-danger' : 'bi-heart';
   const saveBtnText = isSaved ? 'Đã lưu' : 'Lưu';
@@ -101,15 +116,32 @@ function renderJobDetail(job) {
   const workingTimeText = job.workingTime || 'Giờ hành chính';
   const companyDesc = job.companyId?.description || 'Chưa có thông tin giới thiệu công ty.';
 
+  const isApplied = appliedJobIds.includes(String(job._id));
+
+  let isExpired = false;
+  if (job.deadline) {
+    const diffDays = Math.ceil((new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+    isExpired = diffDays <= 0;
+  }
+
+  let actionButton = '';
+  if (isApplied) {
+    actionButton = `<button class="btn btn-success disabled" style="padding: 10px 30px; border-radius: 8px; font-weight: bold;"><i class="bi bi-check-circle me-2"></i>Đã ứng tuyển</button>`;
+  } else if (isExpired) {
+    actionButton = `<button class="btn btn-secondary disabled" style="padding: 10px 30px; border-radius: 8px; font-weight: bold;"><i class="bi bi-clock-history me-2"></i>Đã hết hạn</button>`;
+  } else {
+    actionButton = `<button class="btn-apply" id="applyBtn">Ứng tuyển ngay</button>`;
+  }
+
   container.innerHTML = `
     <div class="job-detail-card">
       <div class="job-header-pattern"></div>
       
       <div class="job-header-content">
         <div class="company-logo bg-white shadow-sm d-flex align-items-center justify-content-center" style="border-radius: 12px; overflow: hidden; padding: 5px;">
-          ${job.companyId?.logoUrl 
-            ? `<img src="${job.companyId.logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">` 
-            : `<span class="fs-2 fw-bold text-primary">${job.companyId?.companyName?.charAt(0) || 'C'}</span>`}
+          ${job.companyId?.logoUrl
+      ? `<img src="${job.companyId.logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">`
+      : `<span class="fs-2 fw-bold text-primary">${job.companyId?.companyName?.charAt(0) || 'C'}</span>`}
         </div>
         <h1 class="job-title">${job.title || 'Đang cập nhật...'}</h1>
         <div class="company-name">${job.companyId?.companyName || 'Công ty'}</div>
@@ -128,8 +160,8 @@ function renderJobDetail(job) {
           </li>
         </ul>
 
-        <div class="action-buttons">
-          <button class="btn-apply" id="applyBtn">Ứng tuyển ngay</button>
+        <div class="action-buttons d-flex gap-3" id="actionBtnWrapper">
+          ${actionButton}
           <button class="btn-save" id="saveBtn" style="${saveBtnStyle}">
             <i class="${heartIconClass}" id="mainHeartIcon"></i> <span id="mainSaveText">${saveBtnText}</span>
           </button>
@@ -172,15 +204,14 @@ function renderJobDetail(job) {
     </div>
   `;
 
-  document.getElementById('applyBtn').onclick = () => {
-    if (!token) {
-      window.location.href = '../../pages/utils/login.html';
-    } else {
-      window.location.href = `apply.html?jobId=${job._id}`;
-    }
-  };
+  const applyBtnElement = document.getElementById('applyBtn');
+  if (applyBtnElement) {
+    applyBtnElement.onclick = () => {
+      window.openApplyModal(job._id);
+    };
+  }
 
-  document.getElementById('saveBtn').onclick = function() {
+  document.getElementById('saveBtn').onclick = function () {
     window.toggleSaveJob(job._id, this, true);
   };
 }
@@ -218,9 +249,9 @@ function renderSimilarJobs(jobs) {
           </button>
           <div class="d-flex align-items-center mb-3">
             <div class="sim-logo me-2 rounded-3 bg-white d-flex align-items-center justify-content-center border shadow-sm fw-bold text-primary" style="width: 50px; height: 50px; overflow: hidden; padding: 3px;">
-              ${job.companyId?.logoUrl 
-                ? `<img src="${job.companyId.logoUrl}" style="width:100%; height:100%; object-fit:contain;">` 
-                : (job.companyId?.companyName?.charAt(0) || 'C')}
+              ${job.companyId?.logoUrl
+        ? `<img src="${job.companyId.logoUrl}" style="width:100%; height:100%; object-fit:contain;">`
+        : (job.companyId?.companyName?.charAt(0) || 'C')}
             </div>
             <div style="width: calc(100% - 60px);">
               <div class="fw-bold fs-6 text-truncate" title="${job.title}">${job.title}</div>
@@ -235,7 +266,7 @@ function renderSimilarJobs(jobs) {
   }).join('');
 }
 
-window.toggleSaveJob = async function(id, btnElement, isMainDetail = false) {
+window.toggleSaveJob = async function (id, btnElement, isMainDetail = false) {
   if (!token) {
     alert('Vui lòng đăng nhập để lưu việc làm!');
     window.location.href = '../../pages/utils/login.html';
@@ -251,14 +282,14 @@ window.toggleSaveJob = async function(id, btnElement, isMainDetail = false) {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (res.ok) {
         savedJobIds = savedJobIds.filter(savedId => savedId !== id);
-        
+
         if (isMainDetail) {
           document.getElementById('mainHeartIcon').className = 'bi-heart';
           document.getElementById('mainSaveText').innerText = 'Lưu';
-          btnElement.style = ''; 
+          btnElement.style = '';
         } else {
           const icon = btnElement.querySelector('i');
           icon.classList.remove('bi-heart-fill', 'text-danger');
@@ -275,10 +306,10 @@ window.toggleSaveJob = async function(id, btnElement, isMainDetail = false) {
         },
         body: JSON.stringify({ jobId: id })
       });
-      
+
       if (res.ok) {
         savedJobIds.push(id);
-        
+
         if (isMainDetail) {
           document.getElementById('mainHeartIcon').className = 'bi-heart-fill text-danger';
           document.getElementById('mainSaveText').innerText = 'Đã lưu';
@@ -296,5 +327,124 @@ window.toggleSaveJob = async function(id, btnElement, isMainDetail = false) {
     alert('Lỗi kết nối: ' + err.message);
   }
 }
+
+// ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
+let currentApplyJobId = null;
+
+window.openApplyModal = async function (jobId) {
+  if (!token) {
+    alert('Vui lòng đăng nhập để ứng tuyển!');
+    window.location.href = '../../pages/utils/login.html';
+    return;
+  }
+  currentApplyJobId = jobId;
+
+  const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    document.getElementById('applyUserName').innerText = user.fullName || 'Người dùng';
+    document.getElementById('applyUserEmail').innerText = user.email || '';
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/resumes/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const resumes = await res.json();
+      const select = document.getElementById('existingCvSelect');
+
+      let optionsHtml = '<option value="">Chọn từ danh sách CV của bạn</option>';
+      resumes.forEach(cv => {
+        optionsHtml += `<option value="${cv._id}">${cv.title} (${new Date(cv.createdAt).toLocaleDateString('vi-VN')})</option>`;
+      });
+      select.innerHTML = optionsHtml;
+    }
+  } catch (err) {
+    console.error("Lỗi lấy danh sách CV", err);
+  }
+
+
+  new bootstrap.Modal(document.getElementById('applyModal')).show();
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const uploadInput = document.getElementById('uploadCvInput');
+  const existingSelect = document.getElementById('existingCvSelect');
+  const submitBtn = document.getElementById('submitApplicationBtn');
+
+  if (uploadInput) {
+    uploadInput.addEventListener('change', function () {
+      if (this.files && this.files[0]) {
+        document.getElementById('uploadCvName').innerHTML = `<i class="bi bi-file-earmark-check me-1"></i> Đã chọn: ${this.files[0].name}`;
+        if (existingSelect) existingSelect.value = "";
+      }
+    });
+  }
+
+  if (existingSelect) {
+    existingSelect.addEventListener('change', function () {
+      if (this.value) {
+        if (uploadInput) uploadInput.value = "";
+        document.getElementById('uploadCvName').innerText = "";
+      }
+    });
+  }
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const selectedCvId = document.getElementById('existingCvSelect').value;
+      const coverLetter = document.getElementById('coverLetter')?.value || "";
+
+      if (!selectedCvId) {
+        alert("Vui lòng chọn một bản CV từ danh sách!");
+        return;
+      }
+
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang nộp...';
+      submitBtn.disabled = true;
+
+      try {
+        const payload = {
+          jobId: currentApplyJobId,
+          resumeId: selectedCvId,
+          coverLetter: coverLetter
+        };
+
+        const res = await fetch(`${API_URL}/applications`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Có lỗi xảy ra khi nộp đơn');
+        }
+
+        const applyModalEl = document.getElementById('applyModal');
+        bootstrap.Modal.getInstance(applyModalEl).hide();
+
+        const successModalEl = document.getElementById('successApplyModal');
+        new bootstrap.Modal(successModalEl).show();
+
+        const applyBtn = document.getElementById('applyBtn');
+        if (applyBtn) {
+          applyBtn.outerHTML = `<button class="btn btn-success disabled" style="padding: 10px 30px; border-radius: 8px; font-weight: bold;"><i class="bi bi-check-circle me-2"></i>Đã ứng tuyển</button>`;
+        }
+      } catch (err) {
+        alert("Lỗi ứng tuyển: " + err.message);
+      } finally {
+        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i> Nộp hồ sơ';
+        submitBtn.disabled = false;
+      }
+    });
+  }
+});
 
 initPage();

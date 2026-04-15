@@ -7,9 +7,12 @@ import Notification from "../models/notification.js";
 // Create application
 export const createApplication = async (req, res) => {
   try {
-    const { candidateProfileId, jobId, resumeId } = req.body;
+    const {jobId, resumeId } = req.body;
 
-    const candidateProfile = await CandidateProfile.findById(candidateProfileId);
+    let candidateProfile = await CandidateProfile.findOne({ userId: req.user.userId });
+    if (!candidateProfile) {
+      candidateProfile = await CandidateProfile.findOne({ user: req.user.userId });
+    }
     if (!candidateProfile) {
       return res.status(404).json({ message: "Candidate profile not found" });
     }
@@ -42,7 +45,7 @@ export const createApplication = async (req, res) => {
     const newApplication = new Application({
       jobId,
       userId: req.user.userId,
-      candidateProfileId: candidateProfileId,
+      candidateProfileId: candidateProfile._id,
       resumeId,
       applyDate: new Date(),
       status: "pending",
