@@ -35,6 +35,8 @@ function updateNavbarAuth() {
           <li><a class="dropdown-item py-2" href="../../pages/Candidate Pages/profile.html"><i class="bi bi-person-lines-fill me-2 text-muted"></i>Hồ sơ cá nhân</a></li>
           <li><a class="dropdown-item py-2" href="../../pages/Candidate Pages/my-cvs.html"><i class="bi bi-file-earmark-text me-2 text-muted"></i>Quản lý CV</a></li>
           <li><a class="dropdown-item py-2" href="../../pages/Candidate Pages/saved-jobs.html"><i class="bi bi-bookmark-heart me-2 text-muted"></i>Việc làm đã lưu</a></li>
+          <li><a class="dropdown-item py-2" href="../../pages/Candidate Pages/applications.html"><i class="bi bi-send-check me-2 text-muted"></i>Việc làm đã ứng tuyển</a></li>
+          <li><a class="dropdown-item py-2" href="../../pages/Candidate Pages/viewed-jobs.html"><i class="bi bi-clock-history me-2 text-muted"></i>Việc làm đã xem</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item py-2 text-danger" href="../../pages/utils/login.html" id="btnLogout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
         </ul>

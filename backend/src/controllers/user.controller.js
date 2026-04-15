@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import candidateProfile from "../models/candidateProfile.js";
 import hrProfile from "../models/hrProfile.js";
+import bcrypt from "bcrypt";
 
 export const getProfile = async (req, res) => {
   try {
@@ -103,5 +104,29 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Đổi mật khẩu
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.userId);
+
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Mật khẩu hiện tại không chính xác" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({ message: "Đổi mật khẩu thành công" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi Server" });
   }
 };
