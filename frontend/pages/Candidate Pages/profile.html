@@ -30,8 +30,9 @@
 
         <div class="sidebar-nav">
           <a href="my-cvs.html" class="nav-item">CV của tôi</a>
-          <a href="#" class="nav-item">Việc làm đã lưu</a>
-          <a href="#" class="nav-item">Việc làm đã ứng tuyển</a>
+          <a href="saved-jobs.html" class="nav-item">Việc làm đã lưu</a>
+          <a href="applications.html" class="nav-item">Việc làm đã ứng tuyển</a>
+          <a href="viewed-jobs.html" class="nav-item">Việc làm đã xem</a>
         </div>
       </div>
 
@@ -48,11 +49,64 @@
     </div>
   </main>
 
+  <div class="modal fade" id="avatarUrlModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 16px; border: none;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title fw-bold text-primary">Cập nhật ảnh đại diện</h5>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-medium">Đường dẫn ảnh (URL)</label>
+            <input type="url" class="form-control" id="inputAvatarUrl" placeholder="https://..." required>
+            <div class="form-text">Mẹo: Bạn có thể copy địa chỉ hình ảnh và dán vào đây.</div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="button" class="btn btn-light rounded-pill flex-grow-1" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary rounded-pill flex-grow-1" id="btnSaveAvatarUrl">Lưu ảnh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 16px; border: none;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title fw-bold text-primary">Đổi mật khẩu</h5>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="changePasswordForm">
+            <div class="mb-3">
+              <label class="form-label fw-medium">Mật khẩu hiện tại</label>
+              <input type="password" class="form-control" name="currentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium">Mật khẩu mới</label>
+              <input type="password" class="form-control" name="newPassword" required minlength="6">
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-medium">Xác nhận mật khẩu mới</label>
+              <input type="password" class="form-control" name="confirmPassword" required minlength="6">
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-light rounded-pill flex-grow-1" data-bs-dismiss="modal">Hủy</button>
+              <button type="submit" class="btn btn-primary rounded-pill flex-grow-1" id="btnSubmitPassword">Xác nhận đổi</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="footer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../js/utils/loadNavbar.js"></script>
   <script src="../../js/utils/loadFooter.js"></script>
-  <script src="../../js/Candidate js/profile.js"></script>
+  <script type="module" src="../../js/Candidate js/profile.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-import { getProfile, getProfileById, getAllUsers, updateMyProfile, deleteUser } from "../controllers/user.controller.js";
+import { getProfile, getProfileById, getAllUsers, updateMyProfile, deleteUser,changePassword } from "../controllers/user.controller.js";
 import { upsertCandidateProfile, getMyCandidateProfile, deleteCandidateProfile } from "../controllers/candidateProfile.controller.js";
 import { updateHrProfile, deleteHrProfile } from "../controllers/hrProfile.controller.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -18,5 +18,7 @@ router.delete("/candidate-profile", authMiddleware, authorizeRoles("candidate"),
 
 router.post("/hr-profile", authMiddleware, authorizeRoles("hr"), updateHrProfile);
 router.delete("/hr-profile", authMiddleware, authorizeRoles("hr"), deleteHrProfile);
+
+router.put("/password", authMiddleware, changePassword);
 
 export default router;

@@ -12,26 +12,6 @@
 <body>
   <div id="navbar"></div>
 
-  <div class="search-banner">
-    <div class="container">
-      <div class="search-box bg-white rounded-pill shadow-sm d-flex align-items-center p-2 mx-auto">
-        <div class="flex-grow-1 border-end px-3 d-flex align-items-center search-input-wrap">
-          <i class="bi bi-search text-muted me-2"></i>
-          <input type="text" id="searchInput" class="form-control border-0 shadow-none" placeholder="Tên công ty, vị trí...">
-        </div>
-        <div class="flex-grow-1 px-3 d-flex align-items-center location-select-wrap">
-          <i class="bi bi-geo-alt text-muted me-2"></i>
-          <select id="locationSelect" class="form-select border-0 shadow-none text-muted">
-            <option value="">Địa điểm</option>
-            <option value="HN">Hà Nội</option>
-            <option value="HCM">TP.HCM</option>
-          </select>
-        </div>
-        <button class="btn btn-primary rounded-pill px-4 py-2" onclick="window.location.href='companies.html'">Tìm kiếm</button>
-      </div>
-    </div>
-  </div>
-
   <main class="container py-5">
     <div id="companyDetailWrapper">
       <div class="text-center py-5">
@@ -47,6 +27,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../js/utils/loadNavbar.js"></script>
   <script src="../../js/utils/loadFooter.js"></script>
-  <script src="../../js/Candidate js/company-detail.js"></script>
+  
+  <script type="module" src="../../js/Candidate js/company-detail.js"></script>
 </body>
 </html>

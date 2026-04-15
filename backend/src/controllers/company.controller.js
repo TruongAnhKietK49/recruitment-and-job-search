@@ -137,13 +137,13 @@ export const getMyCompany = async (req, res) => {
 // Get a company by ID
 export const getCompanyById = async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id).populate("createdBy", "fullName email role");
+    const company = await Company.findById(req.params.companyId).populate("createdBy", "fullName email role");
 
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    if (req.user.role === "hr" && company.createdBy._id.toString() !== req.user.userId) {
+    if (req.user && req.user.role === "hr" && company.createdBy._id.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
@@ -166,12 +166,12 @@ export const getCompanyById = async (req, res) => {
 // Update company info (ONLY OWNER)
 export const updateCompany = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { companyId } = req.params;
     const userId = req.user.userId || req.user._id;
 
     const { companyName, address, category, website, description, phoneCompany, logoUrl, status } = req.body;
 
-    const company = await Company.findById(id);
+    const company = await Company.findById(companyId);
 
     if (!company) {
       return res.status(404).json({
@@ -207,7 +207,7 @@ export const updateCompany = async (req, res) => {
 
     await company.save();
 
-    const updatedCompany = await Company.findById(id)
+    const updatedCompany = await Company.findById(companyId)
       .populate("createdBy", "fullName email role")
       .populate("members.user", "fullName email role status");
 
