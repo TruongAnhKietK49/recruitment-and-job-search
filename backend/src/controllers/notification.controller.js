@@ -25,15 +25,24 @@ export const createNotification = async (req, res) => {
 // Get my notifications
 export const getMyNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({
-      userId: req.user.userId,
-    }).sort({ createdAt: -1 });
+    const userId = req.user.userId;
+    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(20);
 
-    res.status(200).json(notifications);
+    const unreadCount = await Notification.countDocuments({
+      userId,
+      isRead: false,
+    });
+
+    return res.status(200).json({
+      success: true,
+      unreadCount,
+      notifications,
+    });
   } catch (error) {
-    res.status(500).json({
-      message: "Error fetching notifications",
-      error: error.message,
+    console.error("Lỗi lấy thông báo:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Không thể tải thông báo",
     });
   }
 };
