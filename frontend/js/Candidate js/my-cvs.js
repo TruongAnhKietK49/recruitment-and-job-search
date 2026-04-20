@@ -46,10 +46,14 @@ function renderCVs() {
     const isImage = cv.fileUrl && (cv.fileUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null || cv.fileUrl.includes('unsplash.com'));
 
     const thumbnailContent = isImage 
-        ? `<img src="${cv.fileUrl}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px 12px 0 0;" alt="CV Thumbnail" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-           <div class="bg-light d-none align-items-center justify-content-center text-primary" style="height: 160px; border-radius: 12px 12px 0 0; font-size: 3rem;"><i class="bi bi-file-earmark-text"></i></div>`
-        : `<div class="bg-light d-flex align-items-center justify-content-center text-danger" style="height: 160px; border-radius: 12px 12px 0 0; font-size: 3.5rem;"><i class="bi bi-filetype-pdf"></i></div>`;
-
+        ? `<img src="${cv.fileUrl}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px 12px 0 0;" alt="CV Thumbnail" 
+             onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.classList.add('d-flex');">
+           <div class="bg-light d-none align-items-center justify-content-center text-primary" style="height: 160px; border-radius: 12px 12px 0 0; font-size: 3rem;">
+             <i class="bi bi-file-earmark-text"></i>
+           </div>`
+        : `<div class="bg-light d-flex align-items-center justify-content-center text-danger" style="height: 160px; border-radius: 12px 12px 0 0; font-size: 3.5rem;">
+             <i class="bi bi-filetype-pdf"></i>
+           </div>`;
     return `
       <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; transition: 0.3s;" onmouseover="this.classList.add('shadow')" onmouseout="this.classList.remove('shadow')">

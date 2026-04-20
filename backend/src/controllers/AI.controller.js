@@ -4,14 +4,22 @@ import { GoogleGenAI, Type } from "@google/genai";
 import AIConversation from "../models/AIConversation.js";
 import { executeTool } from "../services/aiTools.js";
 
+import Job from "../models/job.js";
+import CandidateProfile from "../models/candidateProfile.js";
+import JobViewHistory from "../models/jobViewHistory.js";
+import Application from "../models/application.js";
+
 dotenv.config();
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("Thiếu GEMINI_API_KEY trong .env");
 }
 
+// console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+// const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-pro";
 
 function normalizePageContext(pageContext = {}) {
   return {
@@ -195,5 +203,93 @@ export const aiChat = async (req, res) => {
       message: "Không thể xử lý AI chat.",
       error: error.message,
     });
+  }
+};
+
+
+export const recommendSmartJobs = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const profile = await CandidateProfile.findOne({ userId }).populate("skills", "skillName");
+    if (!profile) return res.status(404).json({ message: "Vui lòng cập nhật Profile" });
+    const userSkills = profile.skills.map(s => s.skillName).join(", ");
+
+    const viewHistory = await JobViewHistory.find({ userId })
+      .sort({ viewDate: -1 })
+      .limit(5)
+      .populate("jobId", "title category");
+    const viewedJobsText = viewHistory.map(v => v.jobId?.title).filter(Boolean).join(", ");
+
+    const applications = await Application.find({ userId }).populate("jobId", "title");
+    const appliedJobIds = applications.map(app => app.jobId?._id.toString());
+    const appliedJobsText = applications.map(app => app.jobId?.title).filter(Boolean).join(", ");
+
+    const potentialJobs = await Job.find({ 
+      _id: { $nin: appliedJobIds },
+      status: "approved" 
+    }).limit(10).populate("companyId", "companyName");
+
+    const jobPool = potentialJobs.map(job => ({
+      id: job._id.toString(),
+      title: job.title,
+      company: job.companyId?.companyName,
+      salary: `${job.salaryMin} - ${job.salaryMax}`,
+      requirements: job.requirements ? job.requirements.substring(0, 150) + "..." : ""
+    }));
+
+    // Prompt 
+    const promptText = `
+      Dựa vào:
+      - Kỹ năng ứng viên: [${userSkills}], Lương mong: [${profile.expectedSalary}]
+      - Đã xem: [${viewedJobsText || "Không có"}]
+      - Đã ứng tuyển: [${appliedJobsText || "Không có"}]
+
+      Danh sách việc làm: ${JSON.stringify(jobPool)}
+      Chọn ra đúng 3 việc phù hợp nhất.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: promptText,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              jobId: { type: Type.STRING },
+              matchScore: { type: Type.STRING, description: "Ví dụ: 95%" },
+              reason: { type: Type.STRING, description: "Lý do phù hợp ngắn gọn" }
+            },
+            required: ["jobId", "matchScore", "reason"]
+          }
+        }
+      }
+    });
+
+    let recommendedData = [];
+    try {
+      recommendedData = JSON.parse(response.text);
+    } catch (parseError) {
+      console.error("Lỗi parse JSON:", parseError);
+      return res.status(500).json({ message: "Lỗi đọc dữ liệu AI" });
+    }
+
+    const finalRecommendations = recommendedData.map(aiMatch => {
+      const fullJobData = potentialJobs.find(j => j._id.toString() === aiMatch.jobId);
+      return {
+        job: fullJobData,
+        matchScore: aiMatch.matchScore,
+        aiReason: aiMatch.reason
+      };
+    }).filter(item => item.job);
+
+    res.status(200).json(finalRecommendations);
+
+  } catch (error) {
+    console.error("Lỗi AI Recommend:", error);
+    res.status(500).json({ message: "Lỗi kết nối AI", error: error.message });
   }
 };

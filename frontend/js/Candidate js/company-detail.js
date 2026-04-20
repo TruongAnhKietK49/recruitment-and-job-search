@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -130,7 +131,7 @@ function renderCompanyAndJobs(company, jobs) {
       } else if (isExpired) {
         actionButton = `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 w-100"><i class="bi bi-clock-history me-1"></i>Đã hết hạn</span>`;
       } else {
-        actionButton = `<button class="btn btn-primary btn-sm px-3 py-2 w-100 shadow-sm" style="border-radius: 8px;" onclick="event.stopPropagation(); window.openApplyModal('${job._id}');">Ứng tuyển ngay</button>`;
+        actionButton = `<button id="btnApply_${job._id}" class="btn btn-primary btn-sm px-3 py-2 w-100 shadow-sm" style="border-radius: 8px;" onclick="event.stopPropagation(); window.openApplyModal('${job._id}');">Ứng tuyển ngay</button>`;
       }
 
       return `
@@ -303,5 +304,24 @@ window.toggleSaveJob = async function (jobId, btnElement) {
     alert('Lỗi kết nối: ' + err.message);
   }
 }
+// ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
+injectApplyModal();
+
+window.openApplyModal = function(jobId) {
+    window.currentApplyJobId = jobId; 
+    setupApplyModal(jobId, token);
+};
+
+window.addEventListener('applySuccess', (e) => {
+    const jobId = e.detail.jobId;
+    appliedJobIds.push(jobId); 
+
+    const btn = document.getElementById(`btnApply_${jobId}`);
+    if (btn) {
+        btn.outerHTML = `<span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 w-100"><i class="bi bi-check2-all me-1"></i>Đã ứng tuyển</span>`;
+    }
+});
+
+initPage();
 
 initPage();

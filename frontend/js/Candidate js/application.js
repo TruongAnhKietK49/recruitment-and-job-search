@@ -80,12 +80,19 @@ function renderApplications(apps) {
             </div>
 
             <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
-              ${app.jobId ? `<a href="job-detail.html?id=${app.jobId._id}" class="btn btn-outline-primary shadow-sm" style="border-radius: 10px;">Xem việc</a>` : ''}
-              <button class="btn btn-outline-danger shadow-sm" onclick="window.deleteApplication('${app._id}')" style="border-radius: 10px;">
-                <i class="bi bi-trash3"></i>
-              </button>
+              ${app.jobId ? `
+                <a href="job-detail.html?id=${app.jobId._id}" class="btn btn-outline-primary shadow-sm" style="border-radius: 10px;" title="Xem chi tiết việc làm">
+                  <i class="bi bi-eye"></i>
+                </a>
+              ` : ''}
+              
+              ${app.status === 'pending' ? `
+                <button class="btn btn-outline-danger shadow-sm" onclick="window.deleteApplication('${app._id}')" style="border-radius: 10px;" title="Rút lại đơn ứng tuyển">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              ` : ''}
             </div>
-
+            
           </div>
         </div>
       </div>

@@ -119,7 +119,8 @@
   </div>
 
   <main class="container py-5">
-    <div class="mb-5 pb-3">
+
+    <div class="mb-5 pb-4">
       <h2 class="section-title text-primary mb-4">Việc làm theo ngành nghề</h2>
       <div class="row g-3">
         <div class="col-6 col-md-4 col-lg-2">
@@ -163,8 +164,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
       <h2 class="section-title text-primary">Danh sách việc làm</h2>
-      <a href="#" class="view-all-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
-    </div>
+      </div>
 
     <div id="jobsContainer">
       <div id="noJobsFound" class="alert alert-info text-center d-none">Không tìm thấy việc làm phù hợp.</div>
@@ -172,44 +172,83 @@
         </div>
     </div>
 
+    <nav aria-label="Page navigation" class="mt-5">
+      <ul class="pagination justify-content-center" id="jobsPagination"></ul>
+    </nav>
+
     <div class="mt-5 pt-5">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="section-title text-primary">Cẩm nang tìm việc</h2>
         <a href="blog.html" class="view-all-link">Xem tất cả <i class="bi bi-arrow-right"></i></a>
       </div>
+    </div>
+    
+    <div class="row g-4">
       
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
-            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
-            <div class="p-4">
-              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
-              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
-              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="cursor: pointer; transition: all 0.3s;" onclick="window.open('https://vn.joboko.com/blog/cach-viet-cv-nwi5592', '_blank')" onmouseover="this.classList.add('shadow-lg'); this.style.transform='translateY(-5px)';" onmouseout="this.classList.remove('shadow-lg'); this.style.transform='translateY(0)';">
+          <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&auto=format&fit=crop" class="card-img-top" alt="Cách viết CV" style="height: 200px; object-fit: cover;">
+          <div class="card-body d-flex flex-column p-4">
+            <div class="mb-2">
+               <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill">Góc nghề nghiệp</span>
             </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
-            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
-            <div class="p-4">
-              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
-              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
-              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="blog-card border rounded-4 overflow-hidden bg-white shadow-sm h-100">
-            <img src="../../images/banner_blog.png" class="w-100" alt="Blog image" style="height: 220px; object-fit: cover;">
-            <div class="p-4">
-              <span class="blog-tag fw-bold mb-2 d-block">Tư vấn nghề nghiệp</span>
-              <h5 class="fw-bold mb-3">Top 5 trường đại học đào tạo ngành IT tốt nhất</h5>
-              <p class="text-muted small mb-0">Top 5 trường đại học đào tạo ngành IT uy tín tại Việt Nam, chất lượng đảm bảo...</p>
-            </div>
+            <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1.1rem; line-height: 1.5;">Cách viết CV IT chuẩn và thu hút nhà tuyển dụng</h5>
+            <p class="card-text text-muted small flex-grow-1 mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">Lập trình viên viết CV như thế nào để vượt qua vòng CV screening? Tham khảo ngay các mẫu CV IT chuẩn, cách trình bày kỹ năng công nghệ (Tech Stack)...</p>
           </div>
         </div>
       </div>
+
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="cursor: pointer; transition: all 0.3s;" onclick="window.open('https://www.topcv.vn/chuyen-vien-phan-tich-du-lieu-la-gi', '_blank')" onmouseover="this.classList.add('shadow-lg'); this.style.transform='translateY(-5px)';" onmouseout="this.classList.remove('shadow-lg'); this.style.transform='translateY(0)';">
+          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop" class="card-img-top" alt="Data Analyst" style="height: 200px; object-fit: cover;">
+          <div class="card-body d-flex flex-column p-4">
+            <div class="mb-2">
+               <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">Xu hướng ngành</span>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1.1rem; line-height: 1.5;">Lộ trình trở thành Data Analyst (Chuyên viên phân tích dữ liệu)</h5>
+            <p class="card-text text-muted small flex-grow-1 mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">Data Analyst đang là một trong những ngành hot nhất hiện nay. Bài viết cung cấp lộ trình chi tiết từ con số 0, các công cụ cần học như SQL, Python...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="cursor: pointer; transition: all 0.3s;" onclick="window.open('https://bizflycloud.vn/tin-tuc/50-cau-hoi-phong-van-reactjs-tu-co-ban-den-nang-cao-pho-bien-nhat-20241216165234194.htm', '_blank')" onmouseover="this.classList.add('shadow-lg'); this.style.transform='translateY(-5px)';" onmouseout="this.classList.remove('shadow-lg'); this.style.transform='translateY(0)';">
+          <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop" class="card-img-top" alt="ReactJS" style="height: 200px; object-fit: cover;">
+          <div class="card-body d-flex flex-column p-4">
+            <div class="mb-2">
+               <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill">Kỹ năng phỏng vấn</span>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-3" style="font-size: 1.1rem; line-height: 1.5;">Tổng hợp 50 câu hỏi phỏng vấn ReactJS thường gặp nhất</h5>
+            <p class="card-text text-muted small flex-grow-1 mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">Bạn sắp có buổi phỏng vấn Frontend? Hãy ôn tập ngay bộ câu hỏi thực chiến từ cơ bản (Virtual DOM, Hooks) đến nâng cao (Performance, State Management)...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+
+    <div class="mt-5 pt-4 mb-5 pb-4 border-bottom" id="ai-recommendation-section" style="display: none;">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+          <h2 class="section-title text-primary mb-0">✨ Việc làm gợi ý</h2>
+          <span class="badge bg-info-subtle text-info ms-3 px-3 py-2 rounded-pill border border-info-subtle shadow-sm">Dành riêng cho bạn</span>
+        </div>
+        
+        <button id="btnRefreshAi" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-medium shadow-sm">
+          <i class="bi bi-arrow-clockwise me-1" id="refreshAiIcon"></i> Gợi ý
+        </button>
+      </div>
+
+
+
+      <div id="ai-loading" class="text-center py-5">
+        <div class="spinner-stars text-primary">
+          <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.25rem;"></div>
+          <p class="mt-3 text-muted fst-italic">AI đang phân tích hồ sơ và sở thích của bạn...</p>
+        </div>
+      </div>
+
+      <div class="row g-4" id="ai-jobs-container"></div>
     </div>
 
   </main>
