@@ -23,7 +23,6 @@ const hrProfileSchema = new mongoose.Schema(
     },
     position: {
       type: String,
-      required: true,
     },
     verifiedStatus: {
       type: String,

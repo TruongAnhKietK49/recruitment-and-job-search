@@ -14,9 +14,7 @@ export const getProfile = async (req, res) => {
     if (user.role === "candidate") {
       profileData = await candidateProfile.findOne({ userId: user._id });
     } else if (user.role === "hr") {
-      profileData = await hrProfile
-        .findOne({ userId: user._id })
-        .populate("companyId", "companyName website address status");
+      profileData = await hrProfile.findOne({ userId: user._id }).populate("companyId", "companyName website address status");
     }
 
     res.status(200).json({ user, profileData });
@@ -37,9 +35,7 @@ export const getProfileById = async (req, res) => {
     if (user.role === "candidate") {
       profileData = await candidateProfile.findOne({ userId: user._id });
     } else if (user.role === "hr") {
-      profileData = await hrProfile
-        .findOne({ userId: user._id })
-        .populate("companyId", "companyName website address status");
+      profileData = await hrProfile.findOne({ userId: user._id }).populate("companyId", "companyName website address status");
     }
 
     res.status(200).json({ user, profileData });
@@ -51,9 +47,7 @@ export const getProfileById = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: { $ne: "admin" } }).select(
-      "-password",
-    );
+    const users = await User.find({ role: { $ne: "admin" } }).select("-password");
 
     res.status(200).json(users);
   } catch (error) {
@@ -68,7 +62,7 @@ export const updateMyProfile = async (req, res) => {
     const userRole = req.user.role;
 
     const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
-      new: true,
+      returnDocument: "after",
     });
 
     let updatedProfile = null;
@@ -81,6 +75,7 @@ export const updateMyProfile = async (req, res) => {
         })
         .populate("skills", "skillName");
     } else if (userRole === "hr") {
+      console.log("Hello");
       updatedProfile = await hrProfile.findOneAndUpdate({ userId }, req.body, {
         returnDocument: "after",
         runValidators: true,
@@ -90,6 +85,7 @@ export const updateMyProfile = async (req, res) => {
 
     res.status(200).json({ updatedUser, updatedProfile });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };

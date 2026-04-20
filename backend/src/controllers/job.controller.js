@@ -11,6 +11,8 @@ export const getAllJobs = async (req, res) => {
 
     const query = {};
 
+    query.status = "approved";
+
     if (keyword) {
       query.title = { $regex: keyword, $options: "i" };
     }
@@ -26,12 +28,6 @@ export const getAllJobs = async (req, res) => {
     if (companyId) {
       query.companyId = companyId;
     }
-
-    // if (req.user.role === "candidate") {
-    //   query.status = "approved";
-    // } else if (status) {
-    //   query.status = status;
-    // }
     
 
     if (experience) {
