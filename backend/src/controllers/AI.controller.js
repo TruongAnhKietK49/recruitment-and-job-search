@@ -10,8 +10,6 @@ if (!process.env.GEMINI_API_KEY) {
   throw new Error("Thiếu GEMINI_API_KEY trong .env");
 }
 
-console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
-
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 

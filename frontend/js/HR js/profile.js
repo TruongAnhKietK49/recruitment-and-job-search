@@ -1,4 +1,5 @@
 import URL from "../utils/url.js";
+import Toastify from "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify-es.js";
 
 let user = sessionStorage.getItem("user")
   ? JSON.parse(sessionStorage.getItem("user"))
@@ -24,7 +25,6 @@ async function loadInfo() {
       },
     });
     const data = await res.json();
-    console.log(data);
     return data;
   } catch (err) {
     console.log(err);
@@ -45,7 +45,7 @@ async function updateInfo(data) {
     if (!res.ok) {
       throw new Error(result.message);
     }
-    alert("Câp nhat thông tin thành công!");
+    showToast("Cập nhật thông tin thành công!");
     return result;
   } catch (err) {
     console.log(err);
@@ -62,9 +62,9 @@ async function handleUpdate() {
     address: document.querySelector(".edit-address").value.trim(),
     header: document.querySelector(".edit-header").value.trim(),
     position: document.querySelector(".edit-position").value.trim(),
-    avatar: tempAvatarUrl,
+    avatar: document.getElementById("avatarInput").value.trim(),
   };
-
+  console.log(data);
   await updateInfo(data);
   fillInfo();
 }
@@ -77,6 +77,7 @@ const previewBtn = document.getElementById("previewBtn");
 const profileAvatar = document.querySelector(".profile-avatar");
 let tempAvatarUrl = "";
 
+// Toggle input box
 changePhotoBtn.addEventListener("click", () => {
   if (avatarInputBox.style.display === "block") {
     avatarInputBox.style.display = "none";
@@ -85,20 +86,36 @@ changePhotoBtn.addEventListener("click", () => {
     avatarInput.focus();
   }
 });
-previewBtn.addEventListener("click", () => {
-  const url = avatarInput.value.trim();
-  if (!url) return alert("Vui lòng nhập URL");
 
-  tempAvatarUrl = url;
+// 👇 Cập nhật tempAvatarUrl khi input thay đổi
+avatarInput.addEventListener("input", () => {
+  tempAvatarUrl = avatarInput.value.trim();
+  console.log("Updated tempAvatarUrl:", tempAvatarUrl);
+});
+
+// Preview dùng giá trị đã lưu
+previewBtn.addEventListener("click", () => {
+  if (!tempAvatarUrl) return alert("Vui lòng nhập URL");
 
   profileAvatar.innerHTML = `
-    <img src="${url}" alt="avatar"
+    <img src="${tempAvatarUrl}" alt="avatar"
     style="width:100%;height:100%;object-fit:cover;" />
   `;
 });
 
+function showToast(msg) {
+  Toastify({
+    text: msg,
+    duration: 3000,
+    gravity: "top",
+    position: "right",
+  }).showToast();
+}
+
+
 async function fillInfo() {
   const data = await loadInfo();
+  console.log(data);
   let status = data.profileData?.verifiedStatus || "pending";
   if (status == "pending") {
     status = "Chưa xác thực";
@@ -111,6 +128,7 @@ async function fillInfo() {
 
   const avatarImg = document.getElementById("avatarImg");
   avatarImg.src = data.profileData?.avatar || "";
+  document.getElementById("avatarInput").value = data.profileData?.avatar || "";
   document.querySelector(".profile-name").textContent = data.user.fullName;
   document.querySelector(".profile-position").textContent = data.profileData?.position || "";
   document.querySelector(".profile-email").textContent = data.user.email;
@@ -121,7 +139,7 @@ async function fillInfo() {
   document.querySelector(".edit-position").value = data.profileData?.position || "";
   document.querySelector(".edit-email").value = data.user.email;
   document.querySelector(".edit-phone").value = data.user.phone;
-  document.querySelector(".edit-birthday").value = data.user.birthday.split("T")[0];
+  document.querySelector(".edit-birthday").value = data.user.birthday.split("T")[0] || "";
   document.querySelector(".edit-gender").value = data.user.gender;
   document.querySelector(".edit-address").value = data.profileData?.address || "";
   document.querySelector(".edit-header").value = data.profileData?.header || "";

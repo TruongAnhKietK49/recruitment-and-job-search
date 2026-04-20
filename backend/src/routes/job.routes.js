@@ -25,7 +25,7 @@ import {
 import { saveJob, getMySavedJobs, removeSavedJob } from "../controllers/saveJob.controller.js";
 
 const router = express.Router();
-router.get("/", authMiddleware, getAllJobs);
+router.get("/", getAllJobs);
 router.get("/pending", authMiddleware, authorizeRoles("admin"), getPendingJobs);
 router.get("/:id", authMiddleware, getJobById);
 
