@@ -72,12 +72,6 @@ export const getAllCompanies = async (req, res) => {
       query.status = status.trim();
     }
 
-    const myCompany = await Company.findOne({ createdBy: req.user.userId }).select("_id");
-
-    if (myCompany) {
-      query.createdBy = req.user.userId;
-    }
-
     const companies = await Company.find(query)
       .populate("createdBy", "fullName email role")
       .skip((pageNumber - 1) * limitNumber)

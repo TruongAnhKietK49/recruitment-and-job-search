@@ -23,7 +23,7 @@ router.get("/my/join-requests", authMiddleware, getMyCompanyJoinRequests);
 router.patch("/join-requests/:requestId/approve", authMiddleware, approveJoinRequest);
 router.patch("/join-requests/:requestId/reject", authMiddleware, rejectJoinRequest);
 
-router.get("/", authMiddleware, getAllCompanies);
+router.get("/", getAllCompanies);
 router.get("/me", authMiddleware, getMyCompany);
 router.get("/:companyId", authMiddleware, getCompanyById);
 

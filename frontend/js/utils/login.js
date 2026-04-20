@@ -147,7 +147,7 @@
     const role = data?.user?.role || data?.role || "";
 
     if (role.toLowerCase() === "hr") {
-      window.location.href = "../../pages/HR Pages/dashboard.html";
+      window.location.href = "../../pages/HR Pages/candidateManagement.html";
       return;
     }
 

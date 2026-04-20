@@ -1,14 +1,33 @@
 <aside class="sidebar">
-  <div class="brand">
-    <i class="bi bi-briefcase"></i>
-    <span>Job Website</span>
+  <div class="brand d-flex flex-column">
+    <div class="notification-wrapper">
+      <button class="notification-btn" id="notificationBtn" type="button">
+        <i class="bi bi-bell"></i>
+        <span class="badge" id="notificationCount" style="display: none">0</span>
+      </button>
+
+      <div class="notification-dropdown" id="notificationDropdown">
+        <div class="notification-header">
+          <p class="noti-title mb-0">Thông báo</p>
+          <button type="button" class="mark-all-read-btn" id="markAllReadBtn">Đánh dấu đã đọc</button>
+        </div>
+
+        <ul id="notificationList" class="notification-list">
+          <li class="notification-empty">Chưa có thông báo nào</li>
+        </ul>
+      </div>
+    </div>
+    <div class="title">
+      <i class="bi bi-briefcase"></i>
+      <span>Job Website</span>
+    </div>
   </div>
 
   <nav>
-    <a href="../HR Pages/dashboard.html" class="menu-link">
+    <!-- <a href="../HR Pages/dashboard.html" class="menu-link">
       <i class="bi bi-house-door"></i>
       <span>Dashboard</span>
-    </a>
+    </a> -->
     <a href="../HR Pages/jobManagement.html" class="menu-link" id="menu-manage-posts">
       <i class="bi bi-clipboard"></i>
       <span>Quản lý bài đăng</span>
@@ -33,10 +52,36 @@
       <span>Đăng xuất</span>
     </a>
   </div>
+
+  <div class="ai-chat-widget">
+    <button id="toggleAiChat" class="ai-chat-toggle" type="button" title="AI hỗ trợ tuyển dụng">
+      <i class="bi bi-robot"></i>
+    </button>
+
+    <div class="ai-chatbox d-none" id="aiChatbox">
+      <div class="ai-chat-header">
+        <div>
+          <strong>AI tuyển dụng</strong>
+          <div class="ai-chat-subtitle">Lọc ứng viên theo job/category</div>
+        </div>
+        <button id="closeAiChat" class="ai-chat-close" type="button">&times;</button>
+      </div>
+
+      <div class="ai-chat-body" id="aiChatBody">
+        <div class="ai-message ai">Xin chào. Tôi có thể giúp bạn lọc ứng viên phù hợp với job hoặc category.</div>
+      </div>
+
+      <div class="ai-chat-footer">
+        <input type="text" id="aiChatInput" placeholder="Ví dụ: Lọc 5 ứng viên phù hợp với job Frontend Developer" />
+        <button id="sendAiChat" type="button">Gửi</button>
+      </div>
+    </div>
+  </div>
 </aside>
 
 <style>
   .sidebar {
+    font-family: "Inter", sans-serif;
     width: var(--sidebar-width);
     min-height: 100vh;
     background: linear-gradient(180deg, var(--primary) 0%, #2b7ae4 100%);
@@ -45,11 +90,11 @@
     position: fixed;
     left: 0;
     top: 0;
+    overflow: visible;
+    z-index: 1000;
   }
 
   .brand {
-    display: flex;
-    align-items: center;
     gap: 12px;
     font-size: 22px;
     font-weight: 700;
@@ -107,5 +152,324 @@
       position: static;
       margin-top: 24px;
     }
+  }
+
+  .notification-wrapper {
+    position: relative;
+  }
+
+  .notification-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    z-index: 20;
+  }
+
+  .notification-btn i {
+    font-size: 16px;
+  }
+
+  .badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: red;
+    color: #fff;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 52px;
+    left: calc(100% + 12px); /* xổ sang phải sidebar */
+    width: 320px;
+    max-height: 420px;
+    overflow-y: auto;
+    background: #fff;
+    color: #333;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    z-index: 9999;
+  }
+
+  .notification-dropdown.active {
+    display: block;
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .noti-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .mark-all-read-btn {
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .notification-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .notification-item {
+    padding: 10px;
+    border-radius: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .notification-item:hover {
+    background: #f5f8ff;
+  }
+
+  .notification-item.unread {
+    background: #eef4ff;
+  }
+
+  .notification-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .notification-item-message {
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #555;
+  }
+
+  .notification-item-time {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .notification-empty {
+    padding: 12px;
+    text-align: center;
+    color: #777;
+  }
+
+  .ai-chat-widget {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    font-family: "Inter", sans-serif;
+  }
+
+  .ai-chat-toggle {
+    width: 58px;
+    height: 58px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2f80ed, #4a90e2);
+    color: #fff;
+    font-size: 24px;
+    box-shadow: 0 12px 24px rgba(47, 128, 237, 0.28);
+    cursor: pointer;
+  }
+
+  .ai-chat-toggle:hover {
+    transform: translateY(-2px);
+  }
+
+  .ai-chatbox {
+    width: 380px;
+    height: 560px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .d-none {
+    display: none !important;
+  }
+
+  .ai-chat-header {
+    background: linear-gradient(135deg, #2f80ed, #4a90e2);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ai-chat-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+  .ai-chat-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  .ai-chat-body {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    background: #f7f9fc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-message {
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .ai-message.ai {
+    background: #eaf2ff;
+    color: #1f2937;
+    align-self: flex-start;
+  }
+
+  .ai-message.user {
+    background: #2f80ed;
+    color: #fff;
+    align-self: flex-end;
+  }
+
+  .ai-chat-footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid #eee;
+    background: #fff;
+  }
+
+  .ai-chat-footer input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+  }
+
+  .ai-chat-footer button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #2f80ed;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .ai-candidate-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  }
+
+  .ai-candidate-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .ai-candidate-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .ai-candidate-score {
+    background: #eaf2ff;
+    color: #2f80ed;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ai-candidate-reason {
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+
+  .ai-tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .ai-tag {
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 12px;
+    border-radius: 999px;
+    padding: 4px 8px;
+  }
+
+  .ai-candidate-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .ai-candidate-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    background: #2f80ed;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .ai-typing {
+    font-style: italic;
+    opacity: 0.75;
   }
 </style>
