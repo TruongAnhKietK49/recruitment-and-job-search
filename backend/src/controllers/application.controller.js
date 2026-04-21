@@ -7,21 +7,21 @@ import Notification from "../models/notification.js";
 // Create application
 export const createApplication = async (req, res) => {
   try {
-    const { candidateProfileId, jobId, resumeId } = req.body;
+    const { jobId, resumeId } = req.body;
 
-    const candidateProfile = await CandidateProfile.findById(candidateProfileId);
+    const candidateProfile = await CandidateProfile.findOne({ userId: req.user.userId });
     if (!candidateProfile) {
-      return res.status(404).json({ message: "Candidate profile not found" });
+      return res.status(404).json({ message: "Vui lòng cập nhật Hồ sơ cá nhân trước khi ứng tuyển!" });
     }
 
     const job = await Job.findById(jobId);
     if (!job) {
-      return res.status(404).json({ message: "Job not found" });
+      return res.status(404).json({ message: "Không tìm thấy công việc" });
     }
 
     const resume = await Resume.findById(resumeId);
     if (!resume) {
-      return res.status(404).json({ message: "Resume not found" });
+      return res.status(404).json({ message: "Không tìm thấy CV" });
     }
 
     if (resume.userId.toString() !== req.user.userId) {
@@ -35,14 +35,14 @@ export const createApplication = async (req, res) => {
 
     if (existingApplication) {
       return res.status(400).json({
-        message: "You have already applied for this job",
+        message: "Bạn đã ứng tuyển công việc này rồi!",
       });
     }
 
     const newApplication = new Application({
       jobId,
       userId: req.user.userId,
-      candidateProfileId: candidateProfileId,
+      candidateProfileId: candidateProfile._id, 
       resumeId,
       applyDate: new Date(),
       status: "pending",
@@ -86,7 +86,14 @@ export const getAllApplications = async (req, res) => {
     }
 
     const applications = await Application.find(query)
-      .populate("jobId", "title category status companyId")
+      .populate({
+        path: "jobId",
+        select: "title category status companyId",
+        populate: {
+          path: "companyId",
+          select: "companyName logoUrl" 
+        }
+      })
       .populate("userId", "fullName email avatar")
       .populate("resumeId", "title fileUrl")
       .skip((pageNumber - 1) * limitNumber)

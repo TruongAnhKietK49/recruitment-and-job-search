@@ -54,9 +54,18 @@ export const getAllCompanies = async (req, res) => {
   try {
     const pageNumber = parseInt(req.query.page, 10) || 1;
     const limitNumber = parseInt(req.query.limit, 10) || 10;
-    const { keyword, status } = req.query;
+    const { keyword, status, location } = req.query;
 
     const query = {};
+
+    if (location && location.trim()) {
+    let locString = location.trim();
+    if (locString === "HN") locString = "Hà Nội";
+    if (locString === "HCM") locString = "Hồ Chí Minh";
+    if (locString === "BN") locString = "Bắc Ninh";
+    
+    query.address = { $regex: locString, $options: "i" };
+  }
 
     if (keyword && keyword.trim()) {
       query.$or = [
@@ -78,6 +87,14 @@ export const getAllCompanies = async (req, res) => {
       .limit(limitNumber)
       .sort({ createdAt: -1 })
       .lean();
+
+    for (let company of companies) {
+      const jobCount = await Job.countDocuments({
+        companyId: company._id,
+        status: "approved" 
+      });
+      company.activeJobsCount = jobCount; 
+    }
 
     const total = await Company.countDocuments(query);
 
