@@ -1,26 +1,27 @@
-const API_URL = 'http://localhost:5000/api';
-const token = localStorage.getItem('token');
+import BASE_URL from '../utils/url.js';
+const API_URL = `${BASE_URL}/api`;
+const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+const currentUser = userStr ? JSON.parse(userStr) : null;
 
-// --- 1. CẬP NHẬT HEADER (Ngày tháng & Tên Admin) ---
-function updateHeaderInfo() {
-  const dateOptions = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
-  document.getElementById('currentDate').textContent = `Hôm nay là ${new Date().toLocaleDateString('vi-VN', dateOptions)}`;
-  
-  // Tạm thời hiển thị tên admin giả lập
-  const adminName = "Nguyễn Thị B"; 
-  document.getElementById('adminNameDisplay').textContent = adminName;
-  const sidebarName = document.getElementById('adminName');
-  if(sidebarName) sidebarName.textContent = adminName;
+if (!token || currentUser?.role !== 'admin') {
+  window.location.href = "../../pages/utils/login.html";
 }
 
-// --- 2. GỌI API LẤY THỐNG KÊ ---
+function updateHeaderInfo() {
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('currentDate').textContent = `Hôm nay là ${new Date().toLocaleDateString('vi-VN', dateOptions)}`;
+
+  if (currentUser && currentUser.fullName) {
+    document.getElementById('adminNameDisplay').textContent = currentUser.fullName;
+  }
+}
+
 async function fetchStats() {
   try {
     const usersRes = await fetch(`${API_URL}/users`, { headers: { Authorization: `Bearer ${token}` } });
     if (usersRes.ok) {
       const users = await usersRes.json();
-      
-      // Lọc dữ liệu dựa theo Schema của bạn
       const candidatesCount = users.filter(u => u.role === 'candidate').length;
       const employersCount = users.filter(u => u.role === 'hr').length;
       const lockedCount = users.filter(u => u.status === 'inactive').length;
@@ -30,31 +31,32 @@ async function fetchStats() {
       document.getElementById('statLocked').innerText = lockedCount;
     }
 
-    // 2. Thống kê Tin tuyển dụng
-    const jobsRes = await fetch(`${API_URL}/jobs?limit=1`, { headers: { Authorization: `Bearer ${token}` } });
+    const jobsRes = await fetch(`${API_URL}/jobs/admin/all`, { headers: { Authorization: `Bearer ${token}` } });
     if (jobsRes.ok) {
       const jobsData = await jobsRes.json();
-      document.getElementById('statJobs').innerText = jobsData.total || 0;
+      const jobsArray = Array.isArray(jobsData) ? jobsData : (jobsData.jobs || []);
+      document.getElementById('statJobs').innerText = jobsArray.length;
     }
 
-    // 3. Thống kê Công ty
-    const compRes = await fetch(`${API_URL}/companies?limit=1`, { headers: { Authorization: `Bearer ${token}` } });
+    const compRes = await fetch(`${API_URL}/companies`, { headers: { Authorization: `Bearer ${token}` } });
     if (compRes.ok) {
       const compData = await compRes.json();
-      document.getElementById('statCompanies').innerText = compData.total || 0;
+      const companiesArray = Array.isArray(compData) ? compData : (compData.companies || []);
+      document.getElementById('statCompanies').innerText = companiesArray.length;
     }
 
-    // 4. Thống kê Hồ sơ ứng tuyển (Giả lập hoặc lấy từ API nếu có)
     try {
       const appRes = await fetch(`${API_URL}/applications`, { headers: { Authorization: `Bearer ${token}` } });
       if (appRes.ok) {
-        const apps = await appRes.json();
-        document.getElementById('statApplications').innerText = apps.length || 0;
+        const appsData = await appRes.json();
+
+        document.getElementById('statApplications').innerText = appsData.total || 0;
       } else {
-        document.getElementById('statApplications').innerText = 1900; // Số giả lập nếu API chưa sẵn sàng
+        document.getElementById('statApplications').innerText = "0"; 
       }
     } catch (e) {
-      document.getElementById('statApplications').innerText = 1900;
+      console.error("Lỗi tải số lượng ứng tuyển:", e);
+      document.getElementById('statApplications').innerText = "0";
     }
 
   } catch (err) {
@@ -62,74 +64,81 @@ async function fetchStats() {
   }
 }
 
-// --- 3. VẼ BIỂU ĐỒ (Chart.js) ---
 function initChart() {
-  const canvas = document.getElementById('hrChart');
+  const canvas = document.getElementById('systemChart');
   if (!canvas) return; 
   
   const ctx = canvas.getContext('2d');
-  
+
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['2016', '2017', '2018', '2019', '2020'],
+      labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
       datasets: [
         {
-          label: 'Tiếp nhận',
-          data: [40, 80, 100, 120, 180],
+          label: 'Người dùng mới',
+          data: [150, 230, 200, 320, 450, 500],
           borderColor: '#2f80ed',
-          backgroundColor: '#2f80ed',
+          backgroundColor: 'rgba(47, 128, 237, 0.1)',
+          fill: true, 
           tension: 0.4, 
-          borderWidth: 2,
+          borderWidth: 3,
           pointBackgroundColor: '#fff',
           pointBorderColor: '#2f80ed',
           pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7
+          pointRadius: 4,
+          pointHoverRadius: 6
         },
         {
-          label: 'Nghỉ việc',
-          data: [25, 40, 70, 75, 90],
-          borderColor: '#f2994a',
-          backgroundColor: '#f2994a',
+          label: 'Bài đăng việc làm mới',
+          data: [80, 120, 150, 200, 280, 310],
+          borderColor: '#10b981', 
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          fill: true,
           tension: 0.4,
-          borderWidth: 2,
+          borderWidth: 3,
           pointBackgroundColor: '#fff',
-          pointBorderColor: '#f2994a',
+          pointBorderColor: '#10b981',
           pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7
+          pointRadius: 4,
+          pointHoverRadius: 6
         }
       ]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false, 
       plugins: {
         legend: {
           position: 'top',
           align: 'end',
-          labels: { usePointStyle: true, boxWidth: 8, font: { size: 14, weight: '500' } }
+          labels: { usePointStyle: true, boxWidth: 8, font: { size: 13, family: 'Inter' } }
         },
         tooltip: {
-          backgroundColor: '#1a202c', padding: 10, titleFont: { size: 14 }, bodyFont: { size: 14 }
+          backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+          padding: 12, 
+          titleFont: { size: 13, family: 'Inter' }, 
+          bodyFont: { size: 13, family: 'Inter' },
+          cornerRadius: 8
         }
       },
       scales: {
         y: {
-          min: 0, max: 200,
-          ticks: { stepSize: 50, color: '#718096' },
-          grid: { borderDash: [5, 5] } 
+          min: 0, 
+          ticks: { color: '#64748b', font: { family: 'Inter' } },
+          grid: { color: '#f1f5f9', borderDash: [5, 5] },
+          border: { display: false } 
         },
         x: {
-          ticks: { color: '#718096' },
-          grid: { display: false } 
+          ticks: { color: '#64748b', font: { family: 'Inter' } },
+          grid: { display: false },
+          border: { display: false }
         }
       }
     }
   });
 }
 
-// --- 4. KHỞI CHẠY KHI TRANG TẢI XONG ---
 document.addEventListener('DOMContentLoaded', () => {
   updateHeaderInfo();
   fetchStats();

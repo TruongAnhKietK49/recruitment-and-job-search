@@ -289,142 +289,126 @@ function bindStaticEvents() {
   bindAiRefreshEvent();
 }
 
-// ================= AI RECOMMENDATION LOGIC (NÂNG CẤP XỬ LÝ LỖI) =================
-const CACHE_KEY = 'ai_jobs_cache';
+// ================= AI RECOMMENDATION LOGIC  =================
+const getCacheKey = () => {
+  const uid = currentUser?._id || currentUser?.userId || 'guest';
+  return `ai_jobs_cache_${uid}`;
+};
+const CLIENT_CACHE_TTL = 2 * 60 * 60 * 1000;
+
+function getClientCache() {
+  try {
+    const raw = localStorage.getItem(getCacheKey());
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() > parsed.expiredAt) { localStorage.removeItem(getCacheKey()); return null; }
+    return parsed.data;
+  } catch { return null; }
+}
+
+function setClientCache(data) {
+  try { localStorage.setItem(getCacheKey(), JSON.stringify({ data, expiredAt: Date.now() + CLIENT_CACHE_TTL })); } catch {}
+}
+
+function clearClientCache() {
+  try { localStorage.removeItem(getCacheKey()); } catch {}
+}
+
+let aiLoading = false;
 
 async function loadAiRecommendations(isForceReload = false) {
-  const section = $('#ai-recommendation-section');
+  const section   = $('#ai-recommendation-section');
   const container = $('#ai-jobs-container');
-  const loading = $('#ai-loading');
+  const loading   = $('#ai-loading');
 
-  if (!token || !isCandidate) {
-    section.style.display = 'none';
-    return;
+  if (!token || !isCandidate) { if (section) section.style.display = 'none'; return; }
+  if (section) section.style.display = 'block';
+  if (aiLoading && !isForceReload) return;
+
+  if (isForceReload) { clearClientCache(); if (container) container.innerHTML = ''; }
+
+  if (!isForceReload) {
+    const cached = getClientCache();
+    if (cached?.length > 0) { renderAiCards(cached, container, loading); return; }
   }
-  section.style.display = 'block';
 
-  if (isForceReload) {
-    sessionStorage.removeItem(CACHE_KEY);
-    container.innerHTML = '';
-    loading.classList.remove('d-none');
-  }
-
-  const CACHE_TIME = 15 * 60 * 1000; 
-  const cachedDataString = sessionStorage.getItem(CACHE_KEY);
-
-  if (cachedDataString) {
-    const cachedData = JSON.parse(cachedDataString);
-    const now = new Date().getTime();
-
-    if (now - cachedData.timestamp < CACHE_TIME && cachedData.data && cachedData.data.length > 0) {
-      renderAiCards(cachedData.data, container, loading);
-      return;
-    }
-  }
+  if (loading) loading.classList.remove('d-none');
+  if (container) container.innerHTML = '';
+  aiLoading = true;
 
   try {
     let data = null;
-    let retries = 1; 
-
-    while (retries >= 0) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         data = await requestApi('/ai/recommendations');
-        break; 
+        break;
       } catch (err) {
-        if (err.message && err.message.includes("cập nhật Profile")) {
-          loading.classList.add('d-none');
-          container.innerHTML = `
+        const msg = err.message || '';
+        if (msg.includes("cập nhật Profile")) {
+          if (loading) loading.classList.add('d-none');
+          if (container) container.innerHTML = `
             <div class="col-12 text-center py-4">
-              <div class="alert alert-info d-inline-block shadow-sm" style="border-radius: 15px;">
-                <i class="bi bi-person-vcard me-2"></i> Bạn cần <a href="profile.html" class="fw-bold text-info">cập nhật Hồ sơ (Kỹ năng)</a> để AI có thể phân tích và gợi ý việc làm nhé!
+              <div class="alert alert-info d-inline-block shadow-sm" style="border-radius:15px;">
+                <i class="bi bi-person-vcard me-2"></i> Bạn cần <a href="profile.html" class="fw-bold text-info">cập nhật Hồ sơ (Kỹ năng)</a> để AI gợi ý việc làm nhé!
               </div>
             </div>`;
-          return; 
+          return;
         }
-
-        retries--;
-        if (retries < 0) throw err; 
-        console.warn(`Lỗi API, đang thử lại...`);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        if (msg.includes("quota") || msg.includes("Quota") || msg.includes("timeout")) throw err;
+        if (attempt < 2) await new Promise(r => setTimeout(r, 15000)); 
+        else throw err;
       }
     }
 
     if (!data || data.length === 0) {
-      loading.classList.add('d-none');
-      container.innerHTML = `
+      if (loading) loading.classList.add('d-none');
+      if (container) container.innerHTML = `
         <div class="col-12 text-center py-4">
-          <div class="alert alert-warning d-inline-block shadow-sm" style="border-radius: 15px;">
-            <i class="bi bi-robot me-2"></i> AI hiện chưa tìm thấy công việc nào hoàn toàn khớp với bạn. Hãy cập nhật thêm kỹ năng nhé!
+          <div class="alert alert-warning d-inline-block shadow-sm" style="border-radius:15px;">
+            <i class="bi bi-robot me-2"></i> AI chưa tìm thấy việc phù hợp. Hãy cập nhật thêm kỹ năng nhé!
           </div>
         </div>`;
       return;
     }
 
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({
-      timestamp: new Date().getTime(),
-      data: data
-    }));
-    
+    setClientCache(data);
     renderAiCards(data, container, loading);
 
   } catch (err) {
     console.error("Lỗi AI Recommend:", err);
-    loading.classList.add('d-none');
-
-    container.innerHTML = `
+    if (loading) loading.classList.add('d-none');
+    const msg = err.message || '';
+    const errText = msg.includes("quota") || msg.includes("Quota")
+      ? 'Hệ thống AI đang hết lượt gọi. Vui lòng thử lại sau vài phút!'
+      : msg.includes("timeout") ? 'AI phân tích quá lâu. Vui lòng thử lại!'
+      : 'Không thể kết nối AI. Vui lòng thử lại!';
+    if (container) container.innerHTML = `
       <div class="col-12 text-center py-4">
-        <div class="alert alert-danger d-inline-block shadow-sm" style="border-radius: 15px;">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> Hệ thống AI đang hết lượt gọi (Quota) hoặc đang bận. Vui lòng thử lại sau!
+        <div class="alert alert-danger d-inline-block shadow-sm" style="border-radius:15px;">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i> ${errText}
+          <div class="mt-2">
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="loadAiRecommendations(true)">
+              <i class="bi bi-arrow-clockwise me-1"></i> Thử lại
+            </button>
+          </div>
         </div>
       </div>`;
+  } finally {
+    aiLoading = false;
   }
 }
-function renderAiCards(data, container, loading) {
-  loading.classList.add('d-none'); 
-  
-  container.innerHTML = data.map(item => {
-    const job = item.job;
-    const companyName = job.companyId?.companyName || 'Công ty ẩn danh';
-    
-    return `
-      <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm position-relative ai-card" style="border-radius: 20px; overflow: hidden; border: 1px solid rgba(13, 202, 240, 0.3) !important;">
-          <div class="position-absolute top-0 end-0 m-3 z-2">
-             <span class="badge bg-warning text-dark shadow-sm px-3 py-2 rounded-pill"><i class="bi bi-fire me-1"></i>Phù hợp ${item.matchScore}</span>
-          </div>
-          <div class="card-body p-4 d-flex flex-column position-relative z-1">
-            <h5 class="fw-bold text-dark mb-1 pe-5" style="line-height: 1.4;">${job.title}</h5>
-            <p class="text-primary fw-medium small mb-3"><i class="bi bi-building me-1"></i>${companyName}</p>
-            
-            <div class="ai-reason-box p-3 rounded-3 mb-4 flex-grow-1" style="background-color: #f0faff; border-left: 4px solid #0dcaf0;">
-              <small class="text-muted d-block mb-2 fw-bold"><i class="bi bi-robot text-info me-1"></i> AI phân tích:</small>
-              <small class="fst-italic text-dark d-block" style="line-height: 1.6;">"${item.aiReason}"</small>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
-              <span class="text-success fw-bold"><i class="bi bi-cash-coin me-1"></i>${formatSalary(job.salaryMin, job.salaryMax)}</span>
-              <a href="job-detail.html?id=${job._id}" class="btn btn-outline-info rounded-pill px-4 fw-medium shadow-sm">Xem ngay</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+
+window.loadAiRecommendations = loadAiRecommendations;
 
 function bindAiRefreshEvent() {
   const btnRefresh = $('#btnRefreshAi');
   if (btnRefresh) {
     btnRefresh.addEventListener('click', async function () {
-      const icon = $('#refreshAiIcon');
-      if (icon) icon.classList.add('bi-spin');
       this.disabled = true;
       this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang cập nhật...';
-
       await loadAiRecommendations(true);
-
       this.disabled = false;
-      this.innerHTML = '<i class="bi bi-arrow-clockwise me-1" id="refreshAiIcon"></i> Làm mới gợi ý';
+      this.innerHTML = '<i class="bi bi-arrow-clockwise me-1" id="refreshAiIcon"></i> Gợi ý';
     });
   }
 }

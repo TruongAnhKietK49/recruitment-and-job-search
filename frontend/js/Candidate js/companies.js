@@ -13,7 +13,7 @@ async function fetchCompanies() {
   const container = document.getElementById('companiesContainer');
   container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
-  let url = `${API_URL}/companies?page=${currentPage}&limit=9&keyword=${encodeURIComponent(keyword)}`;
+  let url = `${API_URL}/companies?page=${currentPage}&limit=9&status=active&keyword=${encodeURIComponent(keyword)}`;
   if(locationFilter) {
     url += `&location=${encodeURIComponent(locationFilter)}`;
   }

@@ -156,6 +156,11 @@
       return;
     }
 
+    if (role.toLowerCase() === "admin") {
+      window.location.href = "../../pages/Admin Pages/dashboard.html";
+      return;
+    }
+
     window.location.href = "";
   }
 
