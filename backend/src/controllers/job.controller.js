@@ -37,6 +37,18 @@ export const getAllJobs = async (req, res) => {
       else if (experience === "5+") query.experience = { $regex: /trên 5|5|6|7|8|9|10/i };
     }
 
+    const activeCompanies = await Company.find({ status: "active" }).select("_id");
+    const activeCompanyIds = activeCompanies.map(c => c._id);
+
+    if (companyId) {
+      if (!activeCompanyIds.some(id => id.toString() === companyId)) {
+        return res.status(200).json({ total: 0, page: 1, totalPages: 0, jobs: [] });
+      }
+      query.companyId = companyId;
+    } else {
+      query.companyId = { $in: activeCompanyIds };
+    }
+
     // Xử lý lọc theo Mức lương
     if (salaryRange) {
       if (salaryRange === "50+") {
@@ -96,7 +108,7 @@ export const getAllJobs = async (req, res) => {
 
 export const getJobsByCompany = async (req, res) => {
   try {
-    const jobs = await Job.find({ companyId: req.params.companyId }).populate("companyId", "companyName logoUrl address website");
+    const jobs = await Job.find({ companyId: req.params.companyId, status: "approved" }).populate("companyId", "companyName logoUrl address website");
     if (!jobs) {
       return res.status(404).json({ message: "Jobs not found" });
     }
@@ -239,15 +251,17 @@ export const updateJob = async (req, res) => {
 
 export const approveJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate("companyId", "companyName");
+    const job = await Job.findById(req.params.id);
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    if (job.status !== "pending") {
+    const allowedStatuses = ["pending", "rejected", "closed"];
+    
+    if (!allowedStatuses.includes(job.status)) {
       return res.status(400).json({
-        message: "Only pending jobs can be approved",
+        message: "Trạng thái hiện tại không thể thực hiện thao tác duyệt/khôi phục",
       });
     }
 
@@ -259,7 +273,7 @@ export const approveJob = async (req, res) => {
 
     job.status = "approved";
     job.reviewedBy = req.user.userId;
-    job.reviewNote = req.body.reviewNote || "";
+    job.reviewNote = req.body?.reviewNote || "Đã duyệt/khôi phục bởi Admin";
 
     await job.save();
 
@@ -276,6 +290,7 @@ export const approveJob = async (req, res) => {
       job,
     });
   } catch (error) {
+    console.error("Lỗi tại approveJob:", error);
     res.status(500).json({
       message: "Error approving job",
       error: error.message,
@@ -389,5 +404,39 @@ export const getJobSummary = async (req, res) => {
       message: "Error fetching job summary",
       error: error.message,
     });
+  }
+};
+
+// Lấy TẤT CẢ việc làm cho Admin
+export const getAdminAllJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find()
+      .populate("companyId", "companyName logoUrl")
+      .populate("createdBy", "fullName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ jobs });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi lấy danh sách việc làm", error: error.message });
+  }
+};
+
+// Admin gỡ bài đăng đang hoạt động
+export const closeJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+
+    if (job.status !== "approved") {
+      return res.status(400).json({ message: "Chỉ có thể gỡ các bài đang hoạt động (approved)" });
+    }
+
+    job.status = "closed"; 
+    job.reviewedBy = req.user.userId;
+    await job.save();
+
+    res.status(200).json({ message: "Đã gỡ bài đăng thành công", job });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi gỡ bài", error: error.message });
   }
 };

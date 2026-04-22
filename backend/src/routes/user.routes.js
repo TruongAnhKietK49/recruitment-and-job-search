@@ -1,4 +1,4 @@
-import { getProfile, getProfileById, getAllUsers, updateMyProfile, deleteUser,changePassword } from "../controllers/user.controller.js";
+import { getProfile, getProfileById, getAllUsers, updateMyProfile, deleteUser,changePassword,updateUserStatus } from "../controllers/user.controller.js";
 import { upsertCandidateProfile, getMyCandidateProfile, deleteCandidateProfile } from "../controllers/candidateProfile.controller.js";
 import { updateHrProfile, deleteHrProfile } from "../controllers/hrProfile.controller.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -9,6 +9,11 @@ const router = express.Router();
 
 router.get("/me", authMiddleware, getProfile);
 router.get("/", authMiddleware, authorizeRoles("admin"), getAllUsers);
+
+router.put("/password", authMiddleware, changePassword);
+
+router.put("/:id/status", authMiddleware, authorizeRoles("admin"), updateUserStatus);
+
 router.get("/:id", authMiddleware, authorizeRoles("admin", "hr"), getProfileById);
 router.put("/", authMiddleware, updateMyProfile);
 router.delete("/:id", authMiddleware, authorizeRoles("admin"), deleteUser);
@@ -18,7 +23,5 @@ router.delete("/candidate-profile", authMiddleware, authorizeRoles("candidate"),
 
 router.post("/hr-profile", authMiddleware, authorizeRoles("hr"), updateHrProfile);
 router.delete("/hr-profile", authMiddleware, authorizeRoles("hr"), deleteHrProfile);
-
-router.put("/password", authMiddleware, changePassword);
 
 export default router;

@@ -9,6 +9,7 @@ import {
   getMyCompanyJoinRequests,
   approveJoinRequest,
   rejectJoinRequest,
+  updateCompanyStatus,
 } from "../controllers/company.controller.js";
 
 import express from "express";
@@ -29,4 +30,6 @@ router.get("/:companyId", getCompanyById);
 
 router.put("/:companyId", authMiddleware, authorizeRoles("admin", "hr"), updateCompany);
 router.delete("/:companyId", authMiddleware, authorizeRoles("admin", "hr"), deleteCompany);
+
+router.patch("/:companyId/status", authMiddleware, authorizeRoles("admin"), updateCompanyStatus);
 export default router;

@@ -6,73 +6,125 @@
   <title>Admin Dashboard - Job Website</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="../../css/Admin css/dashboard.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../../css/utils/style.css"> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../../css/Admin css/style_admin.css">
+
 </head>
-<body class="bg-light">
+<body>
   <div id="navbar"></div>
 
   <main class="admin-content">
     
-    <div class="d-flex justify-content-between align-items-start mb-4 pb-2 border-bottom">
+    <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom">
       <div>
-        <h1 class="text-primary fw-bold fst-italic mb-2">Chào mừng quay trở lại 👋</h1>
-        <p class="text-muted fst-italic mb-0" id="currentDate">Hôm nay là thứ 2, ngày 19/2/2026</p>
+        <h2 class="text-dark fw-bold mb-1">Tổng quan hệ thống 👋</h2>
+        <p class="text-muted mb-0" id="currentDate">Đang tải ngày hiện tại...</p>
       </div>
-      <div class="text-primary fw-medium fs-5" id="adminNameDisplay">Nguyễn Thị B</div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end d-none d-md-block">
+          <div class="fw-bold text-dark" id="adminNameDisplay">Đang tải...</div>
+          <small class="text-muted">System Admin</small>
+        </div>
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 48px; height: 48px; font-size: 1.2rem;">
+          AD
+        </div>
+      </div>
     </div>
 
     <div class="row g-4 mb-5">
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Tin tuyển dụng</div>
-          <div class="stat-value"><i class="bi bi-bag"></i> <span id="statJobs">1590</span></div>
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Tin tuyển dụng</p>
+            <h2 class="fw-bold mb-0 text-dark" id="statJobs">...</h2>
+          </div>
+          <div class="icon-box bg-primary-subtle text-primary rounded-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-briefcase-fill fs-3"></i>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Ứng viên</div>
-          <div class="stat-value"><i class="bi bi-person"></i> <span id="statCandidates">10000</span></div>
+
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Doanh nghiệp</p>
+            <h2 class="fw-bold mb-0 text-dark" id="statCompanies">...</h2>
+          </div>
+          <div class="icon-box bg-info-subtle text-info rounded-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-buildings-fill fs-3"></i>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Hồ sơ ứng tuyển</div>
-          <div class="stat-value"><i class="bi bi-file-earmark-text"></i> <span id="statApplications">1900</span></div>
+
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Lượt ứng tuyển</p>
+            <h2 class="fw-bold mb-0 text-dark" id="statApplications">...</h2>
+          </div>
+          <div class="icon-box bg-success-subtle text-success rounded-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-file-earmark-check-fill fs-3"></i>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Công ty</div>
-          <div class="stat-value"><i class="bi bi-briefcase"></i> <span id="statCompanies">190</span></div>
+
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Ứng viên</p>
+            <h2 class="fw-bold mb-0 text-dark" id="statCandidates">...</h2>
+          </div>
+          <div class="icon-box bg-warning-subtle text-warning rounded-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-people-fill fs-3"></i>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Nhà tuyển dụng</div>
-          <div class="stat-value"><i class="bi bi-person"></i> <span id="statEmployers">2300</span></div>
+
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Nhà tuyển dụng (HR)</p>
+            <h2 class="fw-bold mb-0 text-dark" id="statEmployers">...</h2>
+          </div>
+          <div class="icon-box" style="background-color: #f3e8ff; color: #8b5cf6; border-radius: 1rem; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-person-badge-fill fs-3"></i>
+          </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="stat-card">
-          <div class="stat-title">Tài khoản bị khóa</div>
-          <div class="stat-value"><i class="bi bi-file-earmark-lock"></i> <span id="statLocked">10</span></div>
+
+      <div class="col-xl-4 col-md-6">
+        <div class="stat-card bg-white p-4 rounded-4 shadow-sm border-0 h-100 d-flex align-items-center justify-content-between">
+          <div>
+            <p class="text-muted fw-medium mb-1">Tài khoản bị khóa</p>
+            <h2 class="fw-bold mb-0 text-danger" id="statLocked">...</h2>
+          </div>
+          <div class="icon-box bg-danger-subtle text-danger rounded-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-shield-lock-fill fs-3"></i>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="chart-card bg-white p-4 rounded-3 shadow-sm border border-light">
-      <div class="mb-4">
-        <h4 class="fw-bold mb-1">Biến động nhân sự</h4>
-        <p class="text-muted mb-0">Công ty cổ phần Himy</p>
+    <div class="chart-card bg-white p-4 p-md-5 rounded-4 border-0">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <div>
+          <h4 class="fw-bold mb-1 text-dark">Thống kê tổng quan</h4>
+          <p class="text-muted mb-0 small">Lượng người dùng mới và bài đăng mới</p>
+        </div>
+        <select class="form-select w-auto shadow-none bg-light border-0 fw-medium">
+          <option>Năm 2026</option>
+          <option>Năm 2025</option>
+        </select>
       </div>
-      <canvas id="hrChart" height="100"></canvas>
+      <div style="height: 350px; width: 100%;">
+        <canvas id="systemChart"></canvas>
+      </div>
     </div>
 
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../../js/utils/loadNavbarAdmin.js"></script>
-  <script src="../../js/Admin js/dashboard.js"></script>
+  <script type="module" src="../../js/utils/loadNavbarAdmin.js"></script>
+  <script type="module" src="../../js/Admin js/dashboard.js"></script>
 </body>
 </html>

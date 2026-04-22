@@ -14,6 +14,8 @@ import {
   rejectJob,
   deleteJob,
   getJobSummary,
+  getAdminAllJobs,
+  closeJob,
 } from "../controllers/job.controller.js";
 
 import {
@@ -45,5 +47,8 @@ router.get("/save-job/me", authMiddleware, authorizeRoles("candidate"), getMySav
 router.post("/save-job", authMiddleware, authorizeRoles("candidate"), saveJob);
 
 router.delete("/save-job/:id", authMiddleware, authorizeRoles("candidate"), removeSavedJob);
+
+router.get("/admin/all", authMiddleware, authorizeRoles("admin"), getAdminAllJobs);
+router.patch("/:id/close", authMiddleware, authorizeRoles("admin"), closeJob);
 
 export default router;

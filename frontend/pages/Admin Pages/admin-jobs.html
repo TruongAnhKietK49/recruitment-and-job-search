@@ -6,34 +6,115 @@
   <title>Duyệt việc làm - Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="../../css/Admin css/admin-shared.css">
+  <link rel="stylesheet" href="../../css/utils/style.css">
+  <link rel="stylesheet" href="../../css/Admin css/style_admin.css">
 </head>
-<body class="bg-light">
+<body>
   <div id="navbar"></div>
 
-  <main class="admin-content">
-    <h2 class="fw-bold text-primary mb-4">Duyệt bài đăng tuyển dụng</h2>
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <h3 class="fw-bold text-dark mb-0">Duyệt bài đăng tuyển dụng</h3>
+      <button class="btn btn-primary shadow-sm rounded-3 px-3 fw-medium" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+      </button>
+    </div>
 
-    <div class="card border-0 shadow-sm rounded-3">
-      <div class="card-body p-0 table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+    <div class="table-container">
+      <div class="filter-bar d-flex gap-3 align-items-center flex-wrap">
+        <div class="input-group" style="max-width: 350px;">
+          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+          <input type="text" id="searchJob" class="form-control border-start-0 shadow-none" placeholder="Tìm theo tiêu đề, công ty...">
+        </div>
+        <select id="filterCategory" class="form-select w-auto shadow-none">
+          <option value="">Tất cả lĩnh vực</option>
+        </select>
+        <select id="filterStatus" class="form-select w-auto shadow-none">
+          <option value="">Tất cả trạng thái</option>
+          <option value="pending">Chờ duyệt</option>
+          <option value="approved">Đã duyệt</option>
+          <option value="rejected">Bị từ chối</option>
+          <option value="closed">Đã gỡ (Đóng)</option> 
+        </select>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
             <tr>
-              <th class="px-4 py-3">Tiêu đề việc làm</th>
-              <th class="py-3">Trạng thái</th>
-              <th class="px-4 py-3 text-end">Hành động</th>
+              <th width="5%">STT</th>
+              <th>Thông tin bài đăng</th>
+              <th>Công ty / Người đăng</th>
+              <th>Lương & Hạn chót</th>
+              <th class="text-end pe-4">Thao tác</th>
             </tr>
           </thead>
           <tbody id="jobsTableBody">
-            <tr><td colspan="3" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+            <tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>
           </tbody>
         </table>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-3 border-top">
+        <small class="text-muted" id="pageInfo">Đang tải...</small>
+        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
       </div>
     </div>
   </main>
 
+  <div class="modal fade" id="jobDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-light border-0">
+          <h5 class="modal-title fw-bold text-primary"><i class="bi bi-file-earmark-text me-2"></i>Chi tiết bài đăng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-4 pb-3 border-bottom">
+            <h4 id="modalJobTitle" class="fw-bold mb-2 text-dark">...</h4>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-primary-subtle text-primary border" id="modalJobCategory">...</span>
+              <span class="badge bg-info-subtle text-info border" id="modalJobType">...</span>
+            </div>
+            <div class="text-muted small">
+              <i class="bi bi-building me-1"></i> <span id="modalCompanyName" class="fw-medium text-dark">...</span>
+              <span class="mx-2">•</span>
+              <i class="bi bi-person me-1"></i> HR: <span id="modalHrName">...</span>
+            </div>
+          </div>
+
+          <div class="bg-light p-3 rounded mb-4">
+            <div class="row g-3">
+              <div class="col-sm-6"><i class="bi bi-cash-coin text-success me-2"></i><span id="modalJobSalary" class="fw-bold text-success">...</span></div>
+              <div class="col-sm-6"><i class="bi bi-geo-alt text-muted me-2"></i><span id="modalJobLocation" class="fw-medium">...</span></div>
+              <div class="col-sm-6"><i class="bi bi-calendar-x text-danger me-2"></i>Hạn chót: <span id="modalJobDeadline" class="fw-medium">...</span></div>
+              <div class="col-sm-6"><i class="bi bi-people text-muted me-2"></i>Số lượng: <span id="modalJobQuantity" class="fw-medium">...</span></div>
+              <div class="col-sm-6"><i class="bi bi-briefcase text-muted me-2"></i>Kinh nghiệm: <span id="modalJobExp" class="fw-medium">...</span></div>
+              <div class="col-sm-6"><i class="bi bi-clock text-muted me-2"></i>Thời gian làm: <span id="modalJobTime" class="fw-medium">...</span></div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="fw-bold mb-2"><i class="bi bi-card-text me-2"></i>Mô tả công việc</h6>
+            <div id="modalJobDesc" class="text-muted" style="white-space: pre-wrap; font-size: 0.95rem;">...</div>
+          </div>
+          <div class="mb-4">
+            <h6 class="fw-bold mb-2"><i class="bi bi-list-check me-2"></i>Yêu cầu ứng viên</h6>
+            <div id="modalJobReq" class="text-muted" style="white-space: pre-wrap; font-size: 0.95rem;">...</div>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-2"><i class="bi bi-gift me-2"></i>Quyền lợi</h6>
+            <div id="modalJobBenefits" class="text-muted" style="white-space: pre-wrap; font-size: 0.95rem;">...</div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light" id="modalJobFooter">
+          </div>
+      </div>
+    </div>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../../js/utils/loadNavbarAdmin.js"></script>
-  <script src="../../js/Admin js/admin-jobs.js"></script>
+  <script type="module" src="../../js/utils/loadNavbarAdmin.js"></script>
+  <script type="module" src="../../js/Admin js/admin-jobs.js"></script>
 </body>
 </html>

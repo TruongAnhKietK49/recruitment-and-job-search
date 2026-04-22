@@ -9,14 +9,15 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
     },
     toolName: {
       type: String,
       default: "",
     },
   },
-  { _id: false, timestamps: true },
+  { _id: false, timestamps: true }
 );
 
 const aiConversationSchema = new mongoose.Schema(
@@ -36,13 +37,19 @@ const aiConversationSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
+      jobTitle: {
+        type: String,
+        default: "",
+      },
     },
     messages: {
       type: [messageSchema],
       default: [],
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
+
+aiConversationSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 });
 
 export default mongoose.model("AIConversation", aiConversationSchema);
