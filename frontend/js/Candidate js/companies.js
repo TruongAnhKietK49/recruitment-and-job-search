@@ -13,7 +13,7 @@ async function fetchCompanies() {
   const container = document.getElementById('companiesContainer');
   container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
-  let url = `${API_URL}/companies?page=${currentPage}&limit=9&keyword=${encodeURIComponent(keyword)}`;
+  let url = `${API_URL}/companies?page=${currentPage}&limit=9&status=active&keyword=${encodeURIComponent(keyword)}`;
   if(locationFilter) {
     url += `&location=${encodeURIComponent(locationFilter)}`;
   }
@@ -55,7 +55,9 @@ function renderCompanies(companies) {
         ? `<img src="${company.logoUrl}" alt="${company.companyName}">`
         : `<div class="d-flex align-items-center justify-content-center h-100 bg-light text-primary" style="font-size: 4rem; font-weight: bold;">${company.companyName?.charAt(0) || 'C'}</div>`;
 
-    const activeJobs = 'Đang tuyển dụng'; 
+    const activeJobs = company.activeJobsCount > 0 
+      ? `<span class="text-success fw-bold">${company.activeJobsCount} việc làm đang tuyển</span>` 
+      : `<span class="text-muted fst-italic">Chưa có vị trí tuyển dụng</span>`;
 
     return `
       <div class="col-md-6 col-lg-4 mb-4">
@@ -117,9 +119,23 @@ function renderPagination() {
   });
 }
 
-document.getElementById('searchBtn').addEventListener('click', () => {
-  keyword = document.getElementById('searchInput').value;
-  locationFilter = document.getElementById('locationSelect').value;
+let searchTimeout;
+document.getElementById('searchInput')?.addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    keyword = e.target.value.trim();
+    currentPage = 1;
+    fetchCompanies();
+  }, 500);
+});
+
+document.getElementById('locationSelect')?.addEventListener('change', (e) => {
+  locationFilter = e.target.value;
+  currentPage = 1;
+  fetchCompanies();
+});
+
+document.getElementById('searchBtn')?.addEventListener('click', () => {
   currentPage = 1;
   fetchCompanies();
 });

@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -329,122 +330,23 @@ window.toggleSaveJob = async function (id, btnElement, isMainDetail = false) {
 }
 
 // ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
-let currentApplyJobId = null;
+injectApplyModal();
 
-window.openApplyModal = async function (jobId) {
-  if (!token) {
-    alert('Vui lòng đăng nhập để ứng tuyển!');
-    window.location.href = '../../pages/utils/login.html';
-    return;
-  }
-  currentApplyJobId = jobId;
+window.openApplyModal = function(jobId) {
+    window.currentApplyJobId = jobId;
+    setupApplyModal(jobId, token);
+};
 
-  const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-  if (userStr) {
-    const user = JSON.parse(userStr);
-    document.getElementById('applyUserName').innerText = user.fullName || 'Người dùng';
-    document.getElementById('applyUserEmail').innerText = user.email || '';
-  }
+window.addEventListener('applySuccess', (e) => {
+    const jobId = e.detail.jobId;
+    appliedJobIds.push(String(jobId)); 
 
-  try {
-    const res = await fetch(`${API_URL}/resumes/me`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const resumes = await res.json();
-      const select = document.getElementById('existingCvSelect');
-
-      let optionsHtml = '<option value="">Chọn từ danh sách CV của bạn</option>';
-      resumes.forEach(cv => {
-        optionsHtml += `<option value="${cv._id}">${cv.title} (${new Date(cv.createdAt).toLocaleDateString('vi-VN')})</option>`;
-      });
-      select.innerHTML = optionsHtml;
+    const btn = document.getElementById('applyBtn'); 
+    if (btn) {
+        btn.outerHTML = `<button class="btn btn-success disabled" style="padding: 10px 30px; border-radius: 8px; font-weight: bold;"><i class="bi bi-check-circle me-2"></i>Đã ứng tuyển</button>`;
     }
-  } catch (err) {
-    console.error("Lỗi lấy danh sách CV", err);
-  }
-
-
-  new bootstrap.Modal(document.getElementById('applyModal')).show();
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const uploadInput = document.getElementById('uploadCvInput');
-  const existingSelect = document.getElementById('existingCvSelect');
-  const submitBtn = document.getElementById('submitApplicationBtn');
-
-  if (uploadInput) {
-    uploadInput.addEventListener('change', function () {
-      if (this.files && this.files[0]) {
-        document.getElementById('uploadCvName').innerHTML = `<i class="bi bi-file-earmark-check me-1"></i> Đã chọn: ${this.files[0].name}`;
-        if (existingSelect) existingSelect.value = "";
-      }
-    });
-  }
-
-  if (existingSelect) {
-    existingSelect.addEventListener('change', function () {
-      if (this.value) {
-        if (uploadInput) uploadInput.value = "";
-        document.getElementById('uploadCvName').innerText = "";
-      }
-    });
-  }
-
-  if (submitBtn) {
-    submitBtn.addEventListener('click', async () => {
-      const selectedCvId = document.getElementById('existingCvSelect').value;
-      const coverLetter = document.getElementById('coverLetter')?.value || "";
-
-      if (!selectedCvId) {
-        alert("Vui lòng chọn một bản CV từ danh sách!");
-        return;
-      }
-
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang nộp...';
-      submitBtn.disabled = true;
-
-      try {
-        const payload = {
-          jobId: currentApplyJobId,
-          resumeId: selectedCvId,
-          coverLetter: coverLetter
-        };
-
-        const res = await fetch(`${API_URL}/applications`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || 'Có lỗi xảy ra khi nộp đơn');
-        }
-
-        const applyModalEl = document.getElementById('applyModal');
-        bootstrap.Modal.getInstance(applyModalEl).hide();
-
-        const successModalEl = document.getElementById('successApplyModal');
-        new bootstrap.Modal(successModalEl).show();
-
-        const applyBtn = document.getElementById('applyBtn');
-        if (applyBtn) {
-          applyBtn.outerHTML = `<button class="btn btn-success disabled" style="padding: 10px 30px; border-radius: 8px; font-weight: bold;"><i class="bi bi-check-circle me-2"></i>Đã ứng tuyển</button>`;
-        }
-      } catch (err) {
-        alert("Lỗi ứng tuyển: " + err.message);
-      } finally {
-        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i> Nộp hồ sơ';
-        submitBtn.disabled = false;
-      }
-    });
-  }
 });
+
+initPage();
 
 initPage();

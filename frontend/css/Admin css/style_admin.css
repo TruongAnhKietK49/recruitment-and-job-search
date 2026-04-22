@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --admin-bg: #f4f7fe;
+  --admin-surface: #ffffff;
+  --admin-text-dark: #2b3674;
+  --admin-text-muted: #a3aed1;
+  --admin-border: #edf2f7;
+  --admin-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  --admin-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.06);
+  --admin-radius: 16px;
+  --sidebar-width: 280px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--admin-bg);
+  padding-left: var(--sidebar-width);
+  color: #334155;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Layout --- */
+.main-content, .admin-content {
+  padding: 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* --- Typography & Headings --- */
+h2, h3, h4, h5 {
+  color: var(--admin-text-dark);
+  letter-spacing: -0.02em;
+}
+
+/* --- Bảng & Vùng chứa (Tables & Containers) --- */
+.table-container {
+  background: var(--admin-surface);
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.filter-bar {
+  background: var(--admin-surface);
+  padding: 20px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.table th {
+  background-color: #f8fafc;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 700;
+  padding: 16px;
+  border-bottom: 2px solid var(--admin-border);
+}
+
+.table td {
+  vertical-align: middle;
+  padding: 16px;
+  color: #475569;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease;
+}
+
+.job-title-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Thẻ Thống kê (Stat Cards) --- */
+.stat-card {
+  background: var(--admin-surface);
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--admin-shadow-hover);
+  border-color: #e2e8f0;
+}
+
+.icon-box {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .icon-box {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* --- Thẻ Biểu đồ (Chart Cards) --- */
+.chart-card {
+  background: var(--admin-surface);
+  border-radius: var(--admin-radius);
+  box-shadow: var(--admin-shadow);
+  padding: 24px;
+  height: 100%;
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  box-shadow: var(--admin-shadow-hover);
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--admin-text-dark);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-container { position: relative; height: 250px; width: 100%; }
+.bar-chart-container { position: relative; height: 350px; width: 100%; }
+
+/* --- Tabs (Trang Users) --- */
+.nav-tabs {
+  background: var(--admin-surface);
+  padding: 0 20px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  font-weight: 600;
+  padding: 16px 24px;
+  color: #94a3b8;
+  margin-bottom: -1px;
+  transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #475569;
+}
+
+.nav-tabs .nav-link.active {
+  color: #2f80ed;
+  border-bottom: 3px solid #2f80ed;
+  background: transparent;
+}
+
+/* --- Thanh công cụ Bulk Action (Trang Users) --- */
+#bulkActionBar {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* --- Utilities & Modals --- */
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-content {
+  border-radius: var(--admin-radius);
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--admin-border);
+  background-color: #f8fafc;
+  border-radius: var(--admin-radius) var(--admin-radius) 0 0;
+}
+
+/* --- Responsive & Print --- */
+@media (max-width: 991px) {
+  body { padding-left: 0; }
+  .main-content, .admin-content { padding: 20px; }
+}
+
+@media print {
+  body { padding-left: 0 !important; background-color: #fff; }
+  #navbar, .btn-print, .filter-bar, .pagination { display: none !important; }
+  .chart-card, .table-container { box-shadow: none !important; border: 1px solid #ddd; page-break-inside: avoid; }
+}
+
+/* =========================================
+   RESPONSIVE (MOBILE & TABLET)
+   ========================================= */
+/* Ẩn nút Menu Hamburger trên màn hình máy tính (PC) */
+.mobile-menu-toggle {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  /* 1. Trả lại không gian cho màn hình nhỏ, bỏ padding-left */
+  body {
+    padding-left: 0 !important;
+  }
+  
+  /* 2. Thu nhỏ lề của nội dung chính cho vừa màn hình */
+  .main-content, .admin-content {
+    padding: 16px !important;
+  }
+  
+  /* 3. Ẩn thanh Sidebar sang bên trái màn hình */
+  #navbar {
+    position: fixed;
+    left: -300px; /* Giấu nó đi */
+    top: 0;
+    height: 100vh;
+    z-index: 1050;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+  
+  /* Class dùng để trượt Sidebar ra khi bấm nút */
+  #navbar.show-sidebar {
+    left: 0;
+  }
+
+  /* 4. Hiện nút Menu Hamburger trên Mobile */
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+}

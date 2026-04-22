@@ -215,12 +215,15 @@ async function updateProfile() {
 
     alert('Cập nhật hồ sơ thành công!');
 
-    const localUser = JSON.parse(localStorage.getItem('user') || '{}');
-    localUser.fullName = payload.fullName;
-    localUser.avatar = payload.avatar;
-    localStorage.setItem('user', JSON.stringify(localUser));
+    const storage = localStorage.getItem('user') ? localStorage : sessionStorage;
+    const sessionUser = JSON.parse(storage.getItem('user') || '{}');
+    
+    sessionUser.fullName = payload.fullName;
+    sessionUser.avatar = payload.avatar;
+    
+    storage.setItem('user', JSON.stringify(sessionUser));
 
-    initData(); 
+    window.location.reload();
   } catch (err) {
     console.error(err);
     alert('Có lỗi xảy ra: ' + err.message);

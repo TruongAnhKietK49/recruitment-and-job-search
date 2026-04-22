@@ -9,17 +9,16 @@ const token = sessionStorage.getItem("token")
     ? localStorage.getItem("token")
     : null;
 
-// Kiểm tra đăng nhập và role admin (Tạm thời comment để test giao diện)
 if (!token) {
-  window.location.href = "../../pages/utils/login.html";
+  window.location.href = "../utils/login.html";
 } else if (user && user.role !== 'admin') {
   alert('Bạn không có quyền truy cập trang admin.');
-  window.location.href = "../../pages/Admin Pages/index.html";
+  window.location.href = "../Candidate Pages/index.html";
 }
 
 async function loadNavbar() {
   try {
-    const res = await fetch("../../pages/utils/navbarAdmin.html");
+    const res = await fetch("../utils/navbarAdmin.html");
     const data = await res.text();
     document.getElementById("navbar").innerHTML = data;
     
@@ -52,7 +51,7 @@ async function loadNavbar() {
         localStorage.removeItem("user");
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
-        window.location.href = "../../pages/utils/login.html";
+        window.location.href ="../utils/login.html";
       });
     }
   } catch (error) {

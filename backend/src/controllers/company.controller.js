@@ -28,6 +28,7 @@ export const createCompany = async (req, res) => {
       phoneCompany,
       logoUrl,
       createdBy: req.user.userId,
+      status: req.user.role === "admin" ? "active" : "inactive",
       members: [
         {
           user: req.user.userId,
@@ -54,9 +55,18 @@ export const getAllCompanies = async (req, res) => {
   try {
     const pageNumber = parseInt(req.query.page, 10) || 1;
     const limitNumber = parseInt(req.query.limit, 10) || 10;
-    const { keyword, status } = req.query;
+    const { keyword, status, location } = req.query;
 
     const query = {};
+
+    if (location && location.trim()) {
+    let locString = location.trim();
+    if (locString === "HN") locString = "Hà Nội";
+    if (locString === "HCM") locString = "Hồ Chí Minh";
+    if (locString === "BN") locString = "Bắc Ninh";
+    
+    query.address = { $regex: locString, $options: "i" };
+  }
 
     if (keyword && keyword.trim()) {
       query.$or = [
@@ -78,6 +88,14 @@ export const getAllCompanies = async (req, res) => {
       .limit(limitNumber)
       .sort({ createdAt: -1 })
       .lean();
+
+    for (let company of companies) {
+      const jobCount = await Job.countDocuments({
+        companyId: company._id,
+        status: "approved" 
+      });
+      company.activeJobsCount = jobCount; 
+    }
 
     const total = await Company.countDocuments(query);
 
@@ -141,7 +159,7 @@ export const getCompanyById = async (req, res) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    const jobs = await Job.find({ companyId: company._id })
+    const jobs = await Job.find({ companyId: company._id, status: "approved" })
       .select("title category salaryMin salaryMax experience jobType deadline status createdAt")
       .sort({ createdAt: -1 });
 
@@ -222,6 +240,7 @@ export const deleteCompany = async (req, res) => {
   try {
     const companyId = req.params.companyId;
     const userId = req.user.userId;
+    const userRole = req.user.role;
 
     const company = await Company.findById(companyId);
 
@@ -230,9 +249,10 @@ export const deleteCompany = async (req, res) => {
     }
 
     const isOwner = company.createdBy?.toString() === userId;
+    const isAdmin = userRole === "admin";
 
-    if (isOwner) {
-      await Job.deleteMany({ company: companyId });
+    if (isOwner || isAdmin) {
+      await Job.deleteMany({ companyId: companyId });
       await Company.findByIdAndDelete(companyId);
 
       return res.status(200).json({
@@ -486,5 +506,27 @@ export const rejectJoinRequest = async (req, res) => {
       message: "Error rejecting join request",
       error: error.message,
     });
+  }
+};
+
+export const updateCompanyStatus = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { status } = req.body; 
+
+    const company = await Company.findByIdAndUpdate(
+      companyId,
+      { status },
+      { new: true }
+    );
+
+    if (!company) return res.status(404).json({ message: "Không tìm thấy công ty" });
+
+    res.status(200).json({ 
+      message: status === 'active' ? "Đã duyệt công ty thành công" : "Đã cập nhật trạng thái",
+      company 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
