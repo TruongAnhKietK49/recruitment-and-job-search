@@ -15,25 +15,39 @@ if (!process.env.GEMINI_API_KEY) {
   throw new Error("Thiếu GEMINI_API_KEY trong .env");
 }
 
-// console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
-
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-// const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-pro";
+
+const CHAT_MODEL    = process.env.GEMINI_CHAT_MODEL    || "gemini-2.0-flash";
+const RECOMMEND_MODEL = process.env.GEMINI_RECOMMEND_MODEL || "gemini-2.0-flash";
+
+function withTimeout(promise, ms = 25000, label = "AI call") {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`${label} timeout sau ${ms / 1000}s`)), ms)
+  );
+  return Promise.race([promise, timeout]);
+}
 
 function normalizePageContext(pageContext = {}) {
   return {
-    jobId: pageContext.jobId && mongoose.Types.ObjectId.isValid(pageContext.jobId) ? pageContext.jobId : null,
-    category: typeof pageContext.category === "string" ? pageContext.category.trim() : "",
-    jobTitle: typeof pageContext.jobTitle === "string" ? pageContext.jobTitle.trim() : "",
+    jobId:
+      pageContext.jobId && mongoose.Types.ObjectId.isValid(pageContext.jobId)
+        ? pageContext.jobId
+        : null,
+    category:
+      typeof pageContext.category === "string" ? pageContext.category.trim() : "",
+    jobTitle:
+      typeof pageContext.jobTitle === "string" ? pageContext.jobTitle.trim() : "",
   };
 }
 
 function buildHistory(messages = []) {
-  return messages.slice(-12).map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
+  return messages
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .slice(-12)
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
 }
 
 const toolDeclarations = [
@@ -42,9 +56,7 @@ const toolDeclarations = [
     description: "Lấy thông tin chi tiết một job theo jobId",
     parameters: {
       type: Type.OBJECT,
-      properties: {
-        jobId: { type: Type.STRING },
-      },
+      properties: { jobId: { type: Type.STRING } },
       required: ["jobId"],
     },
   },
@@ -54,14 +66,11 @@ const toolDeclarations = [
     parameters: {
       type: Type.OBJECT,
       properties: {
-        jobId: { type: Type.STRING },
-        category: { type: Type.STRING },
-        skills: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
-        },
-        status: { type: Type.STRING },
-        limit: { type: Type.NUMBER },
+        jobId:     { type: Type.STRING },
+        category:  { type: Type.STRING },
+        skills:    { type: Type.ARRAY, items: { type: Type.STRING } },
+        status:    { type: Type.STRING },
+        limit:     { type: Type.NUMBER },
       },
     },
   },
@@ -70,9 +79,7 @@ const toolDeclarations = [
     description: "Lấy hồ sơ chi tiết ứng viên theo candidateId",
     parameters: {
       type: Type.OBJECT,
-      properties: {
-        candidateId: { type: Type.STRING },
-      },
+      properties: { candidateId: { type: Type.STRING } },
       required: ["candidateId"],
     },
   },
@@ -81,9 +88,7 @@ const toolDeclarations = [
     description: "Đưa ứng viên vào shortlist theo applicationId",
     parameters: {
       type: Type.OBJECT,
-      properties: {
-        applicationId: { type: Type.STRING },
-      },
+      properties: { applicationId: { type: Type.STRING } },
       required: ["applicationId"],
     },
   },
@@ -113,9 +118,9 @@ export const aiChat = async (req, res) => {
       });
     } else {
       conversation.pageContext = {
-        jobId: safePageContext.jobId ?? conversation.pageContext?.jobId ?? null,
-        category: safePageContext.category || conversation.pageContext?.category || "",
-        jobTitle: safePageContext.jobTitle || conversation.pageContext?.jobTitle || "",
+        jobId:     safePageContext.jobId ?? conversation.pageContext?.jobId ?? null,
+        category:  safePageContext.category || conversation.pageContext?.category || "",
+        jobTitle:  safePageContext.jobTitle || conversation.pageContext?.jobTitle || "",
       };
     }
 
@@ -137,13 +142,15 @@ export const aiChat = async (req, res) => {
       },
     ];
 
-    const first = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents,
-      config: {
-        tools: [{ functionDeclarations: toolDeclarations }],
-      },
-    });
+    const first = await withTimeout(
+      ai.models.generateContent({
+        model: CHAT_MODEL,
+        contents,
+        config: { tools: [{ functionDeclarations: toolDeclarations }] },
+      }),
+      25000,
+      "AI chat lần 1"
+    );
 
     const functionCalls = first.functionCalls || [];
     let replyText = first.text || "";
@@ -154,10 +161,7 @@ export const aiChat = async (req, res) => {
       for (const call of functionCalls) {
         const result = await executeTool(call.name, call.args || {}, userId);
         toolResponses.push({
-          functionResponse: {
-            name: call.name,
-            response: result,
-          },
+          functionResponse: { name: call.name, response: result },
         });
 
         conversation.messages.push({
@@ -167,25 +171,26 @@ export const aiChat = async (req, res) => {
         });
       }
 
-      const second = await ai.models.generateContent({
-        model: MODEL_NAME,
-        contents: [
-          ...contents,
-          {
-            role: "model",
-            parts: first.candidates?.[0]?.content?.parts || [],
-          },
-          {
-            role: "user",
-            parts: toolResponses,
-          },
-        ],
-      });
+      const second = await withTimeout(
+        ai.models.generateContent({
+          model: CHAT_MODEL,
+          contents: [
+            ...contents,
+            { role: "model", parts: first.candidates?.[0]?.content?.parts || [] },
+            { role: "user",  parts: toolResponses },
+          ],
+        }),
+        25000,
+        "AI chat lần 2"
+      );
 
       replyText = second.text || "Tôi đã xử lý xong yêu cầu.";
     }
 
-    conversation.messages.push({ role: "user", content: message }, { role: "assistant", content: replyText || "Tôi chưa có phản hồi rõ ràng." });
+    conversation.messages.push(
+      { role: "user",      content: message },
+      { role: "assistant", content: replyText || "Tôi chưa có phản hồi rõ ràng." }
+    );
 
     await conversation.save();
 
@@ -194,102 +199,151 @@ export const aiChat = async (req, res) => {
       conversationId: conversation._id,
       reply: replyText || "Tôi chưa có phản hồi rõ ràng.",
       provider: "gemini",
-      model: MODEL_NAME,
+      model: CHAT_MODEL,
     });
   } catch (error) {
     console.error("aiChat error:", error);
+
+    const isTimeout = error.message?.includes("timeout");
+    const isQuota   = error.message?.includes("quota") || error.status === 429;
+
     return res.status(500).json({
       success: false,
-      message: "Không thể xử lý AI chat.",
+      message: isTimeout
+        ? "AI phản hồi quá chậm, vui lòng thử lại."
+        : isQuota
+        ? "Hệ thống AI đang quá tải, vui lòng thử lại sau."
+        : "Không thể xử lý AI chat.",
       error: error.message,
     });
   }
 };
 
+const serverRecommendCache = new Map(); 
+const SERVER_CACHE_TTL = 2 * 60 * 60 * 1000;
 
 export const recommendSmartJobs = async (req, res) => {
   try {
     const userId = req.user.userId;
 
+
+    const cached = serverRecommendCache.get(userId.toString());
+    if (cached && Date.now() < cached.expiredAt) {
+      return res.status(200).json({ ...cached.data, fromCache: true });
+    }
+
     const profile = await CandidateProfile.findOne({ userId }).populate("skills", "skillName");
-    if (!profile) return res.status(404).json({ message: "Vui lòng cập nhật Profile" });
-    const userSkills = profile.skills.map(s => s.skillName).join(", ");
+    if (!profile) {
+      return res.status(404).json({ message: "Vui lòng cập nhật Profile" });
+    }
+    const userSkills = profile.skills.map((s) => s.skillName).join(", ");
 
-    const viewHistory = await JobViewHistory.find({ userId })
-      .sort({ viewDate: -1 })
-      .limit(5)
-      .populate("jobId", "title category");
-    const viewedJobsText = viewHistory.map(v => v.jobId?.title).filter(Boolean).join(", ");
+    const [viewHistory, applications] = await Promise.all([
+      JobViewHistory.find({ userId }).sort({ viewDate: -1 }).limit(5).populate("jobId", "title category"),
+      Application.find({ userId }).populate("jobId", "title"),
+    ]);
 
-    const applications = await Application.find({ userId }).populate("jobId", "title");
-    const appliedJobIds = applications.map(app => app.jobId?._id.toString());
-    const appliedJobsText = applications.map(app => app.jobId?.title).filter(Boolean).join(", ");
+    const appliedJobIds    = applications.map((app) => app.jobId?._id?.toString()).filter(Boolean);
+    const viewedJobsText   = viewHistory.map((v) => v.jobId?.title).filter(Boolean).join(", ");
+    const appliedJobsText  = applications.map((app) => app.jobId?.title).filter(Boolean).join(", ");
 
-    const potentialJobs = await Job.find({ 
+    const potentialJobs = await Job.find({
       _id: { $nin: appliedJobIds },
-      status: "approved" 
-    }).limit(10).populate("companyId", "companyName");
+      status: "approved",
+    })
+      .limit(20)
+      .populate("companyId", "companyName")
+      .select("_id title category salaryMin salaryMax requirements jobType experience location");
 
-    const jobPool = potentialJobs.map(job => ({
-      id: job._id.toString(),
-      title: job.title,
-      company: job.companyId?.companyName,
-      salary: `${job.salaryMin} - ${job.salaryMax}`,
-      requirements: job.requirements ? job.requirements.substring(0, 150) + "..." : ""
+    if (potentialJobs.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const jobPool = potentialJobs.map((job) => ({
+      id:           job._id.toString(),
+      title:        job.title,
+      category:     job.category || "",
+      jobType:      job.jobType || "",
+      experience:   job.experience || "",
+      salary:       `${job.salaryMin || 0} - ${job.salaryMax || 0}`,
+      requirements: job.requirements ? job.requirements.substring(0, 100) : "",
     }));
 
-    // Prompt 
     const promptText = `
-      Dựa vào:
-      - Kỹ năng ứng viên: [${userSkills}], Lương mong: [${profile.expectedSalary}]
-      - Đã xem: [${viewedJobsText || "Không có"}]
-      - Đã ứng tuyển: [${appliedJobsText || "Không có"}]
+Ứng viên:
+- Kỹ năng: ${userSkills || "Chưa cập nhật"}
+- Lương mong muốn: ${profile.expectedSalary || "Không rõ"}
+- Đã xem: ${viewedJobsText || "Không có"}
+- Đã ứng tuyển: ${appliedJobsText || "Không có"}
 
-      Danh sách việc làm: ${JSON.stringify(jobPool)}
-      Chọn ra đúng 3 việc phù hợp nhất.
-    `;
+Danh sách ${jobPool.length} công việc (JSON):
+${JSON.stringify(jobPool)}
 
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: promptText,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              jobId: { type: Type.STRING },
-              matchScore: { type: Type.STRING, description: "Ví dụ: 95%" },
-              reason: { type: Type.STRING, description: "Lý do phù hợp ngắn gọn" }
+Chọn đúng 3 công việc phù hợp nhất với ứng viên. Trả về JSON array.
+`.trim();
+
+    const aiResponse = await withTimeout(
+      ai.models.generateContent({
+        model: RECOMMEND_MODEL,
+        contents: promptText,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                jobId:      { type: Type.STRING },
+                matchScore: { type: Type.STRING, description: "Ví dụ: 92%" },
+                reason:     { type: Type.STRING, description: "Lý do phù hợp ngắn gọn (1-2 câu)" },
+              },
+              required: ["jobId", "matchScore", "reason"],
             },
-            required: ["jobId", "matchScore", "reason"]
-          }
-        }
-      }
-    });
+          },
+        },
+      }),
+      20000,
+      "AI recommend"
+    );
 
     let recommendedData = [];
     try {
-      recommendedData = JSON.parse(response.text);
+      recommendedData = JSON.parse(aiResponse.text);
+      if (!Array.isArray(recommendedData)) recommendedData = [];
     } catch (parseError) {
-      console.error("Lỗi parse JSON:", parseError);
+      console.error("Lỗi parse JSON AI recommend:", parseError);
       return res.status(500).json({ message: "Lỗi đọc dữ liệu AI" });
     }
 
-    const finalRecommendations = recommendedData.map(aiMatch => {
-      const fullJobData = potentialJobs.find(j => j._id.toString() === aiMatch.jobId);
-      return {
-        job: fullJobData,
-        matchScore: aiMatch.matchScore,
-        aiReason: aiMatch.reason
-      };
-    }).filter(item => item.job);
+    const finalRecommendations = recommendedData
+      .map((aiMatch) => {
+        const fullJobData = potentialJobs.find((j) => j._id.toString() === aiMatch.jobId);
+        return fullJobData
+          ? { job: fullJobData, matchScore: aiMatch.matchScore, aiReason: aiMatch.reason }
+          : null;
+      })
+      .filter(Boolean)
+      .slice(0, 3); 
 
-    res.status(200).json(finalRecommendations);
+    serverRecommendCache.set(userId.toString(), {
+      data:      finalRecommendations,
+      expiredAt: Date.now() + SERVER_CACHE_TTL,
+    });
 
+    return res.status(200).json(finalRecommendations);
   } catch (error) {
     console.error("Lỗi AI Recommend:", error);
-    res.status(500).json({ message: "Lỗi kết nối AI", error: error.message });
+
+    const isTimeout = error.message?.includes("timeout");
+    const isQuota   = error.message?.includes("quota") || error.status === 429;
+
+    return res.status(500).json({
+      message: isTimeout
+        ? "AI phân tích quá chậm, vui lòng thử lại."
+        : isQuota
+        ? "Hệ thống AI đang hết lượt gọi (Quota), vui lòng thử lại sau vài phút."
+        : "Lỗi kết nối AI",
+      error: error.message,
+    });
   }
 };

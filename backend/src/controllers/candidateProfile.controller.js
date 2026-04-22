@@ -35,7 +35,9 @@ export const getMyCandidateProfile = async (req, res) => {
   try {
     const profile = await CandidateProfile.findOne({
       userId: req.user.userId,
-    }).populate("userId", "fullName email avatar status");
+    })
+      .populate("userId", "fullName email avatar status")
+      .populate("skills", "skillName");
 
     if (!profile) {
       return res.status(404).json({ message: "Candidate profile not found" });

@@ -12,7 +12,7 @@ export const getProfile = async (req, res) => {
     let profileData = null;
 
     if (user.role === "candidate") {
-      profileData = await candidateProfile.findOne({ userId: user._id });
+      profileData = await candidateProfile.findOne({ userId: user._id }).populate("skills", "skillName");
     } else if (user.role === "hr") {
       profileData = await hrProfile.findOne({ userId: user._id }).populate("companyId", "companyName website address status");
     }
@@ -33,7 +33,7 @@ export const getProfileById = async (req, res) => {
     let profileData = null;
 
     if (user.role === "candidate") {
-      profileData = await candidateProfile.findOne({ userId: user._id });
+      profileData = await candidateProfile.findOne({ userId: user._id }).populate("skills", "skillName");
     } else if (user.role === "hr") {
       profileData = await hrProfile.findOne({ userId: user._id }).populate("companyId", "companyName website address status");
     }
@@ -124,5 +124,20 @@ export const changePassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi Server" });
+  }
+};
+
+// Trạng thái tài khoản 
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { status } = req.body; 
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy User" });
+
+    user.status = status;
+    await user.save();
+    res.status(200).json({ message: "Cập nhật trạng thái thành công" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
