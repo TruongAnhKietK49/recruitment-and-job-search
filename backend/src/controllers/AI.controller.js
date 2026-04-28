@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { GoogleGenAI, Type } from "@google/genai";
 import AIConversation from "../models/AIConversation.js";
-import { executeTool } from "../services/aiTools.js";
+import { executeTool } from "../services/AITools.js";
 
 dotenv.config();
 
@@ -13,6 +13,28 @@ if (!process.env.GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
+const MAX_HISTORY_MESSAGES = 8;
+const MAX_HISTORY_CHARS = 700;
+const MAX_TOOL_RESPONSE_CHARS = 3000;
+
+const SYSTEM_PROMPT = [
+  "Bạn là AI assistant cho recruiter trong job portal.",
+  "Luôn trả lời bằng tiếng Việt, ngắn gọn, đúng trọng tâm.",
+  "Chỉ gọi function khi cần dữ liệu thật từ hệ thống.",
+  "Khi có đủ dữ liệu, ưu tiên trả lời trực tiếp thay vì gọi thêm function.",
+].join(" ");
+
+function withTimeout(promise, ms = 25000, label = "AI call") {
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timeout sau ${ms / 1000}s`)), ms));
+  return Promise.race([promise, timeout]);
+}
+
+function truncateText(text, maxChars) {
+  if (!text) return "";
+  const value = String(text);
+  return value.length > maxChars ? `${value.slice(0, maxChars)}…` : value;
+}
+
 function normalizePageContext(pageContext = {}) {
   return {
     jobId: pageContext.jobId && mongoose.Types.ObjectId.isValid(pageContext.jobId) ? pageContext.jobId : null,
@@ -22,10 +44,18 @@ function normalizePageContext(pageContext = {}) {
 }
 
 function buildHistory(messages = []) {
-  return messages.slice(-12).map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
+  return messages
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: truncateText(m.content, MAX_HISTORY_CHARS) }],
+    }));
+}
+
+function compactToolResult(result) {
+  const raw = JSON.stringify(result);
+  return truncateText(raw, MAX_TOOL_RESPONSE_CHARS);
 }
 
 const toolDeclarations = [
@@ -111,31 +141,30 @@ export const aiChat = async (req, res) => {
       };
     }
 
+    const userPrompt = [
+      `Page context: ${JSON.stringify(conversation.pageContext)}`,
+      `Yêu cầu người dùng: ${message}`,
+    ].join("\n\n");
+
     const contents = [
+      { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
       ...buildHistory(conversation.messages),
-      {
-        role: "user",
-        parts: [
-          {
-            text:
-              "Bạn là AI assistant cho recruiter trong job portal. " +
-              "Khi lọc ứng viên, bạn có thể dùng jobId, title (tên job), category, skills, status." +
-              "Luôn trả lời bằng tiếng Việt. " +
-              "Khi cần dữ liệu thật từ hệ thống, phải dùng function calling. " +
-              `Page context: ${JSON.stringify(conversation.pageContext)}\n\n` +
-              `Yêu cầu người dùng: ${message}`,
-          },
-        ],
-      },
+      { role: "user", parts: [{ text: userPrompt }] },
     ];
 
-    const first = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents,
-      config: {
-        tools: [{ functionDeclarations: toolDeclarations }],
-      },
-    });
+    const first = await withTimeout(
+      ai.models.generateContent({
+        model: MODEL_NAME,
+        contents,
+        config: {
+          tools: [{ functionDeclarations: toolDeclarations }],
+          maxOutputTokens: 700,
+          temperature: 0.3,
+        },
+      }),
+      25000,
+      "AI chat lần 1",
+    );
 
     const functionCalls = first.functionCalls || [];
     let replyText = first.text || "";
@@ -145,34 +174,40 @@ export const aiChat = async (req, res) => {
 
       for (const call of functionCalls) {
         const result = await executeTool(call.name, call.args || {}, userId);
+        const compactResult = compactToolResult(result);
+
         toolResponses.push({
           functionResponse: {
             name: call.name,
-            response: result,
+            response: { result: compactResult },
           },
         });
 
         conversation.messages.push({
           role: "tool",
           toolName: call.name,
-          content: JSON.stringify({ args: call.args || {}, result }),
+          content: compactResult,
         });
       }
 
-      const second = await ai.models.generateContent({
-        model: MODEL_NAME,
-        contents: [
-          ...contents,
-          {
-            role: "model",
-            parts: first.candidates?.[0]?.content?.parts || [],
+      const second = await withTimeout(
+        ai.models.generateContent({
+          model: MODEL_NAME,
+          contents: [
+            { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+            ...buildHistory(conversation.messages),
+            { role: "model", parts: first.candidates?.[0]?.content?.parts || [] },
+            { role: "user", parts: toolResponses },
+            { role: "user", parts: [{ text: "Tóm tắt kết quả rõ ràng, tối đa 8 gạch đầu dòng." }] },
+          ],
+          config: {
+            maxOutputTokens: 700,
+            temperature: 0.2,
           },
-          {
-            role: "user",
-            parts: toolResponses,
-          },
-        ],
-      });
+        }),
+        25000,
+        "AI chat lần 2",
+      );
 
       replyText = second.text || "Tôi đã xử lý xong yêu cầu.";
     }
@@ -190,9 +225,17 @@ export const aiChat = async (req, res) => {
     });
   } catch (error) {
     console.error("aiChat error:", error);
+
+    const isTimeout = error.message?.includes("timeout");
+    const isQuota = error.message?.includes("quota") || error.status === 429;
+
     return res.status(500).json({
       success: false,
-      message: "Không thể xử lý AI chat.",
+      message: isTimeout
+        ? "AI phản hồi quá chậm, vui lòng thử lại."
+        : isQuota
+          ? "Hệ thống AI đang quá tải, vui lòng thử lại sau."
+          : "Không thể xử lý AI chat.",
       error: error.message,
     });
   }
