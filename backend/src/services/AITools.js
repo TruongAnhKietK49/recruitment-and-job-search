@@ -10,7 +10,6 @@ function normalizeText(value) {
 }
 
 function candidateFromApplication(app) {
-  console.log(app);
   const user = app.userId;
   if (!user) return null;
 
@@ -122,7 +121,12 @@ export async function executeTool(name, args, currentUserId) {
       if (args.jobId) query.jobId = args.jobId;
       if (args.status) query.status = args.status;
 
-      const applications = await Application.find(query).populate("userId").populate("jobId").sort({ createdAt: -1 }).limit(100).lean();
+      const applications = await Application.find(query)
+        .populate("userId", "fullName name email phone phoneNumber skills experience education summary description about category cvUrl resumeUrl")
+        .populate("jobId", "title")
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean();
 
       let candidates = applications.map(candidateFromApplication).filter(Boolean);
 
@@ -130,7 +134,7 @@ export async function executeTool(name, args, currentUserId) {
         const jobTitle = String(args.jobTitle).toLowerCase().trim();
 
         candidates = candidates.filter((c) =>
-          String(c.title || "")
+          String(c.jobTitle || "")
             .toLowerCase()
             .includes(jobTitle),
         );
@@ -172,7 +176,7 @@ export async function executeTool(name, args, currentUserId) {
         }
       }
 
-      const limit = Math.min(Number(args.limit) || 10, 30);
+      const limit = Math.min(Number(args.limit) || 8, 20);
 
       return {
         total: uniqueMap.size,

@@ -36,6 +36,10 @@ const aiConversationSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
+      jobTitle: {
+        type: String,
+        default: "",
+      },
     },
     messages: {
       type: [messageSchema],
