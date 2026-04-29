@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { GoogleGenAI, Type } from "@google/genai";
 import AIConversation from "../models/AIConversation.js";
-import { executeTool } from "../services/aiTools.js";
+import { executeTool } from "../services/AITools.js";
 
 import Job from "../models/job.js";
 import CandidateProfile from "../models/candidateProfile.js";
