@@ -42,7 +42,7 @@ export const createApplication = async (req, res) => {
     const newApplication = new Application({
       jobId,
       userId: req.user.userId,
-      candidateProfileId: candidateProfile._id, 
+      candidateProfileId: candidateProfile._id,
       resumeId,
       applyDate: new Date(),
       status: "pending",
@@ -91,8 +91,8 @@ export const getAllApplications = async (req, res) => {
         select: "title category status companyId",
         populate: {
           path: "companyId",
-          select: "companyName logoUrl" 
-        }
+          select: "companyName logoUrl",
+        },
       })
       .populate("userId", "fullName email avatar")
       .populate("resumeId", "title fileUrl")
@@ -120,9 +120,10 @@ export const getAllApplications = async (req, res) => {
 export const getCompanyApplications = async (req, res) => {
   try {
     const pageNumber = Number.parseInt(req.query.page, 10) || 1;
-    const limitNumber = Number.parseInt(req.query.limit, 10) || 10;
-    const { status, jobId } = req.query;
+    const isGetAll = req.query.limit === "all";
+    const limitNumber = isGetAll ? 0 : Number.parseInt(req.query.limit, 10) || 10;
 
+    const { status, jobId } = req.query;
     const companyId = req.params.companyId;
 
     if (!req.user || !["hr", "admin"].includes(req.user.role)) {
@@ -133,7 +134,7 @@ export const getCompanyApplications = async (req, res) => {
       return res.status(400).json({ message: "User does not belong to any company" });
     }
 
-    const companyJobs = await Job.find({ companyId: companyId }).select("_id");
+    const companyJobs = await Job.find({ companyId }).select("_id");
     const companyJobIds = companyJobs.map((job) => job._id.toString());
 
     if (jobId && !companyJobIds.includes(jobId)) {
@@ -150,7 +151,7 @@ export const getCompanyApplications = async (req, res) => {
       query.status = status;
     }
 
-    const applications = await Application.find(query)
+    let applicationQuery = Application.find(query)
       .populate("jobId", "title category status companyId createdBy")
       .populate("userId", "fullName email phone gender")
       .populate({
@@ -158,20 +159,24 @@ export const getCompanyApplications = async (req, res) => {
         select: "avatar education expSummary expectedSalary address skills",
         populate: {
           path: "skills",
-          select: "skillName", // 👈 lấy tên skill
+          select: "skillName",
         },
       })
       .populate("resumeId", "title fileUrl")
-      .skip((pageNumber - 1) * limitNumber)
-      .limit(limitNumber)
       .sort({ createdAt: -1 });
 
+    if (!isGetAll) {
+      applicationQuery = applicationQuery.skip((pageNumber - 1) * limitNumber).limit(limitNumber);
+    }
+
+    const applications = await applicationQuery;
     const total = await Application.countDocuments(query);
 
     res.status(200).json({
       total,
-      page: pageNumber,
-      totalPages: Math.ceil(total / limitNumber),
+      page: isGetAll ? 1 : pageNumber,
+      limit: isGetAll ? total : limitNumber,
+      totalPages: isGetAll ? 1 : Math.ceil(total / limitNumber),
       applications,
     });
   } catch (error) {
@@ -181,7 +186,6 @@ export const getCompanyApplications = async (req, res) => {
     });
   }
 };
-
 // Get application by ID
 export const getApplicationById = async (req, res) => {
   try {
