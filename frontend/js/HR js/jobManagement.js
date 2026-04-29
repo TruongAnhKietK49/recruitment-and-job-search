@@ -110,9 +110,11 @@ async function deleteJobAPI(jobId) {
   }
 }
 
-async function getJobSummary() {
+async function getJobSummary(companyId) {
   try {
-    const res = await fetch(`${URL}/api/jobs/summary`, {
+    const query = companyId ? `?companyId=${encodeURIComponent(companyId)}` : "";
+
+    const res = await fetch(`${URL}/api/jobs/summary${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -121,6 +123,8 @@ async function getJobSummary() {
     });
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Không thể tải tổng quan bài đăng");
+
     return data.data;
   } catch (err) {
     console.log(err);
@@ -130,16 +134,22 @@ async function getJobSummary() {
 
 // Fill summary info
 function fillJobSummary(data) {
-  console.log(data);
+  const summary = data || {
+    totalPosts: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  };
+
   const totalPosts = document.querySelector(".total-post-count");
   const approved = document.querySelector(".approved-post-count");
   const pending = document.querySelector(".pending-post-count");
   const rejected = document.querySelector(".rejected-post-count");
 
-  totalPosts.textContent = data.totalPosts;
-  approved.textContent = data.approved;
-  pending.textContent = data.pending;
-  rejected.textContent = data.rejected;
+  if (totalPosts) totalPosts.textContent = summary.totalPosts;
+  if (approved) approved.textContent = summary.approved;
+  if (pending) pending.textContent = summary.pending;
+  if (rejected) rejected.textContent = summary.rejected;
 }
 
 function renderPostCard(post) {
@@ -318,11 +328,7 @@ function renderJobCard(job) {
   const company = job.companyId || {};
   const statusInfo = getStatusInfo(job.status);
 
-  const website = company.website
-    ? company.website.startsWith("http")
-      ? company.website
-      : "https://" + company.website
-    : "";
+  const website = company.website ? (company.website.startsWith("http") ? company.website : "https://" + company.website) : "";
 
   return `
     <div class="job-card compact">
@@ -580,11 +586,7 @@ function applyPostFilters(resetPage = true) {
     postState.currentPage = 1;
   }
 
-  const { currentPage, totalPages, paginatedItems } = paginatePosts(
-    postState.filteredPosts,
-    postState.currentPage,
-    postState.pageSize,
-  );
+  const { currentPage, totalPages, paginatedItems } = paginatePosts(postState.filteredPosts, postState.currentPage, postState.pageSize);
 
   postState.currentPage = currentPage;
 
@@ -673,9 +675,7 @@ function fillEditJobForm(job) {
   document.getElementById("editJobExperience").value = job.experience || "";
   document.getElementById("editSalaryMin").value = job.salaryMin || "";
   document.getElementById("editSalaryMax").value = job.salaryMax || "";
-  document.getElementById("editDeadline").value = job.deadline
-    ? new Date(job.deadline).toISOString().split("T")[0]
-    : "";
+  document.getElementById("editDeadline").value = job.deadline ? new Date(job.deadline).toISOString().split("T")[0] : "";
   document.getElementById("editJobType").value = job.jobType || "";
   document.getElementById("editWorkingTime").value = job.workingTime || "";
   document.getElementById("editQuantity").value = job.quantity ?? "";
@@ -687,14 +687,26 @@ function fillEditJobForm(job) {
 async function reloadMyJobs() {
   if (!dataCompany?._id) {
     dataJobs = [];
+    fillJobSummary(null);
     renderNoCompanyState();
     return;
   }
 
+  dataSummary = await getJobSummary(dataCompany._id);
+  fillJobSummary(dataSummary);
+
   dataJobs = await loadMyCompanyJobs(dataCompany._id);
-  renderCurrentPosts(dataJobs);
-  renderJobs(dataJobs);
-  renderApprovalList(dataJobs);
+
+  // Tổng quan: chỉ hiển thị vài bài gần đây
+  renderCurrentPosts(dataJobs.slice(0, 5));
+
+  // Tab bài đăng công ty: render qua phân trang
+  postState.filteredPosts = [...dataJobs];
+  applyPostFilters(false);
+
+  // Tab trạng thái duyệt: render qua phân trang
+  approvalState.filteredJobs = [...dataJobs];
+  applyApprovalFilters(false);
 }
 
 async function handleCreateJob() {
@@ -941,11 +953,7 @@ function applyApprovalFilters(resetPage = true) {
     approvalState.currentPage = 1;
   }
 
-  const { currentPage, totalPages, paginatedItems } = paginateJobs(
-    approvalState.filteredJobs,
-    approvalState.currentPage,
-    approvalState.pageSize,
-  );
+  const { currentPage, totalPages, paginatedItems } = paginateJobs(approvalState.filteredJobs, approvalState.currentPage, approvalState.pageSize);
 
   approvalState.currentPage = currentPage;
 
@@ -970,25 +978,23 @@ function initApprovalFilters(jobs) {
 async function initPage() {
   bindEvents();
 
-  dataSummary = await getJobSummary();
-  fillJobSummary(dataSummary);
-
   dataCompany = await loadMyCompany();
   setManagePostsMenuDisabled(!dataCompany?._id);
 
-  dataJobs = await loadMyCompanyJobs(dataCompany?._id);
-
-  renderCurrentPosts(dataJobs);
-  initPostFilters(dataJobs);
-  initApprovalFilters(dataJobs);
-
   if (!dataCompany?._id) {
     alert("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.");
-    window.location.href = "./companyManagement.html"; // hoặc dashboard.html
+    window.location.href = "./companyManagement.html";
     return;
   }
 
-  await reloadMyJobs();
-}
+  dataJobs = await loadMyCompanyJobs(dataCompany._id);
 
+  dataSummary = await getJobSummary(dataCompany._id);
+  fillJobSummary(dataSummary);
+
+  renderCurrentPosts(dataJobs.slice(0, 5));
+
+  initPostFilters(dataJobs);
+  initApprovalFilters(dataJobs);
+}
 initPage();

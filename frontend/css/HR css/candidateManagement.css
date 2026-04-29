@@ -82,6 +82,12 @@ body {
   overflow: hidden;
 }
 
+.candidate-card .card-body,
+.candidate-card .row,
+.candidate-card [class*="col-"] {
+  min-width: 0;
+}
+
 .candidate-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
@@ -138,6 +144,12 @@ body {
 
 .candidate-tags-row {
   padding-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .location-badge {
@@ -152,6 +164,80 @@ body {
   color: #0d6efd;
   border: 1px solid #cfe2ff;
   font-weight: 500;
+}
+
+.candidate-skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.candidate-skill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 30px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #e7f1ff;
+  color: #0d6efd;
+  border: 1px solid #cfe2ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.candidate-skill-badge i {
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
+.candidate-skill-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.candidate-tags-row .candidate-skill-badge {
+  max-width: 180px;
+}
+
+.candidate-tags-row .candidate-skill-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidate-location-badge {
+  max-width: 220px;
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  font-weight: 500;
+}
+
+.candidate-skill-badge.is-matched {
+  background: #ecfdf3;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.candidate-skill-empty {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+  font-weight: 500;
+}
+
+.candidate-skill-more {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
 }
 
 .status-badge {
@@ -366,4 +452,122 @@ body {
   .main-content {
     margin-left: 0;
   }
+}
+
+/* AI recommendation */
+.ai-recommend-toolbar {
+  background: linear-gradient(135deg, #f8fbff, #eef5ff);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+
+.ai-recommend-summary {
+  margin-top: 12px;
+  background: #ffffff;
+  border: 1px solid #cfe2ff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 0.25rem 0.75rem rgba(13, 110, 253, 0.06);
+}
+
+.ai-score-card {
+  width: 96px;
+  margin-left: auto;
+  margin-bottom: 10px;
+  text-align: center;
+  background: #eef5ff;
+  border: 1px solid #cfe2ff;
+  border-radius: 14px;
+  padding: 10px 8px;
+}
+
+.ai-score-main {
+  color: #0d6efd;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.ai-score-label {
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.ai-top-candidate {
+  border: 2px solid #22c55e !important;
+  box-shadow: 0 0.75rem 1.5rem rgba(34, 197, 94, 0.15) !important;
+}
+
+.ai-detail-box {
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.ai-detail-score {
+  color: #0d6efd;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ai-level-badge {
+  background: #e7f1ff;
+  color: #0d6efd;
+  border: 1px solid #cfe2ff;
+}
+
+.ai-skill-badge {
+  background: #ecfdf3;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+  .ai-score-card {
+    margin-left: 0;
+  }
+}
+
+.pagination {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-item .page-link {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  color: var(--app-primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+.pagination .page-item .page-link:hover {
+  background: var(--app-primary-soft);
+  color: var(--primary-dark);
+  border-color: #b7d1fa;
+}
+
+.pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #4e97ff, #2f6fe4);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(47, 128, 237, 0.2);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #98a2b3;
+  background: #f2f4f7;
+  border-color: #e4e7ec;
+  cursor: not-allowed;
 }

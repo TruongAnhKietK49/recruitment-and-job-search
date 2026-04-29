@@ -841,3 +841,41 @@ textarea.form-control {
     padding: 16px;
   }
 }
+
+.pagination {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-item .page-link {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #d7e6fb;
+  color: var(--primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+.pagination .page-item .page-link:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: #b7d1fa;
+}
+
+.pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #2f80ed, #5ba6ff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 18px rgba(47, 128, 237, 0.2);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #98a2b3;
+  background: #f2f4f7;
+  border-color: #e4e7ec;
+  cursor: not-allowed;
+}
