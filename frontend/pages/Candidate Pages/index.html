@@ -251,6 +251,30 @@
       <div class="row g-4" id="ai-jobs-container"></div>
     </div>
 
+    <div class="mt-5 pt-4 mb-5 pb-4 border-bottom" id="ai-recommendation-section" style="display: none;">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+          <h2 class="section-title text-primary mb-0">✨ Việc làm gợi ý</h2>
+          <span class="badge bg-info-subtle text-info ms-3 px-3 py-2 rounded-pill border border-info-subtle shadow-sm">Dành riêng cho bạn</span>
+        </div>
+        
+        <button id="btnRefreshAi" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-medium shadow-sm">
+          <i class="bi bi-arrow-clockwise me-1" id="refreshAiIcon"></i> Gợi ý
+        </button>
+      </div>
+
+
+
+      <div id="ai-loading" class="text-center py-5">
+        <div class="spinner-stars text-primary">
+          <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.25rem;"></div>
+          <p class="mt-3 text-muted fst-italic">AI đang phân tích hồ sơ và sở thích của bạn...</p>
+        </div>
+      </div>
+
+      <div class="row g-4" id="ai-jobs-container"></div>
+    </div>
+
   </main>
 
   <div id="footer"></div>

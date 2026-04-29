@@ -53,6 +53,12 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    if (user.status === "inactive") {
+      return res.status(403).json({ 
+        message: "Your account has been locked by the administrator!" 
+      });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid email or password" });

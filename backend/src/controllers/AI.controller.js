@@ -9,6 +9,11 @@ import CandidateProfile from "../models/candidateProfile.js";
 import JobViewHistory from "../models/jobViewHistory.js";
 import Application from "../models/application.js";
 
+import Job from "../models/job.js";
+import CandidateProfile from "../models/candidateProfile.js";
+import JobViewHistory from "../models/jobViewHistory.js";
+import Application from "../models/application.js";
+
 dotenv.config();
 
 if (!process.env.GEMINI_API_KEY) {
