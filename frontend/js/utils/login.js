@@ -1,5 +1,5 @@
 (function () {
-  const URL = "http://localhost:5000";
+  import URL from "./url.js";
 
   const form = document.getElementById("loginForm");
   const emailInput = document.getElementById("email");
