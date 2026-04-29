@@ -1,1 +1,2 @@
-export default URL = "http://localhost:5000";
+const URL = "https://recruitment-and-job-search.onrender.com";
+export default URL;
