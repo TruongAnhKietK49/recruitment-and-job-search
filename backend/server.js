@@ -17,6 +17,7 @@ import applicationRoutes from "./src/routes/application.routes.js";
 import skillRoutes from "./src/routes/skill.routes.js";
 import notificationRoutes from "./src/routes/notification.routes.js";
 import AI from "./src/routes/AI.routes.js";
+import recommendCandidateRoutes from "./src/routes/recommendCandidate.route.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/ai", AI);
+app.use("/api/recommend", recommendCandidateRoutes);
 
 await connectDB();
 app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));

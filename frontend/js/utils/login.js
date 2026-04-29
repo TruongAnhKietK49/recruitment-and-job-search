@@ -1,6 +1,6 @@
-(function () {
-  const URL = "http://localhost:5000";
+import URL from "./url.js";
 
+(function () {
   const form = document.getElementById("loginForm");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");

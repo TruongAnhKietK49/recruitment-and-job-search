@@ -8,12 +8,18 @@ let allCandidates = [];
 let filteredCandidates = [];
 let selectedCandidate = null;
 
+const candidatePaginationState = {
+  currentPage: 1,
+  pageSize: 5,
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
   await initCandidateManagement();
   initBtnOverviewActions();
   initCandidateDetailActions();
   initStatusBoardActions();
   bindFilterEvents();
+  initAIRecommend();
 });
 
 // Load company
@@ -33,17 +39,49 @@ async function loadMyCompany() {
   }
 }
 
-// Get my company applications
-async function getMyCompanyApplications(companyId) {
+// AI recommend candidates for selected job
+async function getRecommendedCandidates(jobId, limit = 2) {
+  console.log("Gọi API gợi ý ứng viên cho jobId:", jobId, "limit:", limit);
+
   try {
-    const res = await fetch(`${URL}/api/applications/company/${companyId}`, {
+    const safeLimit = Math.min(Math.max(Number(limit) || 2, 1), 50);
+
+    const primaryUrl = `${URL}/api/recommend/${jobId}/recommend-candidates?limit=${safeLimit}`;
+
+    const res = await fetch(primaryUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
+
     const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Không gọi được API gợi ý ứng viên");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("AI recommend error:", error);
+    return null;
+  }
+}
+
+// Get my company applications
+async function getMyCompanyApplications(companyId) {
+  try {
+    const res = await fetch(`${URL}/api/applications/company/${companyId}?limit=all`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("Ứng viên đã nộp đơn cho công ty:", data);
     return data;
   } catch (error) {
     console.error("Lỗi load applications:", error);
@@ -107,6 +145,96 @@ async function initCandidateManagement() {
   }
 }
 
+function initAIRecommend() {
+  const btn = document.getElementById("aiRecommendBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    const jobId = document.getElementById("jobFilter")?.value;
+
+    if (!jobId) {
+      alert("Vui lòng chọn vị trí tuyển dụng trước khi gợi ý ứng viên.");
+      return;
+    }
+
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Đang phân tích...`;
+    btn.disabled = true;
+
+    const limitInput = document.getElementById("aiRecommendLimitInput");
+    const limit = Number(limitInput?.value) || 2;
+
+    if (limit < 1) {
+      alert("Số lượng gợi ý phải lớn hơn 0.");
+      return;
+    }
+
+    const result = await getRecommendedCandidates(jobId, limit);
+
+    btn.innerHTML = `🤖 Gợi ý ứng viên`;
+    btn.disabled = false;
+
+    if (!result || !Array.isArray(result.candidates)) {
+      alert("Không có dữ liệu gợi ý ứng viên.");
+      return;
+    }
+
+    const aiSummary = document.getElementById("aiRecommendSummary");
+
+    if (aiSummary) {
+      aiSummary.classList.remove("d-none");
+      aiSummary.innerHTML = `
+    <strong>Đã gợi ý ${result.candidates.length} ứng viên phù hợp nhất.</strong>
+  `;
+    }
+
+    const aiMap = new Map(result.candidates.map((candidate) => [candidate.applicationId?.toString(), candidate]));
+
+    allCandidates = allCandidates.map((candidate) => {
+      const ai = aiMap.get(candidate.applicationId?.toString());
+
+      return {
+        ...candidate,
+        aiScore: ai?.score || 0,
+        aiLevel: ai?.level || "",
+        aiReason: ai?.reason || "",
+        aiMatchedSkills: ai?.matchedSkills || [],
+        aiBreakdown: ai?.breakdown || null,
+        profile: ai?.profile || candidate.profile || null,
+      };
+    });
+
+    filteredCandidates = filteredCandidates.map((candidate) => {
+      const ai = aiMap.get(candidate.applicationId?.toString());
+
+      return {
+        ...candidate,
+        aiScore: ai?.score || 0,
+        aiLevel: ai?.level || "",
+        aiReason: ai?.reason || "",
+        aiMatchedSkills: ai?.matchedSkills || [],
+        aiBreakdown: ai?.breakdown || null,
+        profile: ai?.profile || candidate.profile || null,
+      };
+    });
+
+    filteredCandidates.sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
+    candidatePaginationState.currentPage = 1;
+
+    if (selectedCandidate) {
+      selectedCandidate =
+        filteredCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
+        allCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
+        selectedCandidate;
+    }
+
+    const sortFilter = document.getElementById("sortFilter");
+    if (sortFilter) sortFilter.value = "ai_score";
+
+    renderCandidateList();
+    renderCandidateDetail(selectedCandidate || filteredCandidates[0] || null);
+  });
+}
+
 function mapApplicationToCandidate(application) {
   const user = application?.userId || {};
   const profile = application?.candidateProfileId || {};
@@ -114,6 +242,7 @@ function mapApplicationToCandidate(application) {
   const resume = application?.resumeId || {};
 
   return {
+    _id: application?._id || "",
     applicationId: application?._id || "",
     status: application?.status || "pending",
     appliedAt: application?.createdAt || application?.applyDate || null,
@@ -138,9 +267,92 @@ function mapApplicationToCandidate(application) {
     cvTitle: resume?.title || "CV",
     cvUrl: resume?.fileUrl || "",
 
+    coverLetter: application?.coverLetter || application?.note || "",
+
+    aiScore: 0,
+    aiLevel: "",
+    aiReason: "",
+    aiMatchedSkills: [],
+    aiBreakdown: null,
+
     updatedAt: application?.updatedAt || application?.updatedDate || null,
     createdAt: application?.createdAt || application?.createdDate || null,
   };
+}
+
+function normalizeSkillKey(skill = "") {
+  return String(skill)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .toLowerCase()
+    .trim();
+}
+
+function getSkillLabel(skill) {
+  if (skill === null || skill === undefined) return "";
+  if (typeof skill === "string" || typeof skill === "number") return String(skill).trim();
+
+  return (skill.skillName || skill.name || skill.title || "").toString().trim();
+}
+
+function getCandidateSkills(candidate = {}) {
+  const sources = [candidate.skills, candidate.profile?.skills, candidate.aiMatchedSkills];
+  const skills = [];
+  const seen = new Set();
+
+  sources.forEach((source) => {
+    if (!Array.isArray(source)) return;
+
+    source.forEach((skill) => {
+      const label = getSkillLabel(skill);
+      const key = normalizeSkillKey(label);
+
+      if (!label || seen.has(key)) return;
+
+      seen.add(key);
+      skills.push(label);
+    });
+  });
+
+  return skills;
+}
+
+function getMatchedSkillKeys(candidate = {}) {
+  if (!Array.isArray(candidate.aiMatchedSkills)) return new Set();
+
+  return new Set(candidate.aiMatchedSkills.map(getSkillLabel).map(normalizeSkillKey).filter(Boolean));
+}
+
+function renderSkillBadges(candidate = {}, options = {}) {
+  const { limit = null, emptyText = "Chưa cập nhật" } = options;
+  const skills = getCandidateSkills(candidate);
+
+  if (!skills.length) {
+    return `<span class="candidate-skill-badge candidate-skill-empty">${escapeHTML(emptyText)}</span>`;
+  }
+
+  const visibleSkills = Number.isInteger(limit) && limit > 0 ? skills.slice(0, limit) : skills;
+  const hiddenCount = skills.length - visibleSkills.length;
+  const matchedSkillKeys = getMatchedSkillKeys(candidate);
+
+  const badges = visibleSkills
+    .map((skill) => {
+      const isMatched = matchedSkillKeys.has(normalizeSkillKey(skill));
+
+      return `
+        <span class="candidate-skill-badge ${isMatched ? "is-matched" : ""}" title="${escapeHTML(skill)}">
+          ${isMatched ? `<i class="bi bi-check2-circle"></i>` : ""}
+          <span class="candidate-skill-text">${escapeHTML(skill)}</span>
+        </span>
+      `;
+    })
+    .join("");
+
+  const moreBadge =
+    hiddenCount > 0 ? `<span class="candidate-skill-badge candidate-skill-more">+${hiddenCount} kỹ năng</span>` : "";
+
+  return `${badges}${moreBadge}`;
 }
 
 function bindFilterEvents() {
@@ -180,9 +392,10 @@ function applyCandidateFilters() {
 
   let result = [...allCandidates];
 
-  // Tìm ứng viên ứng vào job có cùng Id của bạn
-  if (selectedApplication === "myApplications") {
-    result = result.filter((candidate) => candidate.createdBy === user.id);
+  const currentUserId = user?._id || user?.id || user?.userId || "";
+
+  if (selectedApplication === "myApplicants" || selectedApplication === "myApplications") {
+    result = result.filter((candidate) => candidate.createdBy?.toString() === currentUserId?.toString());
   }
 
   if (searchValue) {
@@ -210,6 +423,8 @@ function applyCandidateFilters() {
     switch (selectedSort) {
       case "oldest":
         return dateA - dateB;
+      case "ai_score":
+        return (b.aiScore || 0) - (a.aiScore || 0);
       case "name_asc":
         return (a.fullName || "").localeCompare(b.fullName || "", "vi");
       case "name_desc":
@@ -221,8 +436,9 @@ function applyCandidateFilters() {
   });
 
   filteredCandidates = result;
+  candidatePaginationState.currentPage = 1;
 
-  if (selectedCandidate && !filteredCandidates.some((candidate) => candidate._id === selectedCandidate._id)) {
+  if (selectedCandidate && !filteredCandidates.some((candidate) => candidate.applicationId === selectedCandidate.applicationId)) {
     selectedCandidate = filteredCandidates[0] || null;
   }
 
@@ -267,25 +483,140 @@ function renderRecentCandidates() {
   });
 }
 
+function paginateCandidates(candidates, currentPage, pageSize) {
+  const totalItems = candidates.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+  const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  return {
+    currentPage: safePage,
+    totalPages,
+    totalItems,
+    paginatedItems: candidates.slice(startIndex, endIndex),
+  };
+}
+
+function renderCandidatePagination(totalPages, currentPage) {
+  const paginationContainer = document.getElementById("candidatePagination");
+  if (!paginationContainer) return;
+
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = "";
+    return;
+  }
+
+  const maxVisiblePages = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+  if (endPage - startPage < maxVisiblePages - 1) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  let html = `<nav><ul class="pagination mb-0">`;
+
+  html += `
+    <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>
+        Trước
+      </button>
+    </li>
+  `;
+
+  if (startPage > 1) {
+    html += `
+      <li class="page-item">
+        <button class="page-link" data-page="1">1</button>
+      </li>
+    `;
+
+    if (startPage > 2) {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+  }
+
+  for (let page = startPage; page <= endPage; page++) {
+    html += `
+      <li class="page-item ${page === currentPage ? "active" : ""}">
+        <button class="page-link" data-page="${page}">
+          ${page}
+        </button>
+      </li>
+    `;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+
+    html += `
+      <li class="page-item">
+        <button class="page-link" data-page="${totalPages}">
+          ${totalPages}
+        </button>
+      </li>
+    `;
+  }
+
+  html += `
+    <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+      <button class="page-link" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>
+        Sau
+      </button>
+    </li>
+  `;
+
+  html += `</ul></nav>`;
+
+  paginationContainer.innerHTML = html;
+
+  paginationContainer.querySelectorAll(".page-link[data-page]").forEach((button) => {
+    button.addEventListener("click", function () {
+      const page = Number(this.dataset.page);
+
+      if (!page || page === candidatePaginationState.currentPage) return;
+
+      candidatePaginationState.currentPage = page;
+      renderCandidateList();
+    });
+  });
+}
+
 function renderCandidateList() {
   const container = document.getElementById("candidateList");
   container.innerHTML = "";
 
   if (!filteredCandidates.length) {
     container.innerHTML = `
-      <div class="card border-0 shadow-sm empty-candidate-card">
-        <div class="card-body text-center py-5">
-          <i class="bi bi-people fs-1 text-secondary mb-3 d-block"></i>
-          <h5 class="fw-bold text-muted mb-2">Không tìm thấy ứng viên phù hợp</h5>
-          <p class="text-secondary mb-0">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
-        </div>
+    <div class="card border-0 shadow-sm empty-candidate-card">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-people fs-1 text-secondary mb-3 d-block"></i>
+        <h5 class="fw-bold text-muted mb-2">Không tìm thấy ứng viên phù hợp</h5>
+        <p class="text-secondary mb-0">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
       </div>
-    `;
+    </div>
+  `;
+
+    renderCandidatePagination(0, 1);
     return;
   }
 
-  filteredCandidates.forEach((candidate) => {
-    const isActive = selectedCandidate && selectedCandidate._id === candidate._id;
+  const { currentPage, totalPages, paginatedItems } = paginateCandidates(
+    filteredCandidates,
+    candidatePaginationState.currentPage,
+    candidatePaginationState.pageSize,
+  );
+
+  candidatePaginationState.currentPage = currentPage;
+  renderCandidatePagination(totalPages, currentPage);
+
+  paginatedItems.forEach((candidate, index) => {
+    const isActive = selectedCandidate && selectedCandidate.applicationId === candidate.applicationId;
+    const isTopAI = (candidate.aiScore || 0) > 0 && index === 0;
 
     let avatarDefault = "";
     if (candidate.gender == "female")
@@ -296,7 +627,7 @@ function renderCandidateList() {
     const avatar = candidate?.avatar || avatarDefault;
 
     const item = document.createElement("div");
-    item.className = `card candidate-card border-0 shadow-sm mb-3 ${isActive ? "active-candidate" : ""}`;
+    item.className = `card candidate-card border-0 shadow-sm mb-3 ${isActive ? "active-candidate" : ""} ${isTopAI ? "ai-top-candidate" : ""}`;
 
     item.innerHTML = `
       <div class="card-body p-3 p-md-4">
@@ -316,6 +647,26 @@ function renderCandidateList() {
                   <h5 class="mb-0 fw-bold candidate-name">
                     ${escapeHTML(candidate.fullName || "Chưa có tên")}
                   </h5>
+
+                  ${
+                    candidate.aiScore
+                      ? `
+                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                          AI ${candidate.aiScore}/100
+                        </span>
+                      `
+                      : ""
+                  }
+
+                  ${
+                    isTopAI
+                      ? `
+                        <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-3 py-2">
+                          Top phù hợp
+                        </span>
+                      `
+                      : ""
+                  }
                 </div>
 
                 <div class="candidate-job mb-2">
@@ -331,6 +682,16 @@ function renderCandidateList() {
                     <i class="bi bi-telephone me-2"></i>${escapeHTML(candidate.phone || "Chưa có số điện thoại")}
                   </div>
                 </div>
+
+                ${
+                  candidate.aiReason
+                    ? `
+                      <div class="small text-success mt-2">
+                        <i class="bi bi-stars me-1"></i>${escapeHTML(candidate.aiReason)}
+                      </div>
+                    `
+                    : ""
+                }
               </div>
             </div>
           </div>
@@ -342,6 +703,17 @@ function renderCandidateList() {
                   ${getStatusLabel(candidate.status)}
                 </span>
               </div>
+
+              ${
+                candidate.aiScore
+                  ? `
+                    <div class="text-lg-end text-start mb-2">
+                      <div class="fw-bold text-success">${candidate.aiLevel || "AI đánh giá"}</div>
+                      <div class="small text-muted">Điểm phù hợp: ${candidate.aiScore}/100</div>
+                    </div>
+                  `
+                  : ""
+              }
 
               <div class="candidate-date text-lg-end text-start mb-3">
                 <i class="bi bi-calendar-event me-1"></i>
@@ -357,25 +729,13 @@ function renderCandidateList() {
           </div>
 
           <div class="col-12">
-            <div class="candidate-tags-row d-flex flex-wrap gap-2">
-              <span class="badge rounded-pill location-badge px-3 py-2">
-                <i class="bi bi-geo-alt me-1"></i>${escapeHTML(candidate.address || "Chưa cập nhật")}
+            <div class="candidate-tags-row">
+              <span class="candidate-skill-badge candidate-location-badge">
+                <i class="bi bi-geo-alt"></i>
+                <span class="candidate-skill-text">${escapeHTML(candidate.address || "Chưa cập nhật")}</span>
               </span>
 
-              ${
-                Array.isArray(candidate.skills) && candidate.skills.length
-                  ? candidate.skills
-                      .slice(0, 4)
-                      .map(
-                        (skill) => `
-                          <span class="badge rounded-pill skill-badge px-3 py-2">
-                            ${escapeHTML(skill)}
-                          </span>
-                        `,
-                      )
-                      .join("")
-                  : `<span class="badge rounded-pill bg-secondary-subtle text-secondary px-3 py-2">Chưa có kỹ năng</span>`
-              }
+              ${renderSkillBadges(candidate, { limit: 4, emptyText: "Chưa có kỹ năng" })}
             </div>
           </div>
 
@@ -394,6 +754,7 @@ function renderCandidateList() {
 }
 
 function renderCandidateDetail(candidate) {
+  console.log("Hiển thị chi tiết ứng viên:", candidate);
   const container = document.getElementById("candidateDetail");
 
   if (!candidate) {
@@ -462,6 +823,47 @@ function renderCandidateDetail(candidate) {
 
         <hr class="my-4"/>
 
+        ${
+          candidate.aiScore
+            ? `
+              <div class="alert alert-success border-0 rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                  <div>
+                    <h5 class="fw-bold mb-2">
+                      <i class="bi bi-stars me-2"></i>AI đánh giá ứng viên
+                    </h5>
+                    <div class="mb-1">
+                      <strong>Điểm phù hợp:</strong> ${candidate.aiScore}/100
+                    </div>
+                    <div class="mb-1">
+                      <strong>Mức độ:</strong> ${escapeHTML(candidate.aiLevel || "Chưa phân loại")}
+                    </div>
+                    <div>
+                      <strong>Lý do:</strong> ${escapeHTML(candidate.aiReason || "Chưa có lý do.")}
+                    </div>
+                  </div>
+                  <div class="display-6 fw-bold text-success">${candidate.aiScore}</div>
+                </div>
+
+                ${
+                  candidate.aiBreakdown
+                    ? `
+                      <hr/>
+                      <div class="row g-2 small">
+                        <div class="col-6">Kỹ năng: <strong>${candidate.aiBreakdown.skillScore ?? 0}</strong></div>
+                        <div class="col-6">Kinh nghiệm: <strong>${candidate.aiBreakdown.experienceScore ?? 0}</strong></div>
+                        <div class="col-6">Liên quan: <strong>${candidate.aiBreakdown.contextScore ?? 0}</strong></div>
+                        <div class="col-6">Khu vực: <strong>${candidate.aiBreakdown.locationScore ?? 0}</strong></div>
+                        <div class="col-6">Lương: <strong>${candidate.aiBreakdown.salaryScore ?? 0}</strong></div>
+                      </div>
+                    `
+                    : ""
+                }
+              </div>
+            `
+            : ""
+        }
+
         <div class="row g-3 mb-4">
           <div class="col-md-6">
             <div class="info-card">
@@ -496,20 +898,8 @@ function renderCandidateDetail(candidate) {
           <h5 class="section-title">
             <i class="bi bi-stars me-2"></i>Kỹ năng
           </h5>
-          <div class="d-flex flex-wrap gap-2">
-            ${
-              Array.isArray(candidate.skills) && candidate.skills.length
-                ? candidate.skills
-                    .map(
-                      (skill) => `
-                        <span class="badge rounded-pill skill-badge px-3 py-2">
-                          ${escapeHTML(skill)}
-                        </span>
-                      `,
-                    )
-                    .join("")
-                : `<span class="badge rounded-pill bg-secondary-subtle text-secondary px-3 py-2">Chưa cập nhật</span>`
-            }
+          <div class="candidate-skill-list">
+            ${renderSkillBadges(candidate, { emptyText: "Chưa cập nhật" })}
           </div>
         </div>
 
@@ -677,6 +1067,15 @@ function renderStatusBoard() {
                       <div class="mini-card bg-white p-3 mb-3">
                         <div class="fw-bold mb-1">${escapeHTML(candidate.fullName)}</div>
                         <div class="text-secondary small mb-2">${escapeHTML(candidate.jobTitle)}</div>
+                        ${
+                          candidate.aiScore
+                            ? `
+                              <div class="small text-success mb-2">
+                                <i class="bi bi-stars me-1"></i>AI ${candidate.aiScore}/100
+                              </div>
+                            `
+                            : ""
+                        }
                         <div class="small text-muted">
                           Cập nhật: ${formatDate(candidate.updatedAt)}
                         </div>
@@ -708,29 +1107,29 @@ async function updateStatus(applicationId, newStatus) {
       throw new Error("Không nhận được dữ liệu application từ server");
     }
 
-    // Cập nhật allCandidates
     const index = allCandidates.findIndex((c) => c.applicationId === applicationId);
     if (index !== -1) {
       allCandidates[index] = {
         ...allCandidates[index],
-        ...updatedApplication,
+        status: updatedApplication.status || newStatus,
+        updatedAt: updatedApplication.updatedAt || new Date().toISOString(),
       };
     }
 
-    // Cập nhật filteredCandidates
     const filteredIndex = filteredCandidates.findIndex((c) => c.applicationId === applicationId);
     if (filteredIndex !== -1) {
       filteredCandidates[filteredIndex] = {
         ...filteredCandidates[filteredIndex],
-        ...updatedApplication,
+        status: updatedApplication.status || newStatus,
+        updatedAt: updatedApplication.updatedAt || new Date().toISOString(),
       };
 
       renderCandidateDetail(filteredCandidates[filteredIndex]);
     }
 
-    // renderOverview();
+    renderOverview();
     renderCandidateList();
-    // renderRecentCandidates();
+    renderRecentCandidates();
     renderStatusBoard();
 
     alert("Cập nhật trạng thái thành công!");

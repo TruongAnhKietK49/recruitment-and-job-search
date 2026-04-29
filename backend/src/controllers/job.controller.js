@@ -2,6 +2,20 @@ import Job from "../models/job.js";
 import Company from "../models/company.js";
 import User from "../models/user.js";
 import Notification from "../models/notification.js";
+import mongoose from "mongoose";
+
+const isCompanyOwnerOrMember = (company, userId) => {
+  const normalizedUserId = userId?.toString();
+  if (!normalizedUserId) return false;
+
+  const isOwner = company.createdBy?.toString() === normalizedUserId;
+  const isMember = company.members?.some((member) => {
+    const memberUserId = member.user || member;
+    return memberUserId?.toString() === normalizedUserId;
+  });
+
+  return isOwner || isMember;
+};
 
 export const getAllJobs = async (req, res) => {
   try {
@@ -108,10 +122,26 @@ export const getAllJobs = async (req, res) => {
 
 export const getJobsByCompany = async (req, res) => {
   try {
-    const jobs = await Job.find({ companyId: req.params.companyId, status: "approved" }).populate("companyId", "companyName logoUrl address website");
-    if (!jobs) {
-      return res.status(404).json({ message: "Jobs not found" });
+    const { companyId } = req.params;
+
+    if (!mongoose.isValidObjectId(companyId)) {
+      return res.status(400).json({ message: "Invalid company id" });
     }
+
+    const company = await Company.findById(companyId).select("createdBy members");
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    if (req.user.role !== "admin" && !isCompanyOwnerOrMember(company, req.user.userId)) {
+      return res.status(403).json({ message: "You are not a member of this company" });
+    }
+
+    const jobs = await Job.find({ companyId })
+      .populate("companyId", "companyName logoUrl address website")
+      .sort({ createdAt: -1 });
+
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({
@@ -179,10 +209,7 @@ export const createJob = async (req, res) => {
       return res.status(403).json({ message: "Only HR or Admin can create jobs" });
     }
 
-    const isOwner = company.createdBy.toString() === req.user.userId;
-    const isMember = company.members?.some((member) => member.toString() === req.user.userId);
-
-    if (!isOwner && !isMember) {
+    if (!isCompanyOwnerOrMember(company, req.user.userId)) {
       return res.status(403).json({ message: "You are not a member of this company" });
     }
 
@@ -350,7 +377,36 @@ export const getJobSummary = async (req, res) => {
 
     const matchStage = {};
     if (companyId) {
-      matchStage.companyId = companyId;
+      if (!mongoose.isValidObjectId(companyId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid company id",
+        });
+      }
+
+      const company = await Company.findById(companyId).select("createdBy members");
+
+      if (!company) {
+        return res.status(404).json({
+          success: false,
+          message: "Company not found",
+        });
+      }
+
+      if (req.user.role !== "admin" && !isCompanyOwnerOrMember(company, req.user.userId)) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not a member of this company",
+        });
+      }
+
+      matchStage.companyId = new mongoose.Types.ObjectId(companyId);
+    } else if (req.user.role === "hr") {
+      const companies = await Company.find({
+        $or: [{ createdBy: req.user.userId }, { "members.user": req.user.userId }],
+      }).select("_id");
+
+      matchStage.companyId = { $in: companies.map((company) => company._id) };
     }
 
     const result = await Job.aggregate([
