@@ -1,6 +1,5 @@
 import { showToast } from "../components/toast.js";
-
-const URL = "http://localhost:5000";
+import URL from "./url.js";
 
 showToast("Vui lòng đăng ký!", "success");
 
