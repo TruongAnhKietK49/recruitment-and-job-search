@@ -324,4 +324,103 @@ window.addEventListener('applySuccess', (e) => {
 
 initPage();
 
+// ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
+let currentApplyJobId = null;
+
+window.openApplyModal = async function(jobId) {
+  if (!token) {
+    alert("Vui lòng đăng nhập để ứng tuyển!");
+    window.location.href = '../../pages/utils/login.html';
+    return;
+  }
+  
+  currentApplyJobId = jobId;
+
+  const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    document.getElementById('applyUserName').innerText = user.fullName || 'Người dùng';
+    document.getElementById('applyUserEmail').innerText = user.email || '';
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/resumes/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const resumes = await res.json();
+      const select = document.getElementById('existingCvSelect');
+      
+      let optionsHtml = '<option value="">Chọn từ danh sách CV của bạn</option>';
+      resumes.forEach(cv => {
+        optionsHtml += `<option value="${cv._id}">${cv.title} (${new Date(cv.createdAt).toLocaleDateString('vi-VN')})</option>`;
+      });
+      select.innerHTML = optionsHtml;
+    }
+  } catch (err) {
+    console.error("Lỗi lấy danh sách CV", err);
+  }
+
+  new bootstrap.Modal(document.getElementById('applyModal')).show();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const submitBtn = document.getElementById('submitApplicationBtn');
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const selectedCvId = document.getElementById('existingCvSelect').value;
+      const coverLetter = document.getElementById('coverLetter')?.value || "";
+
+      if (!selectedCvId) {
+        alert("Vui lòng chọn một bản CV từ danh sách!");
+        return;
+      }
+
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang nộp...';
+      submitBtn.disabled = true;
+
+      try {
+        const payload = {
+          jobId: currentApplyJobId,
+          resumeId: selectedCvId,
+          coverLetter: coverLetter
+        };
+
+        const res = await fetch(`${API_URL}/applications`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Có lỗi xảy ra khi nộp đơn');
+        }
+
+        const applyModalEl = document.getElementById('applyModal');
+        bootstrap.Modal.getInstance(applyModalEl).hide();
+        
+        const successModalEl = document.getElementById('successApplyModal');
+        new bootstrap.Modal(successModalEl).show();
+
+        const applyBtn = document.getElementById(`btnApply_${currentApplyJobId}`);
+        if (applyBtn) {
+          applyBtn.outerHTML = `<button class="btn btn-success disabled px-4 shadow-sm" style="border-radius: 10px;"><i class="bi bi-check-circle me-1"></i>Đã ứng tuyển</button>`;
+        }
+
+      } catch (err) {
+        alert("Lỗi ứng tuyển: " + err.message);
+      } finally {
+        submitBtn.innerHTML = '<i class="bi bi-send me-2"></i> Nộp hồ sơ';
+        submitBtn.disabled = false;
+      }
+    });
+  }
+});
+
 initPage();
