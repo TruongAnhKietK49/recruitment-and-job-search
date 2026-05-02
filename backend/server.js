@@ -23,6 +23,20 @@ const app = express();
 
 app.use(cors());
 
+// Health check
+app.get("/", (req, res) => {
+  res.status(200).send("Success");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is healthy",
+    uptime: process.uptime(),
+    timestamp: new Date(),
+  });
+});
+
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
