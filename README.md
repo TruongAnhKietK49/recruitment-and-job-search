@@ -5,6 +5,7 @@ Website tuyển dụng và tìm kiếm việc làm với 3 nhóm người dùng 
 ## Link Deploy
 
 - Backend/API: https://recruitment-and-job-search.onrender.com
+- Frontend/UI: https://viechub.netlify.app/
 
 > Lưu ý: phần hướng dẫn bên dưới chỉ dành cho chạy local.
 
