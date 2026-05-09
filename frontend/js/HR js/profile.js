@@ -115,7 +115,6 @@ function showToast(msg) {
 
 async function fillInfo() {
   const data = await loadInfo();
-  console.log(data);
   let status = data.profileData?.verifiedStatus || "pending";
   if (status == "pending") {
     status = "Chưa xác thực";

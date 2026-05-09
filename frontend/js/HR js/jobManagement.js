@@ -18,6 +18,80 @@ const postState = {
 
 const token = sessionStorage.getItem("token") || localStorage.getItem("token") || null;
 
+function showToast(message, type = "info") {
+  let toastContainer = document.getElementById("appToastContainer");
+
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "appToastContainer";
+    toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+    toastContainer.style.zIndex = "1080";
+    document.body.appendChild(toastContainer);
+  }
+
+  const typeConfig = {
+    success: {
+      bg: "text-bg-success",
+      icon: "bi-check-circle-fill",
+      title: "Thành công",
+    },
+    error: {
+      bg: "text-bg-danger",
+      icon: "bi-x-circle-fill",
+      title: "Lỗi",
+    },
+    warning: {
+      bg: "text-bg-warning",
+      icon: "bi-exclamation-triangle-fill",
+      title: "Cảnh báo",
+    },
+    info: {
+      bg: "text-bg-primary",
+      icon: "bi-info-circle-fill",
+      title: "Thông báo",
+    },
+  };
+
+  const config = typeConfig[type] || typeConfig.info;
+
+  const toastEl = document.createElement("div");
+  toastEl.className = `toast align-items-center border-0 shadow-lg ${config.bg}`;
+  toastEl.setAttribute("role", "alert");
+  toastEl.setAttribute("aria-live", "assertive");
+  toastEl.setAttribute("aria-atomic", "true");
+
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-start gap-2">
+        <i class="bi ${config.icon} mt-1"></i>
+        <div>
+          <div class="fw-bold">${config.title}</div>
+          <div>${message}</div>
+        </div>
+      </div>
+      <button 
+        type="button" 
+        class="btn-close btn-close-white me-2 m-auto" 
+        data-bs-dismiss="toast" 
+        aria-label="Close"
+      ></button>
+    </div>
+  `;
+
+  toastContainer.appendChild(toastEl);
+
+  const toast = new bootstrap.Toast(toastEl, {
+    delay: 3500,
+    autohide: true,
+  });
+
+  toast.show();
+
+  toastEl.addEventListener("hidden.bs.toast", () => {
+    toastEl.remove();
+  });
+}
+
 async function loadMyCompany() {
   try {
     const res = await fetch(`${URL}/api/companies/me`, {
@@ -236,7 +310,39 @@ function formatDate(dateString) {
   return date.toLocaleDateString("vi-VN");
 }
 
+function normalizeJobStatus(status) {
+  const value = String(status || "")
+    .trim()
+    .toLowerCase();
+
+  if (!value) return "pending";
+
+  const statusMap = {
+    pending: "pending",
+    approved: "approved",
+    rejected: "rejected",
+    closed: "closed",
+
+    "chờ duyệt": "pending",
+    "cho duyet": "pending",
+    "đã duyệt": "approved",
+    "da duyet": "approved",
+    "bị từ chối": "rejected",
+    "bi tu choi": "rejected",
+    "từ chối": "rejected",
+    "tu choi": "rejected",
+    "đã đóng": "closed",
+    "da dong": "closed",
+    đóng: "closed",
+    dong: "closed",
+  };
+
+  return statusMap[value] || value;
+}
+
 function getStatusInfo(status) {
+  const normalizedStatus = normalizeJobStatus(status);
+
   const statusMap = {
     pending: {
       cardClass: "pending",
@@ -259,10 +365,17 @@ function getStatusInfo(status) {
       metaLabel: "Từ chối lúc",
       message: "Lý do: Nội dung chưa phù hợp. Vui lòng chỉnh sửa và gửi lại.",
     },
+    closed: {
+      cardClass: "closed",
+      badgeClass: "text-bg-secondary",
+      label: "Đã đóng",
+      metaLabel: "Đóng lúc",
+      message: "Bài đăng đã được đóng, hiện không còn nhận hồ sơ ứng tuyển mới.",
+    },
   };
 
   return (
-    statusMap[status] || {
+    statusMap[normalizedStatus] || {
       cardClass: "pending",
       badgeClass: "text-bg-warning",
       label: "Chờ duyệt",
@@ -451,11 +564,12 @@ function filterPostsByStatus(posts, status) {
   if (!status) return posts;
 
   return posts.filter((job) => {
-    const jobStatus = job.status?.toLowerCase() || "";
-    return jobStatus === status;
+    const jobStatus = normalizeJobStatus(job.status);
+    const filterStatus = normalizeJobStatus(status);
+
+    return jobStatus === filterStatus;
   });
 }
-
 function filterPostsByType(posts, jobType) {
   if (!jobType) return posts;
 
@@ -611,7 +725,7 @@ function initPostFilters(posts) {
 }
 
 function renderApprovalCard(job) {
-  const status = job.status || "pending";
+  const status = normalizeJobStatus(job.status);
 
   const info = getStatusInfo(status);
   const displayDate = formatDate(job.updatedAt || job.createdAt || job.submittedAt || job.date);
@@ -652,18 +766,23 @@ function renderApprovalList(jobs) {
   const approvalList = document.getElementById("approvalList");
   if (!approvalList) return;
 
-  const noApprovalState = document.querySelector(".no-approval-state");
-
   if (!jobs || jobs.length === 0) {
-    approvalList.innerHTML = "";
-    noApprovalState?.classList.remove("d-none");
+    approvalList.innerHTML = `
+      <div class="empty-state mt-4">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard-check"></i>
+        </div>
+        <div class="empty-title">Không tìm thấy bài đăng phù hợp</div>
+        <div class="empty-text">
+          Không có bài đăng nào khớp với trạng thái hoặc từ khóa đang lọc.
+        </div>
+      </div>
+    `;
     return;
   }
 
-  noApprovalState?.classList.add("d-none");
   approvalList.innerHTML = jobs.map((job) => renderApprovalCard(job)).join("");
 }
-
 const editJobModalEl = document.getElementById("editJobModal");
 const editJobModal = editJobModalEl ? new bootstrap.Modal(editJobModalEl) : null;
 
@@ -711,7 +830,7 @@ async function reloadMyJobs() {
 
 async function handleCreateJob() {
   if (!dataCompany?._id) {
-    alert("Bạn chưa có công ty nên không thể tạo bài đăng tuyển dụng.");
+    showToast("Bạn chưa có công ty nên không thể tạo bài đăng tuyển dụng.", "warning");
     return;
   }
 
@@ -748,24 +867,25 @@ async function handleCreateJob() {
     !data.requirements ||
     !data.benefits
   ) {
-    alert("Vui lòng không để trống thông tin!");
+    showToast("Vui lòng không để trống thông tin!", "warning");
     return;
   }
 
   if (Number(data.salaryMin) > Number(data.salaryMax)) {
-    alert("Lương tối đa phải lớn hơn lương tối thiểu!");
+    showToast("Lương tối đa phải lớn hơn lương tối thiểu!", "warning");
     return;
   }
 
   const result = await createJobAPI(data);
   if (!result) {
-    alert("Tạo bài đăng tuyển dụng thất bại!");
+    showToast("Tạo bài đăng tuyển dụng thất bại!", "error");
     return;
   }
 
   form.reset();
   await reloadMyJobs();
-  alert("Tạo bài đăng tuyển dụng thành công!");
+
+  showToast("Tạo bài đăng tuyển dụng thành công!", "success");
 }
 
 function bindEvents() {
@@ -773,7 +893,7 @@ function bindEvents() {
 
   document.getElementById("saveEditJobBtn")?.addEventListener("click", async () => {
     if (!dataCompany?._id) {
-      alert("Bạn chưa có công ty nên không thể cập nhật bài đăng.");
+      showToast("Bạn chưa có công ty nên không thể cập nhật bài đăng.", "warning");
       return;
     }
 
@@ -802,7 +922,7 @@ function bindEvents() {
 
     const result = await updateJobAPI(jobId, payload);
     if (!result) {
-      alert("Cập nhật thất bại!");
+      showToast("Cập nhật thất bại!", "error");
       return;
     }
 
@@ -812,7 +932,7 @@ function bindEvents() {
     const tab = document.getElementById("my-posts-tab");
     if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
 
-    alert("Cập nhật bài đăng thành công!");
+    showToast("Cập nhật bài đăng thành công!", "success");
   });
 
   document.addEventListener("click", async (e) => {
@@ -821,7 +941,7 @@ function bindEvents() {
 
     if (editBtn) {
       if (!dataCompany?._id) {
-        alert("Bạn chưa có công ty nên không thể chỉnh sửa bài đăng.");
+        showToast("Bạn chưa có công ty nên không thể chỉnh sửa bài đăng.", "warning");
         return;
       }
 
@@ -836,13 +956,22 @@ function bindEvents() {
 
     if (deleteBtn) {
       if (!dataCompany?._id) {
-        alert("Bạn chưa có công ty nên không thể xóa bài đăng.");
+        showToast("Bạn chưa có công ty nên không thể xóa bài đăng.", "warning");
         return;
       }
 
+      const ok = confirm("Bạn có chắc muốn xóa bài đăng này không?");
+      if (!ok) return;
+
       const jobId = deleteBtn.dataset.id;
       const res = await deleteJobAPI(jobId);
-      if (res?.message) alert(res.message);
+
+      if (!res) {
+        showToast("Xóa bài đăng thất bại!", "error");
+        return;
+      }
+
+      showToast(res.message || "Xóa bài đăng thành công!", "success");
 
       await reloadMyJobs();
 
@@ -866,10 +995,11 @@ function getApprovalFilterValues() {
 
 function filterApprovalPipeline(jobs, filters) {
   return jobs.filter((job) => {
-    const jobStatus = job.status?.toLowerCase() || "";
-    const jobTitle = job.title?.toLowerCase() || "";
+    const jobStatus = normalizeJobStatus(job.status);
+    const filterStatus = normalizeJobStatus(filters.status);
+    const jobTitle = String(job.title || "").toLowerCase();
 
-    const matchStatus = !filters.status || jobStatus === filters.status;
+    const matchStatus = !filters.status || jobStatus === filterStatus;
     const matchKeyword = !filters.keyword || jobTitle.includes(filters.keyword);
 
     return matchStatus && matchKeyword;
@@ -945,6 +1075,15 @@ function renderApprovalPagination(totalPages, currentPage) {
 }
 
 function applyApprovalFilters(resetPage = true) {
+  console.log(
+    "Approval jobs:",
+    dataJobs.map((job) => ({
+      title: job.title,
+      rawStatus: job.status,
+      normalizedStatus: normalizeJobStatus(job.status),
+    })),
+  );
+
   const filters = getApprovalFilterValues();
 
   approvalState.filteredJobs = filterApprovalPipeline(dataJobs, filters);
@@ -982,8 +1121,12 @@ async function initPage() {
   setManagePostsMenuDisabled(!dataCompany?._id);
 
   if (!dataCompany?._id) {
-    alert("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.");
-    window.location.href = "./companyManagement.html";
+    showToast("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.", "warning");
+
+    setTimeout(() => {
+      window.location.href = "./companyManagement.html";
+    }, 1200);
+
     return;
   }
 

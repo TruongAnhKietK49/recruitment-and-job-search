@@ -1,455 +1,376 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thông tin công ty</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="../../css/HR css/companyManagement.css" />
-  </head>
-  <body>
-    <div class="dashboard-wrap">
-      <div id="navbar"></div>
 
-      <main class="main-content">
-        <div class="topbar">
-          <div>
-            <h1 class="page-title">Thông tin công ty</h1>
-            <p class="page-subtitle">Xem công ty đang tham gia hoặc tìm kiếm và gửi yêu cầu tham gia công ty mới.</p>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thông tin công ty</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="../../css/HR css/companyManagement.css" />
+</head>
+
+<body>
+  <div class="dashboard-wrap">
+    <div id="navbar"></div>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Thông tin công ty</h1>
+          <p class="page-subtitle">Xem công ty đang tham gia hoặc tìm kiếm và gửi yêu cầu tham gia công ty mới.</p>
         </div>
+      </div>
 
-        <div class="company-tabs-wrap">
-          <ul class="nav nav-tabs nav-company-tabs" id="companyTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link active"
-                id="my-company-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#my-company-pane"
-                type="button"
-                role="tab"
-                aria-controls="my-company-pane"
-                aria-selected="true"
-              >
-                Công ty của tôi
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="join-company-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#join-company-pane"
-                type="button"
-                role="tab"
-                aria-controls="join-company-pane"
-                aria-selected="false"
-              >
-                Tham gia công ty
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="create-company-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#create-company-pane"
-                type="button"
-                role="tab"
-                aria-controls="create-company-pane"
-                aria-selected="false"
-              >
-                Tạo công ty
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="requests-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#requests-pane"
-                type="button"
-                role="tab"
-                aria-controls="requests-pane"
-                aria-selected="false"
-              >
-                Yêu cầu tham gia
-              </button>
-            </li>
-          </ul>
+      <div class="company-tabs-wrap">
+        <ul class="nav nav-tabs nav-company-tabs" id="companyTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="my-company-tab" data-bs-toggle="tab" data-bs-target="#my-company-pane"
+              type="button" role="tab" aria-controls="my-company-pane" aria-selected="true">
+              Công ty của tôi
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="join-company-tab" data-bs-toggle="tab" data-bs-target="#join-company-pane"
+              type="button" role="tab" aria-controls="join-company-pane" aria-selected="false">
+              Tham gia công ty
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="create-company-tab" data-bs-toggle="tab" data-bs-target="#create-company-pane"
+              type="button" role="tab" aria-controls="create-company-pane" aria-selected="false">
+              Tạo công ty
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests-pane"
+              type="button" role="tab" aria-controls="requests-pane" aria-selected="false">
+              Yêu cầu tham gia
+            </button>
+          </li>
+        </ul>
 
-          <div class="tab-content" id="companyTabsContent">
-            <div
-              class="tab-pane fade show active"
-              id="my-company-pane"
-              role="tabpanel"
-              aria-labelledby="my-company-tab"
-              tabindex="0"
-            >
-              <div class="card-soft overflow-hidden showMyCompany">
-                <div class="company-cover"></div>
-                <div class="company-profile">
-                  <div class="company-logo"></div>
+        <div class="tab-content" id="companyTabsContent">
+          <div class="tab-pane fade show active" id="my-company-pane" role="tabpanel" aria-labelledby="my-company-tab"
+            tabindex="0">
+            <div class="card-soft overflow-hidden showMyCompany">
+              <div class="company-cover"></div>
+              <div class="company-profile">
+                <div class="company-logo"></div>
 
-                  <div class="company-header">
-                    <div>
-                      <div class="company-name"></div>
-                      <div class="company-meta">
-                        <span class="meta-item">
-                          <i class="bi bi-geo-alt mb-1"></i>
-                          <h6 class="company-address"></h6>
-                        </span>
-                        <span class="meta-item">
-                          <i class="bi bi-briefcase mb-1"></i>
-                          <h6 class="company-category"></h6>
-                        </span>
-                        <span class="meta-item">
-                          <i class="bi bi-globe mb-1"></i>
-                          <h6 class="company-website"></h6>
-                        </span>
-                        <span class="meta-item">
-                          <i class="bi bi-person-badge mb-1"></i>
-                          <h6>Vai trò:</h6>
-                          <h6 class="company-role"></h6>
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="company-actions">
-                      <button class="btn btn-primary-soft" id="openEditCompanyModalBtn">
-                        <i class="bi bi-pencil-square me-2"></i>
-                        Chỉnh sửa thông tin
-                      </button>
-                      <button class="btn btn-outline-soft" id="deleteCompanyBtn">
-                        <i class="bi bi-box-arrow-left"></i>
-                        <h6 class="deleteCompany"></h6>
-                      </button>
+                <div class="company-header">
+                  <div>
+                    <div class="company-name"></div>
+                    <div class="company-meta">
+                      <span class="meta-item">
+                        <i class="bi bi-geo-alt mb-1"></i>
+                        <h6 class="company-address"></h6>
+                      </span>
+                      <span class="meta-item">
+                        <i class="bi bi-briefcase mb-1"></i>
+                        <h6 class="company-category"></h6>
+                      </span>
+                      <span class="meta-item">
+                        <i class="bi bi-globe mb-1"></i>
+                        <h6 class="company-website"></h6>
+                      </span>
+                      <span class="meta-item">
+                        <i class="bi bi-person-badge mb-1"></i>
+                        <h6>Vai trò:</h6>
+                        <h6 class="company-role"></h6>
+                      </span>
                     </div>
                   </div>
 
-                  <div class="section-box">
-                    <div class="section-title">Giới thiệu công ty</div>
-                    <p class="section-text company-description"></p>
-                  </div>
-
-                  <div class="section-box">
-                    <div class="section-title">Thông tin chi tiết</div>
-                    <div class="info-grid">
-                      <div class="info-item">
-                        <div class="info-label">Email liên hệ</div>
-                        <div class="info-value company-email"></div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Số điện thoại</div>
-                        <div class="info-value company-phone"></div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Địa chỉ</div>
-                        <div class="info-value company-addressDetail"></div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Ngày thành lập</div>
-                        <div class="info-value company-founded"></div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Trạng thái</div>
-                        <div class="info-value company-status"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="section-box">
-                    <div class="section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
-                      <span>Tổng quan quản trị</span>
-                    </div>
-                    <div class="info-grid">
-                      <div class="info-item">
-                        <div class="info-label">Nhân viên công ty</div>
-                        <div class="info-value employees-count"></div>
-                      </div>
-                      <div class="info-item">
-                        <div class="info-label">Yêu cầu tham gia mới</div>
-                        <div class="info-value requests-count"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="empty-state mt-4 showNotification">
-                <div class="empty-icon">
-                  <i class="bi bi-buildings"></i>
-                </div>
-                <div class="empty-title">Bạn chưa tham gia công ty nào</div>
-                <div class="empty-text">
-                  Nếu bạn chưa thuộc công ty nào, hãy chuyển sang tab
-                  <strong>Tham gia công ty</strong>
-                  để gửi yêu cầu tham gia hoặc sang tab
-                  <strong>Tạo công ty</strong>
-                  nếu bạn là người sáng lập.
-                </div>
-                <div class="d-flex justify-content-center gap-2 flex-wrap">
-                  <button
-                    class="btn btn-primary-soft"
-                    data-bs-toggle="tab"
-                    data-bs-target="#join-company-pane"
-                    type="button"
-                  >
-                    Tham gia công ty
-                  </button>
-                  <button
-                    class="btn btn-outline-soft"
-                    data-bs-toggle="tab"
-                    data-bs-target="#create-company-pane"
-                    type="button"
-                  >
-                    Tạo công ty mới
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="tab-pane fade"
-              id="join-company-pane"
-              role="tabpanel"
-              aria-labelledby="join-company-tab"
-              tabindex="0"
-            >
-              <div class="search-panel">
-                <div class="row g-3 align-items-center">
-                  <div class="col-lg-8">
-                    <div class="search-box">
-                      <i class="bi bi-search"></i>
-                      <input
-                        type="text"
-                        id="company-search-input"
-                        class="search-input"
-                        placeholder="Tìm theo tên công ty, mã công ty hoặc lĩnh vực hoạt động"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-lg-4">
-                    <button id="btn-search-company" class="btn btn-primary-soft w-100">
-                      <i class="bi bi-search me-2"></i>
-                      Tìm công ty
+                  <div class="company-actions">
+                    <button class="btn btn-primary-soft" id="openEditCompanyModalBtn">
+                      <i class="bi bi-pencil-square me-2"></i>
+                      Chỉnh sửa thông tin
+                    </button>
+                    <button class="btn btn-outline-soft" id="deleteCompanyBtn">
+                      <i class="bi bi-box-arrow-left"></i>
+                      <h6 class="deleteCompany"></h6>
                     </button>
                   </div>
                 </div>
-              </div>
 
-              <div class="company-list">
-                <div class="join-card">
-                  <div class="join-header">
-                    <div class="join-logo"></div>
-                    <div>
-                      <div class="join-name"></div>
-                      <div class="join-sub"></div>
-                    </div>
-                  </div>
-                  <div class="join-desc"></div>
-                  <div class="tag-list">
-                    <span class="tag-item">
-                      <i class="bi bi-geo-alt"></i>
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-briefcase"></i>
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-people"></i>
-                    </span>
-                  </div>
-                  <button class="btn btn-primary-soft w-100">
-                    <i class="bi bi-person-plus me-2"></i>
-                  </button>
+                <div class="section-box">
+                  <div class="section-title">Giới thiệu công ty</div>
+                  <p class="section-text company-description"></p>
                 </div>
 
-                <div class="join-card">
-                  <div class="join-header">
-                    <div class="join-logo"></div>
-                    <div>
-                      <div class="join-name"></div>
-                      <div class="join-sub"></div>
+                <div class="section-box">
+                  <div class="section-title">Thông tin chi tiết</div>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">Email liên hệ</div>
+                      <div class="info-value company-email"></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Số điện thoại</div>
+                      <div class="info-value company-phone"></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Địa chỉ</div>
+                      <div class="info-value company-addressDetail"></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Ngày thành lập</div>
+                      <div class="info-value company-founded"></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Trạng thái</div>
+                      <div class="info-value company-status"></div>
                     </div>
                   </div>
-                  <div class="join-desc"></div>
-                  <div class="tag-list">
-                    <span class="tag-item">
-                      <i class="bi bi-geo-alt"></i>
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-briefcase"></i>
-                    </span>
-                    <span class="tag-item">
-                      <i class="bi bi-people"></i>
-                    </span>
+                </div>
+
+                <div class="section-box">
+                  <div class="section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span>Tổng quan quản trị</span>
                   </div>
-                  <button class="btn btn-primary-soft w-100">
-                    <i class="bi bi-person-plus me-2"></i>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">Nhân viên công ty</div>
+                      <div class="info-value employees-count"></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Yêu cầu tham gia mới</div>
+                      <div class="info-value requests-count"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-state mt-4 showNotification">
+              <div class="empty-icon">
+                <i class="bi bi-buildings"></i>
+              </div>
+              <div class="empty-title">Bạn chưa tham gia công ty nào</div>
+              <div class="empty-text">
+                Nếu bạn chưa thuộc công ty nào, hãy chuyển sang tab
+                <strong>Tham gia công ty</strong>
+                để gửi yêu cầu tham gia hoặc sang tab
+                <strong>Tạo công ty</strong>
+                nếu bạn là người sáng lập.
+              </div>
+              <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <button class="btn btn-primary-soft" data-bs-toggle="tab" data-bs-target="#join-company-pane"
+                  type="button">
+                  Tham gia công ty
+                </button>
+                <button class="btn btn-outline-soft" id="goCreateCompanyBtn" data-bs-toggle="tab"
+                  data-bs-target="#create-company-pane" type="button">
+                  Tạo công ty mới
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="join-company-pane" role="tabpanel" aria-labelledby="join-company-tab"
+            tabindex="0">
+            <div class="search-panel">
+              <div class="row g-3 align-items-center">
+                <div class="col-lg-8">
+                  <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="company-search-input" class="search-input"
+                      placeholder="Tìm theo tên công ty, mã công ty hoặc lĩnh vực hoạt động" />
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <button id="btn-search-company" class="btn btn-primary-soft w-100">
+                    <i class="bi bi-search me-2"></i>
+                    Tìm công ty
                   </button>
                 </div>
               </div>
             </div>
 
-            <div
-              class="tab-pane fade"
-              id="create-company-pane"
-              role="tabpanel"
-              aria-labelledby="create-company-tab"
-              tabindex="0"
-            >
-              <div class="card-soft p-4">
-                <div class="section-title mb-3">Tạo công ty mới</div>
-                <p class="page-subtitle mb-4">
-                  Dành cho HR là người sáng lập công ty. Sau khi tạo, bạn sẽ trở thành quản trị viên đầu tiên và có thể
-                  duyệt nhân sự tham gia.
-                </p>
-                <form>
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Tên công ty</label>
-                      <input type="text" class="form-control companyName" placeholder="Nhập tên công ty" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
-                      <input
-                        type="text"
-                        class="form-control companyCategory"
-                        placeholder="Ví dụ: Công nghệ, Logistics..."
-                      />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Website</label>
-                      <input type="text" class="form-control companyWebsite" placeholder="Nhập địa chỉ website" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">Số điện thoại</label>
-                      <input type="text" class="form-control companyPhone" placeholder="Nhập số điện thoại" />
-                    </div>
-                    <div class="col-md-12">
-                      <label class="form-label fw-semibold">Địa chỉ</label>
-                      <input type="text" class="form-control companyAddress" placeholder="Nhập địa chỉ công ty" />
-                    </div>
-                    <div class="col-md-12">
-                      <label class="form-label fw-semibold">Logo công ty</label>
-                      <input type="text" class="form-control companyLogo" placeholder="Nhập logo dạng url" />
-                    </div>
-                    <div class="col-md-12">
-                      <label class="form-label fw-semibold">Mô tả công ty</label>
-                      <textarea
-                        class="form-control companyDescription"
-                        rows="5"
-                        placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"
-                      ></textarea>
-                    </div>
+            <div class="company-list">
+              <div class="join-card">
+                <div class="join-header">
+                  <div class="join-logo"></div>
+                  <div>
+                    <div class="join-name"></div>
+                    <div class="join-sub"></div>
                   </div>
-                  <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
-                    <button type="button" class="btn btn-outline-soft">Lưu nháp</button>
-                    <button type="button" class="btn btn-primary-soft" id="createCompanyBtn">Tạo công ty</button>
+                </div>
+                <div class="join-desc"></div>
+                <div class="tag-list">
+                  <span class="tag-item">
+                    <i class="bi bi-geo-alt"></i>
+                  </span>
+                  <span class="tag-item">
+                    <i class="bi bi-briefcase"></i>
+                  </span>
+                  <span class="tag-item">
+                    <i class="bi bi-people"></i>
+                  </span>
+                </div>
+                <button class="btn btn-primary-soft w-100">
+                  <i class="bi bi-person-plus me-2"></i>
+                </button>
+              </div>
+
+              <div class="join-card">
+                <div class="join-header">
+                  <div class="join-logo"></div>
+                  <div>
+                    <div class="join-name"></div>
+                    <div class="join-sub"></div>
                   </div>
-                </form>
+                </div>
+                <div class="join-desc"></div>
+                <div class="tag-list">
+                  <span class="tag-item">
+                    <i class="bi bi-geo-alt"></i>
+                  </span>
+                  <span class="tag-item">
+                    <i class="bi bi-briefcase"></i>
+                  </span>
+                  <span class="tag-item">
+                    <i class="bi bi-people"></i>
+                  </span>
+                </div>
+                <button class="btn btn-primary-soft w-100">
+                  <i class="bi bi-person-plus me-2"></i>
+                </button>
               </div>
             </div>
+          </div>
 
-            <div class="tab-pane fade" id="requests-pane" role="tabpanel" aria-labelledby="requests-tab" tabindex="0">
-              <div class="search-panel">
+          <div class="tab-pane fade" id="create-company-pane" role="tabpanel" aria-labelledby="create-company-tab"
+            tabindex="0">
+            <div class="card-soft p-4">
+              <div class="section-title mb-3">Tạo công ty mới</div>
+              <p class="page-subtitle mb-4">
+                Dành cho HR là người sáng lập công ty. Sau khi tạo, bạn sẽ trở thành quản trị viên đầu tiên và có thể
+                duyệt nhân sự tham gia.
+              </p>
+              <form>
                 <div class="row g-3">
-                  <div class="col-lg-8">
-                    <div class="search-box">
-                      <i class="bi bi-search"></i>
-                      <input
-                        id="join-request-search-input"
-                        class="search-input"
-                        type="text"
-                        placeholder="Tìm theo tên ứng viên hoặc email"
-                      />
-                    </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tên công ty</label>
+                    <input type="text" class="form-control companyName" placeholder="Nhập tên công ty" />
                   </div>
-                  <div class="col-lg-4">
-                    <button id="btn-filter-join-request" class="btn btn-primary-soft w-100">
-                      <i class="bi bi-funnel me-2"></i>
-                      Lọc yêu cầu
-                    </button>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
+                    <input type="text" class="form-control companyCategory"
+                      placeholder="Ví dụ: Công nghệ, Logistics..." />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Website</label>
+                    <input type="text" class="form-control companyWebsite" placeholder="Nhập địa chỉ website" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold">Số điện thoại</label>
+                    <input type="text" class="form-control companyPhone" placeholder="Nhập số điện thoại" />
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label fw-semibold">Địa chỉ</label>
+                    <input type="text" class="form-control companyAddress" placeholder="Nhập địa chỉ công ty" />
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label fw-semibold">Logo công ty</label>
+                    <input type="text" class="form-control companyLogo" placeholder="Nhập logo dạng url" />
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label fw-semibold">Mô tả công ty</label>
+                    <textarea class="form-control companyDescription" rows="5"
+                      placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"></textarea>
                   </div>
                 </div>
-              </div>
-
-              <div class="company-list company-join-request-list"></div>
+                <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+                  <button type="button" class="btn btn-outline-soft">Lưu nháp</button>
+                  <button type="button" class="btn btn-primary-soft" id="createCompanyBtn">Tạo công ty</button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
 
-    <div
-      class="modal fade"
-      id="editCompanyModal"
-      tabindex="-1"
-      aria-labelledby="editCompanyModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="editCompanyModalLabel">Chỉnh sửa thông tin công ty</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="editCompanyForm">
+          <div class="tab-pane fade" id="requests-pane" role="tabpanel" aria-labelledby="requests-tab" tabindex="0">
+            <div class="search-panel">
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Tên công ty</label>
-                  <input type="text" class="form-control" id="editCompanyName" placeholder="Nhập tên công ty" />
+                <div class="col-lg-8">
+                  <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input id="join-request-search-input" class="search-input" type="text"
+                      placeholder="Tìm theo tên ứng viên hoặc email" />
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="editCompanyCategory"
-                    placeholder="Ví dụ: Công nghệ, Logistics..."
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Website</label>
-                  <input type="text" class="form-control" id="editCompanyWebsite" placeholder="Nhập địa chỉ website" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Số điện thoại</label>
-                  <input type="text" class="form-control" id="editCompanyPhone" placeholder="Nhập số điện thoại" />
-                </div>
-                <div class="col-md-12">
-                  <label class="form-label fw-semibold">Địa chỉ</label>
-                  <input type="text" class="form-control" id="editCompanyAddress" placeholder="Nhập địa chỉ công ty" />
-                </div>
-                <div class="col-md-12">
-                  <label class="form-label fw-semibold">Logo công ty</label>
-                  <input type="text" class="form-control" id="editCompanyLogo" placeholder="Nhập logo dạng url" />
-                </div>
-                <div class="col-md-12">
-                  <label class="form-label fw-semibold">Mô tả công ty</label>
-                  <textarea
-                    class="form-control"
-                    id="editCompanyDescription"
-                    rows="5"
-                    placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"
-                  ></textarea>
+                <div class="col-lg-4">
+                  <button id="btn-filter-join-request" class="btn btn-primary-soft w-100">
+                    <i class="bi bi-funnel me-2"></i>
+                    Lọc yêu cầu
+                  </button>
                 </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-soft" data-bs-dismiss="modal">Đóng</button>
-            <button type="button" class="btn btn-primary-soft" id="saveEditCompanyBtn">Lưu thay đổi</button>
+            </div>
+
+            <div class="company-list company-join-request-list"></div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="../../js/utils/loadNavbarHR.js"></script>
-    <script type="module" src="../../js/HR js/companyManagement.js"></script>
-  </body>
+  <div class="modal fade" id="editCompanyModal" tabindex="-1" aria-labelledby="editCompanyModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="editCompanyModalLabel">Chỉnh sửa thông tin công ty</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editCompanyForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tên công ty</label>
+                <input type="text" class="form-control" id="editCompanyName" placeholder="Nhập tên công ty" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Lĩnh vực hoạt động</label>
+                <input type="text" class="form-control" id="editCompanyCategory"
+                  placeholder="Ví dụ: Công nghệ, Logistics..." />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Website</label>
+                <input type="text" class="form-control" id="editCompanyWebsite" placeholder="Nhập địa chỉ website" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Số điện thoại</label>
+                <input type="text" class="form-control" id="editCompanyPhone" placeholder="Nhập số điện thoại" />
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Địa chỉ</label>
+                <input type="text" class="form-control" id="editCompanyAddress" placeholder="Nhập địa chỉ công ty" />
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Logo công ty</label>
+                <input type="text" class="form-control" id="editCompanyLogo" placeholder="Nhập logo dạng url" />
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-semibold">Mô tả công ty</label>
+                <textarea class="form-control" id="editCompanyDescription" rows="5"
+                  placeholder="Giới thiệu ngắn về công ty, văn hóa và lĩnh vực hoạt động"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-soft" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary-soft" id="saveEditCompanyBtn">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="../../js/utils/loadNavbarHR.js"></script>
+  <script type="module" src="../../js/HR js/companyManagement.js"></script>
+</body>
+
 </html>

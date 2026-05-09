@@ -13,6 +13,28 @@ if (!token) {
   window.location.href = "../../pages/utils/login.html";
 }
 
+async function getHRProfile() {
+  try {
+    const res = await fetch(`${URL}/api/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Không thể tải thông tin HR");
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Lỗi khi tải thông tin HR:", error);
+    throw error;
+  }
+}
+
 async function loadNavbar() {
   try {
     const res = await fetch("../../pages/utils/navbarHR.html");
@@ -24,6 +46,7 @@ async function loadNavbar() {
     if (userName && user) {
       userName.innerHTML = user.fullName;
     }
+    renderSidebarUser();
 
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
@@ -111,8 +134,6 @@ async function loadNotifications() {
 
     const data = await res.json();
 
-    console.log(data);
-
     if (!res.ok) {
       throw new Error(data.message || "Không thể tải thông báo");
     }
@@ -128,6 +149,69 @@ async function loadNotifications() {
         <li class="notification-empty">Không thể tải thông báo</li>
       `;
     }
+  }
+}
+
+function getInitials(name = "") {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(-2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");
+}
+
+function getUserAvatarUrl(user = {}) {
+  const avatar = user.avatarUrl || user.avatar || user.profileImage || user.image || user.photoUrl || "";
+
+  if (!avatar) return "";
+
+  if (avatar.startsWith("http")) {
+    return avatar;
+  }
+
+  return `${URL}/${avatar}`;
+}
+
+function getRoleLabel(role = "") {
+  const normalizedRole = String(role).trim().toLowerCase();
+
+  const roleMap = {
+    hr: "HR",
+    recruiter: "Recruiter",
+    admin: "Admin",
+    owner: "Owner",
+    member: "Thành viên",
+    candidate: "Ứng viên",
+    user: "Người dùng",
+  };
+
+  return roleMap[normalizedRole] || "HR / Recruiter";
+}
+
+async function renderSidebarUser() {
+  if (!user) return;
+
+  const hrProfilePromise = await getHRProfile();
+
+  const sidebarUserName = document.getElementById("sidebarUserName");
+  const sidebarUserRole = document.getElementById("sidebarUserRole");
+  const sidebarUserAvatar = document.getElementById("sidebarUserAvatar");
+
+  const fullName = user.fullName || user.name || "HR User";
+  const roleLabel = getRoleLabel(user.role);
+  const avatarUrl = hrProfilePromise.profileData.avatar || "";
+
+  if (sidebarUserName) {
+    sidebarUserName.textContent = fullName;
+  }
+
+  if (sidebarUserRole) {
+    sidebarUserRole.textContent = roleLabel;
+  }
+
+  if (sidebarUserAvatar) {
+    sidebarUserAvatar.innerHTML = avatarUrl ? `<img src="${avatarUrl}" alt="${fullName}" />` : `<span>${getInitials(fullName) || "HR"}</span>`;
   }
 }
 

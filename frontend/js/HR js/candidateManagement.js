@@ -13,6 +13,80 @@ const candidatePaginationState = {
   pageSize: 5,
 };
 
+function showToast(message, type = "info") {
+  let toastContainer = document.getElementById("appToastContainer");
+
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "appToastContainer";
+    toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+    toastContainer.style.zIndex = "1080";
+    document.body.appendChild(toastContainer);
+  }
+
+  const typeConfig = {
+    success: {
+      bg: "text-bg-success",
+      icon: "bi-check-circle-fill",
+      title: "Thành công",
+    },
+    error: {
+      bg: "text-bg-danger",
+      icon: "bi-x-circle-fill",
+      title: "Lỗi",
+    },
+    warning: {
+      bg: "text-bg-warning",
+      icon: "bi-exclamation-triangle-fill",
+      title: "Cảnh báo",
+    },
+    info: {
+      bg: "text-bg-primary",
+      icon: "bi-info-circle-fill",
+      title: "Thông báo",
+    },
+  };
+
+  const config = typeConfig[type] || typeConfig.info;
+
+  const toastEl = document.createElement("div");
+  toastEl.className = `toast align-items-center border-0 shadow-lg ${config.bg}`;
+  toastEl.setAttribute("role", "alert");
+  toastEl.setAttribute("aria-live", "assertive");
+  toastEl.setAttribute("aria-atomic", "true");
+
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-start gap-2">
+        <i class="bi ${config.icon} mt-1"></i>
+        <div>
+          <div class="fw-bold">${config.title}</div>
+          <div>${message}</div>
+        </div>
+      </div>
+      <button 
+        type="button" 
+        class="btn-close btn-close-white me-2 m-auto" 
+        data-bs-dismiss="toast" 
+        aria-label="Close"
+      ></button>
+    </div>
+  `;
+
+  toastContainer.appendChild(toastEl);
+
+  const toast = new bootstrap.Toast(toastEl, {
+    delay: 3500,
+    autohide: true,
+  });
+
+  toast.show();
+
+  toastEl.addEventListener("hidden.bs.toast", () => {
+    toastEl.remove();
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await initCandidateManagement();
   initBtnOverviewActions();
@@ -153,85 +227,92 @@ function initAIRecommend() {
     const jobId = document.getElementById("jobFilter")?.value;
 
     if (!jobId) {
-      alert("Vui lòng chọn vị trí tuyển dụng trước khi gợi ý ứng viên.");
+      showToast("Vui lòng chọn vị trí tuyển dụng trước khi gợi ý ứng viên.", "warning");
+      return;
+    }
+
+    const limitInput = document.getElementById("aiRecommendLimitInput");
+    const limit = Number(limitInput?.value) || 2;
+
+    if (limit < 1) {
+      showToast("Số lượng gợi ý phải lớn hơn 0.", "warning");
       return;
     }
 
     btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Đang phân tích...`;
     btn.disabled = true;
 
-    const limitInput = document.getElementById("aiRecommendLimitInput");
-    const limit = Number(limitInput?.value) || 2;
+    try {
+      const result = await getRecommendedCandidates(jobId, limit);
 
-    if (limit < 1) {
-      alert("Số lượng gợi ý phải lớn hơn 0.");
-      return;
+      if (!result || !Array.isArray(result.candidates)) {
+        showToast("Không có dữ liệu gợi ý ứng viên.", "warning");
+        return;
+      }
+
+      const aiSummary = document.getElementById("aiRecommendSummary");
+
+      if (aiSummary) {
+        aiSummary.classList.remove("d-none");
+        aiSummary.innerHTML = `
+          <strong>Đã gợi ý ${result.candidates.length} ứng viên phù hợp nhất.</strong>
+        `;
+      }
+
+      const aiMap = new Map(result.candidates.map((candidate) => [candidate.applicationId?.toString(), candidate]));
+
+      allCandidates = allCandidates.map((candidate) => {
+        const ai = aiMap.get(candidate.applicationId?.toString());
+
+        return {
+          ...candidate,
+          aiScore: ai?.score || 0,
+          aiLevel: ai?.level || "",
+          aiReason: ai?.reason || "",
+          aiMatchedSkills: ai?.matchedSkills || [],
+          aiBreakdown: ai?.breakdown || null,
+          profile: ai?.profile || candidate.profile || null,
+        };
+      });
+
+      filteredCandidates = filteredCandidates.map((candidate) => {
+        const ai = aiMap.get(candidate.applicationId?.toString());
+
+        return {
+          ...candidate,
+          aiScore: ai?.score || 0,
+          aiLevel: ai?.level || "",
+          aiReason: ai?.reason || "",
+          aiMatchedSkills: ai?.matchedSkills || [],
+          aiBreakdown: ai?.breakdown || null,
+          profile: ai?.profile || candidate.profile || null,
+        };
+      });
+
+      filteredCandidates.sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
+      candidatePaginationState.currentPage = 1;
+
+      if (selectedCandidate) {
+        selectedCandidate =
+          filteredCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
+          allCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
+          selectedCandidate;
+      }
+
+      const sortFilter = document.getElementById("sortFilter");
+      if (sortFilter) sortFilter.value = "ai_score";
+
+      renderCandidateList();
+      renderCandidateDetail(selectedCandidate || filteredCandidates[0] || null);
+
+      showToast("Gợi ý ứng viên thành công!", "success");
+    } catch (error) {
+      console.error("AI recommend error:", error);
+      showToast("Không thể gợi ý ứng viên. Vui lòng thử lại.", "error");
+    } finally {
+      btn.innerHTML = `🤖 Gợi ý ứng viên`;
+      btn.disabled = false;
     }
-
-    const result = await getRecommendedCandidates(jobId, limit);
-
-    btn.innerHTML = `🤖 Gợi ý ứng viên`;
-    btn.disabled = false;
-
-    if (!result || !Array.isArray(result.candidates)) {
-      alert("Không có dữ liệu gợi ý ứng viên.");
-      return;
-    }
-
-    const aiSummary = document.getElementById("aiRecommendSummary");
-
-    if (aiSummary) {
-      aiSummary.classList.remove("d-none");
-      aiSummary.innerHTML = `
-    <strong>Đã gợi ý ${result.candidates.length} ứng viên phù hợp nhất.</strong>
-  `;
-    }
-
-    const aiMap = new Map(result.candidates.map((candidate) => [candidate.applicationId?.toString(), candidate]));
-
-    allCandidates = allCandidates.map((candidate) => {
-      const ai = aiMap.get(candidate.applicationId?.toString());
-
-      return {
-        ...candidate,
-        aiScore: ai?.score || 0,
-        aiLevel: ai?.level || "",
-        aiReason: ai?.reason || "",
-        aiMatchedSkills: ai?.matchedSkills || [],
-        aiBreakdown: ai?.breakdown || null,
-        profile: ai?.profile || candidate.profile || null,
-      };
-    });
-
-    filteredCandidates = filteredCandidates.map((candidate) => {
-      const ai = aiMap.get(candidate.applicationId?.toString());
-
-      return {
-        ...candidate,
-        aiScore: ai?.score || 0,
-        aiLevel: ai?.level || "",
-        aiReason: ai?.reason || "",
-        aiMatchedSkills: ai?.matchedSkills || [],
-        aiBreakdown: ai?.breakdown || null,
-        profile: ai?.profile || candidate.profile || null,
-      };
-    });
-
-    filteredCandidates.sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
-    candidatePaginationState.currentPage = 1;
-
-    if (selectedCandidate) {
-      selectedCandidate =
-        filteredCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
-        allCandidates.find((candidate) => candidate.applicationId === selectedCandidate.applicationId) ||
-        selectedCandidate;
-    }
-
-    const sortFilter = document.getElementById("sortFilter");
-    if (sortFilter) sortFilter.value = "ai_score";
-
-    renderCandidateList();
-    renderCandidateDetail(selectedCandidate || filteredCandidates[0] || null);
   });
 }
 
@@ -349,8 +430,7 @@ function renderSkillBadges(candidate = {}, options = {}) {
     })
     .join("");
 
-  const moreBadge =
-    hiddenCount > 0 ? `<span class="candidate-skill-badge candidate-skill-more">+${hiddenCount} kỹ năng</span>` : "";
+  const moreBadge = hiddenCount > 0 ? `<span class="candidate-skill-badge candidate-skill-more">+${hiddenCount} kỹ năng</span>` : "";
 
   return `${badges}${moreBadge}`;
 }
@@ -458,27 +538,84 @@ function renderOverview() {
   document.getElementById("rejectedCandidates").textContent = rejected;
 }
 
+function getInitials(name = "") {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(-2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");
+}
+
 function renderRecentCandidates() {
   const container = document.getElementById("recentCandidates");
   container.innerHTML = "";
 
-  const recent = [...allCandidates].sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt)).slice(0, 5);
+  const recent = [...allCandidates].sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt)).slice(0, 3);
 
   if (!recent.length) {
-    container.innerHTML = `<div class="empty-state">Chưa có ứng viên nào.</div>`;
+    container.innerHTML = `
+      <div class="text-center text-muted border rounded-4 py-4">
+        Chưa có ứng viên nào.
+      </div>
+    `;
     return;
   }
 
   recent.forEach((candidate) => {
     const div = document.createElement("div");
-    div.className = "recent-item";
+    div.className = "card border-0 shadow-sm rounded-4 mb-3";
+
     div.innerHTML = `
-      <div class="recent-title">${escapeHTML(candidate.fullName)}</div>
-      <div class="recent-sub">
-        ${escapeHTML(candidate.jobTitle)} • ${escapeHTML(candidate.email)} • Nộp ngày: ${formatDate(candidate.appliedAt)}
+      <div class="card-body p-3">
+        <div class="d-flex align-items-start gap-3">
+          <div
+            class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden"
+            style="width: 44px; height: 44px;"
+          >
+            ${
+              candidate.avatar
+                ? `<img 
+                    src="${escapeHTML(candidate.avatar)}" 
+                    alt="${escapeHTML(candidate.fullName)}"
+                    class="w-100 h-100 object-fit-cover"
+                  />`
+                : escapeHTML(getInitials(candidate.fullName))
+            }
+          </div>
+
+          <div class="flex-grow-1 min-w-0">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <h6 class="mb-1 fw-bold text-dark">
+                  ${escapeHTML(candidate.fullName)}
+                </h6>
+                <div class="text-primary fw-semibold small mb-2">
+                  ${escapeHTML(candidate.jobTitle)}
+                </div>
+              </div>
+
+              <span class="badge rounded-pill px-3 py-2 status-badge ${candidate.status}">
+                ${getStatusLabel(candidate.status)}
+              </span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 text-muted small">
+              <span class="d-inline-flex align-items-center gap-1">
+                <i class="bi bi-envelope"></i>
+                ${escapeHTML(candidate.email)}
+              </span>
+
+              <span class="d-inline-flex align-items-center gap-1">
+                <i class="bi bi-calendar3"></i>
+                Nộp ngày: ${formatDate(candidate.appliedAt)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      <span class="badge rounded-pill px-3 py-2 status-badge ${candidate.status}">${getStatusLabel(candidate.status)}</span>
     `;
+
     container.appendChild(div);
   });
 }
@@ -1019,7 +1156,7 @@ function initStatusBoardActions() {
 
   refeshBtn.addEventListener("click", () => {
     renderStatusBoard();
-    alert("Đã cập nhật lại trạng thái");
+    showToast("Đã cập nhật lại trạng thái.", "success");
   });
 }
 
@@ -1132,13 +1269,12 @@ async function updateStatus(applicationId, newStatus) {
     renderRecentCandidates();
     renderStatusBoard();
 
-    alert("Cập nhật trạng thái thành công!");
+    showToast("Cập nhật trạng thái thành công!", "success");
   } catch (error) {
     console.error("Lỗi cập nhật trạng thái:", error);
 
     const message = error?.response?.data?.message || error?.message || "Cập nhật trạng thái thất bại!";
-
-    alert(message);
+    showToast(message, "error");
   }
 }
 

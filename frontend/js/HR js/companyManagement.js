@@ -15,6 +15,80 @@ const apiHeaders = {
   Authorization: `Bearer ${token}`,
 };
 
+function showToast(message, type = "info") {
+  let toastContainer = document.getElementById("appToastContainer");
+
+  if (!toastContainer) {
+    toastContainer = document.createElement("div");
+    toastContainer.id = "appToastContainer";
+    toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+    toastContainer.style.zIndex = "1080";
+    document.body.appendChild(toastContainer);
+  }
+
+  const typeConfig = {
+    success: {
+      bg: "text-bg-success",
+      icon: "bi-check-circle-fill",
+      title: "Thành công",
+    },
+    error: {
+      bg: "text-bg-danger",
+      icon: "bi-x-circle-fill",
+      title: "Lỗi",
+    },
+    warning: {
+      bg: "text-bg-warning",
+      icon: "bi-exclamation-triangle-fill",
+      title: "Cảnh báo",
+    },
+    info: {
+      bg: "text-bg-primary",
+      icon: "bi-info-circle-fill",
+      title: "Thông báo",
+    },
+  };
+
+  const config = typeConfig[type] || typeConfig.info;
+
+  const toastEl = document.createElement("div");
+  toastEl.className = `toast align-items-center border-0 shadow-lg ${config.bg}`;
+  toastEl.setAttribute("role", "alert");
+  toastEl.setAttribute("aria-live", "assertive");
+  toastEl.setAttribute("aria-atomic", "true");
+
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-start gap-2">
+        <i class="bi ${config.icon} mt-1"></i>
+        <div>
+          <div class="fw-bold">${config.title}</div>
+          <div>${message}</div>
+        </div>
+      </div>
+      <button 
+        type="button" 
+        class="btn-close btn-close-white me-2 m-auto" 
+        data-bs-dismiss="toast" 
+        aria-label="Close"
+      ></button>
+    </div>
+  `;
+
+  toastContainer.appendChild(toastEl);
+
+  const toast = new bootstrap.Toast(toastEl, {
+    delay: 3500,
+    autohide: true,
+  });
+
+  toast.show();
+
+  toastEl.addEventListener("hidden.bs.toast", () => {
+    toastEl.remove();
+  });
+}
+
 function showEmptyState(container, icon, title, text) {
   if (!container) return;
   container.innerHTML = `
@@ -62,8 +136,9 @@ async function getMyCompany() {
     const res = await fetch(`${URL}/api/companies/me`, {
       headers: apiHeaders,
     });
+
     if (res.status === 404) return null;
-    
+
     const data = await res.json().catch(() => null);
 
     if (!res.ok) throw new Error(data?.message || "Không thể tải công ty");
@@ -82,7 +157,7 @@ async function createCompany(data) {
       body: JSON.stringify(data),
     });
   } catch (err) {
-    alert(err.message || "Tạo công ty thất bại");
+    showToast(err.message || "Tạo công ty thất bại", "error");
     return null;
   }
 }
@@ -94,7 +169,7 @@ async function updateMyCompany(companyId, data) {
       body: JSON.stringify(data),
     });
   } catch (err) {
-    alert(err.message || "Cập nhật công ty thất bại");
+    showToast(err.message || "Cập nhật công ty thất bại", "error");
     return null;
   }
 }
@@ -105,7 +180,7 @@ async function deleteCompany(companyId) {
       method: "DELETE",
     });
   } catch (err) {
-    alert(err.message || "Không thể xoá / rời công ty");
+    showToast(err.message || "Không thể xoá / rời công ty", "error");
     return null;
   }
 }
@@ -117,7 +192,7 @@ async function sendJoinRequest(companyId, requestedRole = "member") {
       body: JSON.stringify({ requestedRole }),
     });
   } catch (err) {
-    alert(err.message || "Không thể gửi yêu cầu tham gia công ty");
+    showToast(err.message || "Không thể gửi yêu cầu tham gia công ty", "error");
     return null;
   }
 }
@@ -137,7 +212,7 @@ async function approveJoinRequest(requestId) {
       method: "PATCH",
     });
   } catch (err) {
-    alert(err.message || "Không thể duyệt yêu cầu");
+    showToast(err.message || "Không thể duyệt yêu cầu", "error");
     return null;
   }
 }
@@ -148,7 +223,7 @@ async function rejectJoinRequest(requestId) {
       method: "PATCH",
     });
   } catch (err) {
-    alert(err.message || "Không thể từ chối yêu cầu");
+    showToast(err.message || "Không thể từ chối yêu cầu", "error");
     return null;
   }
 }
@@ -218,13 +293,7 @@ function normalizeText(value) {
 }
 
 function getCompanySearchFields(company) {
-  return [
-    company.companyName,
-    company.companyCode || company._id?.slice(-6),
-    company.address,
-    company.category,
-    company.description,
-  ]
+  return [company.companyName, company.companyCode || company._id?.slice(-6), company.address, company.category, company.description]
     .map(normalizeText)
     .join(" ");
 }
@@ -265,18 +334,12 @@ function getCompanyFormData(prefix = "") {
 }
 
 function resetCreateCompanyForm() {
-  [
-    ".companyName",
-    ".companyCategory",
-    ".companyWebsite",
-    ".companyPhone",
-    ".companyAddress",
-    ".companyLogo",
-    ".companyDescription",
-  ].forEach((selector) => {
-    const el = $(selector);
-    if (el) el.value = "";
-  });
+  [".companyName", ".companyCategory", ".companyWebsite", ".companyPhone", ".companyAddress", ".companyLogo", ".companyDescription"].forEach(
+    (selector) => {
+      const el = $(selector);
+      if (el) el.value = "";
+    },
+  );
 }
 
 function renderCompanyCard(company) {
@@ -334,11 +397,7 @@ function renderJoinRequestCard(request) {
         </span>
       </div>
 
-      ${
-        isAdminRequest
-          ? `<div class="alert alert-warning mt-3 mb-2">Yêu cầu quyền HR / Admin - chỉ owner được duyệt.</div>`
-          : ""
-      }
+      ${isAdminRequest ? `<div class="alert alert-warning mt-3 mb-2">Yêu cầu quyền HR / Admin - chỉ owner được duyệt.</div>` : ""}
 
       <div class="d-flex gap-2 mt-3">
         <button
@@ -366,12 +425,7 @@ function renderCompanyList(companies = []) {
   if (!container) return;
 
   if (!companies.length) {
-    return showEmptyState(
-      container,
-      "bi-search",
-      "Không tìm thấy công ty",
-      "Không có công ty nào phù hợp với từ khóa bạn nhập.",
-    );
+    return showEmptyState(container, "bi-search", "Không tìm thấy công ty", "Không có công ty nào phù hợp với từ khóa bạn nhập.");
   }
 
   container.innerHTML = companies.map(renderCompanyCard).join("");
@@ -382,12 +436,7 @@ function renderJoinRequestList(requests = []) {
   if (!container) return;
 
   if (!requests.length) {
-    return showEmptyState(
-      container,
-      "bi-search",
-      "Không tìm thấy yêu cầu",
-      "Không có yêu cầu nào phù hợp với từ khóa tìm kiếm.",
-    );
+    return showEmptyState(container, "bi-search", "Không tìm thấy yêu cầu", "Không có yêu cầu nào phù hợp với từ khóa tìm kiếm.");
   }
 
   container.innerHTML = requests.map(renderJoinRequestCard).join("");
@@ -400,12 +449,7 @@ async function renderCompanies() {
   dataCompanies = await loadCompanies();
 
   if (!dataCompanies.length) {
-    return showEmptyState(
-      container,
-      "bi-buildings",
-      "Chưa có công ty nào",
-      "Hiện tại chưa có dữ liệu công ty để tham gia.",
-    );
+    return showEmptyState(container, "bi-buildings", "Chưa có công ty nào", "Hiện tại chưa có dữ liệu công ty để tham gia.");
   }
 
   renderCompanyList(dataCompanies);
@@ -416,23 +460,13 @@ async function renderCompanyJoinRequests() {
   if (!container) return;
 
   if (!myCompanyData || !isAdminOrOwner(myCompanyData)) {
-    return showEmptyState(
-      container,
-      "bi-shield-lock",
-      "Không có quyền truy cập",
-      "Chỉ owner hoặc admin mới xem được yêu cầu gia nhập.",
-    );
+    return showEmptyState(container, "bi-shield-lock", "Không có quyền truy cập", "Chỉ owner hoặc admin mới xem được yêu cầu gia nhập.");
   }
 
   companyJoinRequests = await getMyCompanyJoinRequests();
 
   if (!companyJoinRequests.length) {
-    return showEmptyState(
-      container,
-      "bi-inbox",
-      "Chưa có yêu cầu gia nhập",
-      "Hiện chưa có ai gửi yêu cầu vào công ty.",
-    );
+    return showEmptyState(container, "bi-inbox", "Chưa có yêu cầu gia nhập", "Hiện chưa có ai gửi yêu cầu vào công ty.");
   }
 
   renderJoinRequestList(companyJoinRequests);
@@ -510,17 +544,26 @@ async function refreshAllCompanyViews() {
 }
 
 async function handleCreateCompany() {
+  if (myCompanyData) {
+    showToast("Bạn đang thuộc một công ty nên không thể tạo công ty mới. Vui lòng rời khỏi công ty hiện tại trước khi tạo công ty khác.", "warning");
+
+    const myCompanyTab = $("#my-company-tab");
+    if (myCompanyTab) bootstrap.Tab.getOrCreateInstance(myCompanyTab).show();
+
+    return;
+  }
+
   const companyData = getCompanyFormData();
 
   if (!validateCompanyForm(companyData)) {
-    alert("Vui lòng nhập đầy đủ thông tin công ty!");
+    showToast("Vui lòng nhập đầy đủ thông tin công ty!", "warning");
     return;
   }
 
   const result = await createCompany(companyData);
   if (!result) return;
 
-  alert("Tạo công ty thành công!");
+  showToast("Tạo công ty thành công!", "success");
   resetCreateCompanyForm();
   await refreshAllCompanyViews();
 
@@ -549,26 +592,26 @@ function fillEditCompanyModal(data) {
 
 async function handleUpdateCompany() {
   if (!myCompanyData?._id) {
-    alert("Không tìm thấy công ty để cập nhật!");
+    showToast("Không tìm thấy công ty để cập nhật!", "error");
     return;
   }
 
   if (!isOwner(myCompanyData)) {
-    alert("Chỉ owner mới được cập nhật thông tin công ty!");
+    showToast("Chỉ owner mới được cập nhật thông tin công ty!", "warning");
     return;
   }
 
   const updateData = getCompanyFormData("edit");
 
   if (!validateCompanyForm(updateData)) {
-    alert("Vui lòng nhập đầy đủ thông tin công ty!");
+    showToast("Vui lòng nhập đầy đủ thông tin công ty!", "warning");
     return;
   }
 
   const result = await updateMyCompany(myCompanyData._id, updateData);
   if (!result) return;
 
-  alert("Cập nhật thông tin công ty thành công!");
+  showToast("Cập nhật thông tin công ty thành công!", "success");
 
   const modalElement = document.getElementById("editCompanyModal");
   const modalInstance = bootstrap.Modal.getInstance(modalElement);
@@ -596,9 +639,7 @@ function searchCompanyJoinRequests(keyword = "") {
     return;
   }
 
-  renderJoinRequestList(
-    companyJoinRequests.filter((request) => getJoinRequestSearchFields(request).includes(normalizedKeyword)),
-  );
+  renderJoinRequestList(companyJoinRequests.filter((request) => getJoinRequestSearchFields(request).includes(normalizedKeyword)));
 }
 
 function bindLiveSearch({ inputSelector, buttonSelector, onSearch }) {
@@ -624,23 +665,27 @@ function bindStaticEvents() {
   $("#deleteCompanyBtn")?.addEventListener("click", async () => {
     if (!myCompanyData) return;
 
-    const ok = confirm(
-      isOwner(myCompanyData) ? "Bạn có thật sự muốn xoá công ty?" : "Bạn có muốn rời khỏi công ty này không?",
-    );
+    const ok = confirm(isOwner(myCompanyData) ? "Bạn có thật sự muốn xoá công ty?" : "Bạn có muốn rời khỏi công ty này không?");
     if (!ok) return;
 
     const result = await deleteCompany(myCompanyData._id);
-    if (result) window.location.reload();
+    if (result) {
+      showToast(isOwner(myCompanyData) ? "Xoá công ty thành công!" : "Rời công ty thành công!", "success");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
+    }
   });
 
   $("#openEditCompanyModalBtn")?.addEventListener("click", () => {
     if (!myCompanyData) {
-      alert("Bạn chưa có công ty để chỉnh sửa.");
+      showToast("Bạn chưa có công ty để chỉnh sửa.", "warning");
       return;
     }
 
     if (!isOwner(myCompanyData)) {
-      alert("Chỉ owner mới được chỉnh sửa công ty.");
+      showToast("Chỉ owner mới được chỉnh sửa công ty.", "warning");
       return;
     }
 
@@ -652,10 +697,29 @@ function bindStaticEvents() {
     if (!myCompanyData) return;
 
     e.preventDefault();
-    alert("Bạn đang thuộc một công ty. Vui lòng rời khỏi công ty hiện tại trước khi tham gia công ty khác.");
+
+    showToast("Bạn đang thuộc một công ty. Vui lòng rời khỏi công ty hiện tại trước khi tham gia công ty khác.", "warning");
 
     const myCompanyTab = $("#my-company-tab");
     if (myCompanyTab) bootstrap.Tab.getOrCreateInstance(myCompanyTab).show();
+  });
+
+  $("#create-company-tab")?.addEventListener("show.bs.tab", (e) => {
+    if (!myCompanyData) return;
+
+    e.preventDefault();
+
+    showToast("Bạn đang thuộc một công ty nên không thể tạo công ty mới. Vui lòng rời khỏi công ty hiện tại trước khi tạo công ty khác.", "warning");
+
+    const myCompanyTab = $("#my-company-tab");
+    if (myCompanyTab) bootstrap.Tab.getOrCreateInstance(myCompanyTab).show();
+  });
+
+  $("#goCreateCompanyBtn")?.addEventListener("click", (e) => {
+    if (!myCompanyData) return;
+
+    e.preventDefault();
+    showToast("Bạn đang thuộc một công ty nên không thể tạo công ty mới.", "warning");
   });
 
   bindLiveSearch({
@@ -675,14 +739,16 @@ function bindStaticEvents() {
     if (!button) return;
 
     if (myCompanyData) {
-      alert("Bạn đang thuộc một công ty. Vui lòng rời khỏi công ty hiện tại trước khi tham gia công ty khác.");
+      showToast("Bạn đang thuộc một công ty. Vui lòng rời khỏi công ty hiện tại trước khi tham gia công ty khác.", "warning");
+
       const myCompanyTab = $("#my-company-tab");
       if (myCompanyTab) bootstrap.Tab.getOrCreateInstance(myCompanyTab).show();
+
       return;
     }
 
     const result = await sendJoinRequest(button.dataset.id);
-    if (result) alert("Đã gửi yêu cầu tham gia công ty thành công!");
+    if (result) showToast("Đã gửi yêu cầu tham gia công ty thành công!", "success");
   });
 
   $(".company-join-request-list")?.addEventListener("click", async (e) => {
@@ -695,9 +761,10 @@ function bindStaticEvents() {
 
       const result = await approveJoinRequest(approveBtn.dataset.id);
       if (result) {
-        alert("Duyệt yêu cầu thành công!");
+        showToast("Duyệt yêu cầu thành công!", "success");
         await refreshAllCompanyViews();
       }
+
       return;
     }
 
@@ -707,7 +774,7 @@ function bindStaticEvents() {
 
       const result = await rejectJoinRequest(rejectBtn.dataset.id);
       if (result) {
-        alert("Từ chối yêu cầu thành công!");
+        showToast("Từ chối yêu cầu thành công!", "success");
         await renderCompanyJoinRequests();
       }
     }
