@@ -1,5 +1,6 @@
 import BASE_URL from '../utils/url.js';
 import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
+import { showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -269,8 +270,10 @@ function renderSimilarJobs(jobs) {
 
 window.toggleSaveJob = async function (id, btnElement, isMainDetail = false) {
   if (!token) {
-    alert('Vui lòng đăng nhập để lưu việc làm!');
-    window.location.href = '../../pages/utils/login.html';
+    showToast('Vui lòng đăng nhập để lưu việc làm!', 'warning');
+    setTimeout(() => {
+      window.location.href = '../../pages/utils/login.html';
+    }, 800);
     return;
   }
 
@@ -296,6 +299,7 @@ window.toggleSaveJob = async function (id, btnElement, isMainDetail = false) {
           icon.classList.remove('bi-heart-fill', 'text-danger');
           icon.classList.add('bi-heart');
         }
+        showToast('Đã bỏ lưu việc làm.', 'info');
       }
     } else {
       // LƯU MỚI
@@ -320,12 +324,13 @@ window.toggleSaveJob = async function (id, btnElement, isMainDetail = false) {
           icon.classList.remove('bi-heart');
           icon.classList.add('bi-heart-fill', 'text-danger');
         }
+        showToast('Đã lưu việc làm.', 'success');
       } else {
-        alert('Lỗi: Không thể lưu việc làm');
+        showToast('Không thể lưu việc làm.', 'error');
       }
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 

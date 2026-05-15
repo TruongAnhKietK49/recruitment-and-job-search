@@ -1,5 +1,6 @@
 import BASE_URL from '../utils/url.js';
 import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
+import { showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -262,8 +263,10 @@ function renderCompanyAndJobs(company, jobs) {
 
 window.toggleSaveJob = async function (jobId, btnElement) {
   if (!token) {
-    alert('Vui lòng đăng nhập để lưu việc làm!');
-    window.location.href = '../../pages/utils/login.html';
+    showToast('Vui lòng đăng nhập để lưu việc làm!', 'warning');
+    setTimeout(() => {
+      window.location.href = '../../pages/utils/login.html';
+    }, 800);
     return;
   }
 
@@ -281,6 +284,7 @@ window.toggleSaveJob = async function (jobId, btnElement) {
         savedJobIds = savedJobIds.filter(id => id !== jobId);
         icon.classList.remove('bi-heart-fill', 'text-danger');
         icon.classList.add('bi-heart', 'text-muted');
+        showToast('Đã bỏ lưu việc làm.', 'info');
       }
     } else {
       const res = await fetch(`${API_URL}/jobs/save-job`, {
@@ -296,12 +300,13 @@ window.toggleSaveJob = async function (jobId, btnElement) {
         savedJobIds.push(jobId);
         icon.classList.remove('bi-heart', 'text-muted');
         icon.classList.add('bi-heart-fill', 'text-danger');
+        showToast('Đã lưu việc làm.', 'success');
       } else {
-        alert('Lỗi: Không thể lưu việc làm');
+        showToast('Không thể lưu việc làm.', 'error');
       }
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 // ================= LOGIC XỬ LÝ NỘP HỒ SƠ =================
@@ -329,8 +334,10 @@ let currentApplyJobId = null;
 
 window.openApplyModal = async function(jobId) {
   if (!token) {
-    alert("Vui lòng đăng nhập để ứng tuyển!");
-    window.location.href = '../../pages/utils/login.html';
+    showToast("Vui lòng đăng nhập để ứng tuyển!", "warning");
+    setTimeout(() => {
+      window.location.href = '../../pages/utils/login.html';
+    }, 800);
     return;
   }
   
@@ -373,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const coverLetter = document.getElementById('coverLetter')?.value || "";
 
       if (!selectedCvId) {
-        alert("Vui lòng chọn một bản CV từ danh sách!");
+        showToast("Vui lòng chọn một bản CV từ danh sách!", "warning");
         return;
       }
 
@@ -414,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
       } catch (err) {
-        alert("Lỗi ứng tuyển: " + err.message);
+        showToast("Lỗi ứng tuyển: " + err.message, "error");
       } finally {
         submitBtn.innerHTML = '<i class="bi bi-send me-2"></i> Nộp hồ sơ';
         submitBtn.disabled = false;

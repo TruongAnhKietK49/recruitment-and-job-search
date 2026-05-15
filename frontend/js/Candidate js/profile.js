@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -33,7 +34,7 @@ function updateAvatarUI(url) {
   const avatarWrapper = document.getElementById('avatarWrapper');
   if (url) {
     avatarWrapper.innerHTML = `
-      <img src="${url}" class="profile-avatar shadow-sm" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;" alt="Avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'; alert('Đường dẫn ảnh bị lỗi hoặc không truy cập được!');">
+      <img src="${url}" class="profile-avatar shadow-sm" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;" alt="Avatar" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=random'; window.showToast?.('Đường dẫn ảnh bị lỗi hoặc không truy cập được!', 'warning');">
       <button type="button" class="btn-camera" id="btnTriggerCamera"><i class="bi bi-camera"></i></button>
     `;
   } else {
@@ -168,7 +169,8 @@ document.getElementById('btnSaveAvatarUrl').addEventListener('click', () => {
   const urlInput = document.getElementById('inputAvatarUrl').value.trim();
   
   if (!urlInput) {
-    return alert('Vui lòng nhập đường dẫn ảnh!');
+    showToast('Vui lòng nhập đường dẫn ảnh!', 'warning');
+    return;
   }
 
   currentAvatarUrl = urlInput;
@@ -213,8 +215,6 @@ async function updateProfile() {
 
     if (!res.ok) throw new Error('Lỗi cập nhật hệ thống');
 
-    alert('Cập nhật hồ sơ thành công!');
-
     const storage = localStorage.getItem('user') ? localStorage : sessionStorage;
     const sessionUser = JSON.parse(storage.getItem('user') || '{}');
     
@@ -223,10 +223,11 @@ async function updateProfile() {
     
     storage.setItem('user', JSON.stringify(sessionUser));
 
-    window.location.reload();
+    showToast('Cập nhật hồ sơ thành công!', 'success');
+    setTimeout(() => window.location.reload(), 900);
   } catch (err) {
     console.error(err);
-    alert('Có lỗi xảy ra: ' + err.message);
+    showToast('Có lỗi xảy ra: ' + err.message, 'error');
   } finally {
     btn.innerHTML = '<i class="bi bi-floppy me-2"></i> Lưu thay đổi';
     btn.disabled = false;
@@ -248,7 +249,8 @@ document.getElementById('changePasswordForm').addEventListener('submit', async (
   const confirmPassword = form.confirmPassword.value;
 
   if (newPassword !== confirmPassword) {
-    return alert('Mật khẩu xác nhận không khớp!');
+    showToast('Mật khẩu xác nhận không khớp!', 'warning');
+    return;
   }
 
   const btn = document.getElementById('btnSubmitPassword');
@@ -267,15 +269,17 @@ document.getElementById('changePasswordForm').addEventListener('submit', async (
 
     const data = await res.json();
     if (res.ok) {
-      alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = '../../pages/utils/login.html';
+      showToast('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', 'success');
+      setTimeout(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '../../pages/utils/login.html';
+      }, 1200);
     } else {
-      alert(data.message || 'Lỗi đổi mật khẩu');
+      showToast(data.message || 'Lỗi đổi mật khẩu', 'error');
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   } finally {
     btn.innerHTML = 'Xác nhận đổi';
     btn.disabled = false;

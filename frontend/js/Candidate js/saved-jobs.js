@@ -1,5 +1,6 @@
 import BASE_URL from '../utils/url.js';
 import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
+import { showConfirmToast, showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -145,22 +146,28 @@ function renderSavedJobs(savedJobs) {
 }
 
 window.unsaveJob = async function(jobId) {
-  if(confirm('Bạn có chắc chắn muốn bỏ lưu việc làm này?')) {
-    try {
-      const res = await fetch(`${API_URL}/jobs/save-job/${jobId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (res.ok) {
-        fetchSavedJobs(); 
-      } else {
-        const err = await res.json();
-        alert('Lỗi: ' + (err.message || 'Không thể bỏ lưu'));
-      }
-    } catch (err) {
-      alert('Lỗi kết nối: ' + err.message);
+  const confirmed = await showConfirmToast('Bạn có chắc chắn muốn bỏ lưu việc làm này?', {
+    title: 'Bỏ lưu việc làm',
+    confirmText: 'Bỏ lưu',
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API_URL}/jobs/save-job/${jobId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      showToast('Đã bỏ lưu việc làm.', 'success');
+      fetchSavedJobs();
+    } else {
+      const err = await res.json();
+      showToast(err.message || 'Không thể bỏ lưu', 'error');
     }
+  } catch (err) {
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 

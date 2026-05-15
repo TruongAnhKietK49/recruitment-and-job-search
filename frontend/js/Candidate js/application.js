@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { showConfirmToast, showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -101,19 +102,26 @@ function renderApplications(apps) {
 }
 
 window.deleteApplication = async function(appId) {
-  if (!confirm('Bạn có chắc muốn hủy/xóa đơn ứng tuyển này?')) return;
+  const confirmed = await showConfirmToast('Bạn có chắc muốn hủy/xóa đơn ứng tuyển này?', {
+    title: 'Hủy đơn ứng tuyển',
+    confirmText: 'Hủy đơn',
+  });
+
+  if (!confirmed) return;
+
   try {
     const res = await fetch(`${API_URL}/applications/${appId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) {
+      showToast('Đã hủy đơn ứng tuyển.', 'success');
       fetchApplications();
     } else {
-      alert('Không thể xóa đơn ứng tuyển này');
+      showToast('Không thể xóa đơn ứng tuyển này.', 'error');
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 

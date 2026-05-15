@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { showConfirmToast, showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -89,11 +90,12 @@ window.createCV = async function(data) {
       fetchCVs();
       bootstrap.Modal.getInstance(document.getElementById('createCVModal')).hide();
       document.getElementById('createCVForm').reset();
+      showToast("Tạo CV thành công.", "success");
     } else {
-      alert("Lỗi khi tạo CV!");
+      showToast("Lỗi khi tạo CV!", "error");
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 
@@ -107,28 +109,36 @@ window.updateCV = async function(id, data) {
     if (res.ok) {
       fetchCVs();
       bootstrap.Modal.getInstance(document.getElementById('editCVModal')).hide();
+      showToast("Cập nhật CV thành công.", "success");
     } else {
-      alert("Lỗi khi cập nhật CV!");
+      showToast("Lỗi khi cập nhật CV!", "error");
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 
 window.deleteCV = async function(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa CV này?')) return;
+  const confirmed = await showConfirmToast('Bạn có chắc chắn muốn xóa CV này?', {
+    title: 'Xóa CV',
+    confirmText: 'Xóa CV',
+  });
+
+  if (!confirmed) return;
+
   try {
     const res = await fetch(`${API_URL}/resumes/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) {
+      showToast("Đã xóa CV.", "success");
       fetchCVs();
     } else {
-      alert("Lỗi khi xóa CV!");
+      showToast("Lỗi khi xóa CV!", "error");
     }
   } catch (err) {
-    alert('Lỗi kết nối: ' + err.message);
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 
@@ -136,7 +146,10 @@ document.getElementById('saveCVBtn').addEventListener('click', () => {
   const form = document.getElementById('createCVForm');
   const title = form.title.value;
   const fileUrl = form.fileUrl.value;
-  if (!title || !fileUrl) return alert('Vui lòng điền đầy đủ thông tin');
+  if (!title || !fileUrl) {
+    showToast('Vui lòng điền đầy đủ thông tin', 'warning');
+    return;
+  }
   window.createCV({ title, fileUrl });
 });
 
@@ -176,7 +189,10 @@ window.openEditModal = function(id, title, url) {
     
     modal.querySelector('#updateCVBtn').addEventListener('click', () => {
       const form = modal.querySelector('#editCVForm');
-      if (!form.title.value || !form.fileUrl.value) return alert('Vui lòng điền đủ thông tin');
+      if (!form.title.value || !form.fileUrl.value) {
+        showToast('Vui lòng điền đủ thông tin', 'warning');
+        return;
+      }
       window.updateCV(id, { title: form.title.value, fileUrl: form.fileUrl.value });
     });
   }

@@ -1,4 +1,5 @@
 import BASE_URL from '../utils/url.js';
+import { showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let jobsData = [];
@@ -177,25 +178,28 @@ async function refreshJobsView() {
 
 window.toggleSaveJob = async function (jobId, btnElement) {
   if (!token) {
-    alert('Vui lòng đăng nhập để lưu việc làm!');
-    window.location.href = '../../pages/utils/login.html';
+    showToast('Vui lòng đăng nhập để lưu việc làm!', 'warning');
+    setTimeout(() => {
+      window.location.href = '../../pages/utils/login.html';
+    }, 800);
     return;
   }
 
   if (!isCandidate) {
-    alert('Chỉ tài khoản Ứng viên mới có thể lưu việc làm!');
+    showToast('Chỉ tài khoản Ứng viên mới có thể lưu việc làm!', 'warning');
     return;
   }
 
   const icon = btnElement.querySelector('i');
-  const isCurrentlySaved = savedJobIds.includes(jobId);
+  const isCurrentlySaved = savedJobIds.map(id => id.toString()).includes(jobId.toString());
 
   try {
     if (isCurrentlySaved) {
       await requestApi(`/jobs/save-job/${jobId}`, { method: 'DELETE' });
-      savedJobIds = savedJobIds.filter(id => id !== jobId);
+      savedJobIds = savedJobIds.filter(id => id.toString() !== jobId.toString());
 
       icon.className = 'bi bi-heart text-muted fs-5';
+      showToast('Đã bỏ lưu việc làm.', 'info');
     } else {
       await requestApi(`/jobs/save-job`, {
         method: 'POST',
@@ -203,9 +207,10 @@ window.toggleSaveJob = async function (jobId, btnElement) {
       });
       savedJobIds.push(jobId);
       icon.className = 'bi bi-heart-fill text-danger fs-5';
+      showToast('Đã lưu việc làm.', 'success');
     }
   } catch (err) {
-    alert('Lỗi: Không thể cập nhật trạng thái lưu việc làm.');
+    showToast('Không thể cập nhật trạng thái lưu việc làm.', 'error');
   }
 };
 
@@ -432,27 +437,29 @@ function renderJobsPagination() {
     return;
   }
   
-  let html = '';
+  const pageItems = getPaginationItems(currentPage, totalPages);
+  const renderPageButton = (page, label = page, disabled = false) => `
+    <li class="page-item ${disabled ? 'disabled' : ''} ${currentPage === page ? 'active' : ''}">
+      <a class="page-link" href="#" ${disabled ? '' : `data-page="${page}"`}>${label}</a>
+    </li>
+  `;
 
-  for (let i = 1; i <= totalPages; i++) {
-    if (totalPages > 5) {
-      if (i === 4 && currentPage < totalPages - 2) {
-        html += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
-        continue;
-      }
-      if (i > 3 && i < totalPages - 1 && i !== currentPage) {
-        continue;
-      }
+  let html = renderPageButton(currentPage - 1, '&laquo;', currentPage === 1);
+
+  pageItems.forEach(item => {
+    if (item === 'ellipsis') {
+      html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      return;
     }
 
-    html += `<li class="page-item ${currentPage === i ? 'active' : ''}">
-              <a class="page-link" href="#" data-page="${i}">${i}</a>
-            </li>`;
-  }
+    html += renderPageButton(item);
+  });
+
+  html += renderPageButton(currentPage + 1, '&raquo;', currentPage === totalPages);
   
   pagination.innerHTML = html;
 
-  $$('.page-link', pagination).forEach(link => {
+  $$('.page-link[data-page]', pagination).forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = parseInt(link.getAttribute('data-page'));
@@ -467,6 +474,34 @@ function renderJobsPagination() {
         }
       }
     });
+  });
+}
+
+function getPaginationItems(page, total) {
+  const safeTotal = Math.max(Number(total) || 1, 1);
+  const safePage = Math.min(Math.max(Number(page) || 1, 1), safeTotal);
+
+  if (safeTotal <= 7) {
+    return Array.from({ length: safeTotal }, (_, index) => index + 1);
+  }
+
+  const visiblePages = new Set([1, safeTotal, safePage, safePage - 1, safePage + 1]);
+
+  if (safePage <= 4) {
+    [2, 3, 4, 5].forEach(item => visiblePages.add(item));
+  }
+
+  if (safePage >= safeTotal - 3) {
+    [safeTotal - 4, safeTotal - 3, safeTotal - 2, safeTotal - 1].forEach(item => visiblePages.add(item));
+  }
+
+  const pages = [...visiblePages]
+    .filter(item => item >= 1 && item <= safeTotal)
+    .sort((a, b) => a - b);
+
+  return pages.flatMap((item, index) => {
+    if (index === 0) return [item];
+    return item - pages[index - 1] > 1 ? ['ellipsis', item] : [item];
   });
 }
 

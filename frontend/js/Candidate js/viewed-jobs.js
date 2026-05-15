@@ -1,5 +1,6 @@
 import BASE_URL from '../utils/url.js';
 import { injectApplyModal, setupApplyModal } from '../utils/applyModal.js';
+import { showConfirmToast, showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 let token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -145,22 +146,28 @@ function renderViewedJobs(historyData) {
 }
 
 window.deleteViewHistory = async function(historyId) {
-  if(confirm('Xóa công việc này khỏi lịch sử xem?')) {
-    try {
-      const res = await fetch(`${API_URL}/jobs/view-history/${historyId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (res.ok) {
-        fetchViewedJobs(); 
-      } else {
-        const err = await res.json();
-        alert('Lỗi: ' + (err.message || 'Không thể xóa lịch sử'));
-      }
-    } catch (err) {
-      alert('Lỗi kết nối: ' + err.message);
+  const confirmed = await showConfirmToast('Xóa công việc này khỏi lịch sử xem?', {
+    title: 'Xóa lịch sử xem',
+    confirmText: 'Xóa',
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${API_URL}/jobs/view-history/${historyId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      showToast('Đã xóa khỏi lịch sử xem.', 'success');
+      fetchViewedJobs();
+    } else {
+      const err = await res.json();
+      showToast(err.message || 'Không thể xóa lịch sử', 'error');
     }
+  } catch (err) {
+    showToast('Lỗi kết nối: ' + err.message, 'error');
   }
 }
 

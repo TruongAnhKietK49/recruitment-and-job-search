@@ -1,5 +1,6 @@
 // js/utils/applyModal.js
 import BASE_URL from './url.js';
+import { showToast } from '../components/toast.js';
 const API_URL = `${BASE_URL}/api`;
 
 export function injectApplyModal() {
@@ -69,8 +70,10 @@ let currentJobId = null;
 
 export async function setupApplyModal(jobId, token) {
     if (!token) {
-        alert("Vui lòng đăng nhập để ứng tuyển!");
-        window.location.href = '../../pages/utils/login.html';
+        showToast("Vui lòng đăng nhập để ứng tuyển!", "warning");
+        setTimeout(() => {
+            window.location.href = '../../pages/utils/login.html';
+        }, 800);
         return;
     }
 
@@ -107,7 +110,7 @@ export async function setupApplyModal(jobId, token) {
         const coverLetter = document.getElementById('coverLetter').value;
 
         if (!selectedCvId) {
-            alert("Vui lòng chọn một bản CV!");
+            showToast("Vui lòng chọn một bản CV!", "warning");
             return;
         }
 
@@ -130,9 +133,9 @@ export async function setupApplyModal(jobId, token) {
                 window.dispatchEvent(new CustomEvent('applySuccess', { detail: { jobId: currentJobId } }));
             } else {
                 const data = await res.json();
-                alert(data.message || "Lỗi ứng tuyển");
+                showToast(data.message || "Lỗi ứng tuyển", "error");
             }
-        } catch (err) { alert("Lỗi kết nối"); }
+        } catch (err) { showToast("Lỗi kết nối", "error"); }
         finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-send me-2"></i> Nộp hồ sơ';
