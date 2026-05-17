@@ -44,7 +44,14 @@ function getCandidateNavGroup(page = "") {
 }
 
 function setActiveCandidateNav() {
-  const currentPage = normalizePagePath(window.location.pathname);
+  const pathname = decodeURIComponent(window.location.pathname).toLowerCase();
+
+  let currentPage = normalizePagePath(window.location.pathname);
+
+  if (pathname.endsWith("/candidate pages/") || pathname.endsWith("/candidate pages") || currentPage === "candidate pages") {
+    currentPage = "index";
+  }
+
   const currentGroup = getCandidateNavGroup(currentPage);
 
   document.querySelectorAll(".job-navbar .nav-link").forEach((link) => {
