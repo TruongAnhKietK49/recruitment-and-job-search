@@ -1,9 +1,69 @@
+function getStoredValue(key) {
+  const sessionValue = sessionStorage.getItem(key);
+  const localValue = localStorage.getItem(key);
+
+  const value = sessionValue || localValue;
+
+  if (!value || value === "null" || value === "undefined") {
+    return null;
+  }
+
+  return value;
+}
+
+function getStoredUser() {
+  const userStr = getStoredValue("user");
+
+  if (!userStr) return null;
+
+  try {
+    return JSON.parse(userStr);
+  } catch (error) {
+    console.error("Lỗi parse user:", error);
+    return null;
+  }
+}
+
+function getStoredToken() {
+  return getStoredValue("token");
+}
+
+function normalizePagePath(path = "") {
+  return decodeURIComponent(path).toLowerCase().split("?")[0].split("#")[0].split("/").filter(Boolean).pop()?.replace(".html", "").trim() || "";
+}
+
+function getCandidateNavGroup(page = "") {
+  const groups = {
+    index: ["index", "job-detail", "search"],
+    companies: ["companies", "company-detail"],
+    "my-cvs": ["my-cvs"],
+    blog: ["blog", "blog-detail"],
+  };
+
+  return Object.entries(groups).find(([, pages]) => pages.includes(page))?.[0] || page;
+}
+
+function setActiveCandidateNav() {
+  const currentPage = normalizePagePath(window.location.pathname);
+  const currentGroup = getCandidateNavGroup(currentPage);
+
+  document.querySelectorAll(".job-navbar .nav-link").forEach((link) => {
+    const href = link.getAttribute("href");
+    const linkPage = normalizePagePath(href);
+    const linkGroup = getCandidateNavGroup(linkPage);
+
+    link.classList.toggle("active", Boolean(linkGroup) && linkGroup === currentGroup);
+  });
+}
+
 async function loadNavbar() {
   try {
     const res = await fetch("../../pages/utils/navbarCandidate.html");
     const data = await res.text();
+
     document.getElementById("navbar").innerHTML = data;
 
+    setActiveCandidateNav();
     updateNavbarAuth();
   } catch (error) {
     console.error("Lỗi load navbar:", error);
@@ -11,17 +71,13 @@ async function loadNavbar() {
 }
 
 function updateNavbarAuth() {
-  let token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  if (token === 'null' || token === 'undefined') token = null;
+  const token = getStoredToken();
+  const user = getStoredUser();
 
-  let userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-  if (userStr === 'null' || userStr === 'undefined') userStr = null;
+  const authContainer = document.querySelector("#navbarNav .d-flex.align-items-center.gap-2");
 
-  const authContainer = document.querySelector('#navbarNav .d-flex.align-items-center.gap-2');
-
-  if (token && userStr && authContainer) {
-    const user = JSON.parse(userStr);
-    const shortName = user.fullName ? user.fullName.split(' ').pop() : "User";
+  if (token && user && authContainer) {
+    const shortName = user.fullName ? user.fullName.split(" ").pop() : "User";
 
     const avatarUrl = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(shortName)}&background=2f80ed&color=fff`;
 
@@ -43,14 +99,16 @@ function updateNavbarAuth() {
       </div>
     `;
 
-    //đăng xuất
-    const btnLogout = document.getElementById('btnLogout');
+    const btnLogout = document.getElementById("btnLogout");
+
     if (btnLogout) {
-      btnLogout.addEventListener('click', (e) => {
-        e.preventDefault();
+      btnLogout.addEventListener("click", (event) => {
+        event.preventDefault();
+
         localStorage.clear();
         sessionStorage.clear();
-        window.location.href = '../../pages/utils/login.html'; 
+
+        window.location.href = "../../pages/utils/login.html";
       });
     }
   }

@@ -2,14 +2,28 @@ const getStoredUser = () => {
   const sessionUser = sessionStorage.getItem("user");
   const localUser = localStorage.getItem("user");
 
-  if (sessionUser) return JSON.parse(sessionUser);
-  if (localUser) return JSON.parse(localUser);
+  const userStr = sessionUser || localUser;
 
-  return null;
+  if (!userStr || userStr === "null" || userStr === "undefined") {
+    return null;
+  }
+
+  try {
+    return JSON.parse(userStr);
+  } catch (error) {
+    console.error("Lỗi parse admin user:", error);
+    return null;
+  }
 };
 
 const getStoredToken = () => {
-  return sessionStorage.getItem("token") || localStorage.getItem("token");
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+
+  if (!token || token === "null" || token === "undefined") {
+    return null;
+  }
+
+  return token;
 };
 
 const user = getStoredUser();
@@ -22,14 +36,18 @@ if (!token) {
   window.location.href = "../Candidate Pages/index.html";
 }
 
-function setActiveSidebarLink() {
-  const currentPage = window.location.pathname.split("/").pop();
+function normalizePagePath(path = "") {
+  return decodeURIComponent(path).toLowerCase().split("?")[0].split("#")[0].split("/").filter(Boolean).pop()?.replace(".html", "").trim() || "";
+}
+
+function setActiveSidebar() {
+  const currentPage = normalizePagePath(window.location.pathname);
 
   document.querySelectorAll(".sidebar .menu-link").forEach((link) => {
     const href = link.getAttribute("href");
-    const linkPage = href?.split("/").pop();
+    const linkPage = normalizePagePath(href);
 
-    link.classList.toggle("active", linkPage === currentPage);
+    link.classList.toggle("active", Boolean(linkPage) && linkPage === currentPage);
   });
 }
 
@@ -62,7 +80,7 @@ async function loadNavbar() {
       adminName.innerText = user.fullName;
     }
 
-    setActiveSidebarLink();
+    setActiveSidebar();
     bindLogoutEvent();
   } catch (error) {
     console.error("Lỗi load navbar:", error);
