@@ -1,4 +1,5 @@
 import URL from "../utils/url.js";
+import { hidePageLoading, showPageLoading } from "./pageLoader.js";
 
 let dataCompanies = [];
 let myCompanyData = null;
@@ -782,8 +783,17 @@ function bindStaticEvents() {
 }
 
 async function initCompanyManagementPage() {
-  bindStaticEvents();
-  await refreshAllCompanyViews();
+  showPageLoading();
+
+  try {
+    bindStaticEvents();
+    await refreshAllCompanyViews();
+  } catch (error) {
+    console.error("Init company management page failed:", error);
+    showToast("Không thể tải dữ liệu công ty. Vui lòng thử lại.", "error");
+  } finally {
+    hidePageLoading();
+  }
 }
 
 initCompanyManagementPage();

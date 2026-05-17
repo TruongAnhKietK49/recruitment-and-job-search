@@ -520,22 +520,30 @@ export const recommendSmartJobs = async (req, res) => {
     }
 
     const profile = await CandidateProfile.findOne({ userId }).populate("skills", "skillName");
+
     if (!profile) {
       return res.status(404).json({ message: "Vui lòng cập nhật Profile" });
     }
 
-    const userSkills = profile.skills.map((s) => s.skillName).join(", ");
+    const userSkills = Array.isArray(profile.skills) ? profile.skills.map((skill) => skill.skillName).filter(Boolean) : [];
+
+    const userSkillsText = userSkills.join(", ");
+    const expectedSalary = Number(profile.expectedSalary || 0);
+    const preferredLocation = profile.address || "";
 
     const [viewHistory, applications] = await Promise.all([
       JobViewHistory.find({ userId }).sort({ viewDate: -1 }).limit(5).populate("jobId", "title category"),
+
       Application.find({ userId }).populate("jobId", "title"),
     ]);
 
     const appliedJobIds = applications.map((app) => app.jobId?._id?.toString()).filter(Boolean);
+
     const viewedJobsText = viewHistory
-      .map((v) => v.jobId?.title)
+      .map((view) => view.jobId?.title)
       .filter(Boolean)
       .join(", ");
+
     const appliedJobsText = applications
       .map((app) => app.jobId?.title)
       .filter(Boolean)
@@ -545,83 +553,190 @@ export const recommendSmartJobs = async (req, res) => {
       _id: { $nin: appliedJobIds },
       status: "approved",
     })
-      .limit(20)
-      .populate("companyId", "companyName")
-      .select("_id title category salaryMin salaryMax requirements jobType experience location");
+      .limit(30)
+      .populate("companyId", "companyName logoUrl address")
+      .select("_id title category salaryMin salaryMax requirements jobType experience location companyId");
 
-    if (potentialJobs.length === 0) {
+    if (!potentialJobs.length) {
       return res.status(200).json([]);
     }
 
     const jobPool = potentialJobs.map((job) => ({
-      id: job._id.toString(),
+      jobId: job._id.toString(),
       title: job.title,
       category: job.category || "",
       jobType: job.jobType || "",
       experience: job.experience || "",
-      salary: `${job.salaryMin || 0} - ${job.salaryMax || 0}`,
-      requirements: job.requirements ? job.requirements.substring(0, 100) : "",
+      salaryMin: job.salaryMin || 0,
+      salaryMax: job.salaryMax || 0,
+      location: job.location || job.companyId?.address || "",
+      requirements: job.requirements ? job.requirements.substring(0, 300) : "",
     }));
 
-    const promptText = `
+    const buildFallbackRecommendations = () => {
+      const normalizeText = (value = "") =>
+        value
+          .toString()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+      const normalizedSkills = userSkills.map(normalizeText);
+      const normalizedLocation = normalizeText(preferredLocation);
+
+      return potentialJobs
+        .map((job) => {
+          const searchableText = normalizeText(
+            [job.title, job.category, job.requirements, job.description, job.experience, job.location, job.companyId?.address]
+              .filter(Boolean)
+              .join(" "),
+          );
+
+          const matchedSkills = normalizedSkills.filter((skill) => searchableText.includes(skill));
+
+          let score = 40;
+
+          score += matchedSkills.length * 12;
+
+          if (expectedSalary > 0 && Number(job.salaryMax || 0) >= expectedSalary * 0.8) {
+            score += 15;
+          }
+
+          const jobLocation = normalizeText(job.location || job.companyId?.address || "");
+          if (normalizedLocation && jobLocation && (jobLocation.includes(normalizedLocation) || normalizedLocation.includes(jobLocation))) {
+            score += 10;
+          }
+
+          if (job.experience) {
+            score += 5;
+          }
+
+          score = Math.min(score, 98);
+
+          const reasonParts = [];
+
+          if (matchedSkills.length) {
+            reasonParts.push(
+              `Phù hợp với kỹ năng: ${matchedSkills
+                .map((skill) => userSkills.find((s) => normalizeText(s) === skill) || skill)
+                .slice(0, 4)
+                .join(", ")}`,
+            );
+          }
+
+          if (expectedSalary > 0 && Number(job.salaryMax || 0) >= expectedSalary * 0.8) {
+            reasonParts.push("mức lương tương đối phù hợp với mong muốn");
+          }
+
+          if (!reasonParts.length) {
+            reasonParts.push("công việc có trạng thái đã duyệt và phù hợp để tham khảo");
+          }
+
+          return {
+            job,
+            score,
+            matchScore: `${score}%`,
+            aiReason: reasonParts.join(", ") + ".",
+          };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map(({ job, matchScore, aiReason }) => ({
+          job,
+          matchScore,
+          aiReason,
+        }));
+    };
+
+    let finalRecommendations = [];
+
+    if (canUseAi(userId, 1)) {
+      const promptText = `
 Ứng viên:
-- Kỹ năng: ${userSkills || "Chưa cập nhật"}
+- Kỹ năng: ${userSkillsText || "Chưa cập nhật"}
 - Lương mong muốn: ${profile.expectedSalary || "Không rõ"}
+- Khu vực mong muốn: ${preferredLocation || "Không rõ"}
 - Đã xem: ${viewedJobsText || "Không có"}
 - Đã ứng tuyển: ${appliedJobsText || "Không có"}
 
-Danh sách ${jobPool.length} công việc (JSON):
+Danh sách ${jobPool.length} công việc:
 ${JSON.stringify(jobPool)}
 
-Chọn đúng 3 công việc phù hợp nhất với ứng viên. Trả về JSON array.
+Hãy chọn đúng 3 công việc phù hợp nhất với ứng viên.
+Bắt buộc trả về JSON array, mỗi phần tử có dạng:
+{
+  "jobId": "id của công việc trong danh sách",
+  "matchScore": "ví dụ 92%",
+  "reason": "lý do phù hợp ngắn gọn"
+}
+
+Chỉ được dùng jobId có trong danh sách trên.
 `.trim();
 
-    if (!canUseAi(userId, 1)) {
-      return res.status(429).json({
-        message: "Hôm nay AI đã hết lượt miễn phí. Bạn có thể thử lại vào ngày mai.",
-      });
-    }
-
-    const aiResponse = await withTimeout(
-      ai.models.generateContent({
-        model: RECOMMEND_MODEL,
-        contents: promptText,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                jobId: { type: Type.STRING },
-                matchScore: { type: Type.STRING, description: "Ví dụ: 92%" },
-                reason: { type: Type.STRING, description: "Lý do phù hợp ngắn gọn (1-2 câu)" },
+      try {
+        const aiResponse = await withTimeout(
+          ai.models.generateContent({
+            model: RECOMMEND_MODEL,
+            contents: promptText,
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    jobId: { type: Type.STRING },
+                    matchScore: {
+                      type: Type.STRING,
+                      description: "Ví dụ: 92%",
+                    },
+                    reason: {
+                      type: Type.STRING,
+                      description: "Lý do phù hợp ngắn gọn",
+                    },
+                  },
+                  required: ["jobId", "matchScore", "reason"],
+                },
               },
-              required: ["jobId", "matchScore", "reason"],
             },
-          },
-        },
-      }),
-      20000,
-      "AI recommend",
-    );
+          }),
+          20000,
+          "AI recommend",
+        );
 
-    let recommendedData = [];
-    try {
-      recommendedData = JSON.parse(aiResponse.text);
-      if (!Array.isArray(recommendedData)) recommendedData = [];
-    } catch (parseError) {
-      console.error("Lỗi parse JSON AI recommend:", parseError);
-      return res.status(500).json({ message: "Lỗi đọc dữ liệu AI" });
+        let recommendedData = [];
+
+        try {
+          recommendedData = JSON.parse(aiResponse.text);
+          if (!Array.isArray(recommendedData)) recommendedData = [];
+        } catch (parseError) {
+          console.error("Lỗi parse JSON AI recommend:", parseError);
+          recommendedData = [];
+        }
+
+        finalRecommendations = recommendedData
+          .map((aiMatch) => {
+            const matchedJobId = aiMatch.jobId || aiMatch.id;
+            const fullJobData = potentialJobs.find((job) => job._id.toString() === matchedJobId);
+
+            if (!fullJobData) return null;
+
+            return {
+              job: fullJobData,
+              matchScore: aiMatch.matchScore || "Phù hợp",
+              aiReason: aiMatch.reason || "Công việc này phù hợp với hồ sơ và kỹ năng của bạn.",
+            };
+          })
+          .filter(Boolean)
+          .slice(0, 3);
+      } catch (aiError) {
+        console.error("AI recommend failed, fallback scoring will be used:", aiError);
+      }
     }
 
-    const finalRecommendations = recommendedData
-      .map((aiMatch) => {
-        const fullJobData = potentialJobs.find((j) => j._id.toString() === aiMatch.jobId);
-        return fullJobData ? { job: fullJobData, matchScore: aiMatch.matchScore, aiReason: aiMatch.reason } : null;
-      })
-      .filter(Boolean)
-      .slice(0, 3);
+    if (!finalRecommendations.length) {
+      finalRecommendations = buildFallbackRecommendations();
+    }
 
     serverRecommendCache.set(userId.toString(), {
       data: finalRecommendations,

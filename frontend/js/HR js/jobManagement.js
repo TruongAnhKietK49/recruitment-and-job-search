@@ -227,14 +227,14 @@ function fillJobSummary(data) {
 }
 
 function renderPostCard(post) {
-  const status = getStatusInfo(post.status);
   return `
     <div class="recent-post-item">
       <div>
         <div class="recent-post-title">${post.title}</div>
-        <div class="recent-post-meta">${post.category} • ${post.jobType} • Hạn nộp: ${post.deadline}</div>
+        <div class="recent-post-meta">
+          ${post.category} • ${post.jobType} • Hạn nộp: ${formatDate(post.deadline)}
+        </div>
       </div>
-      <span class="badge ${status.badgeClass}">${status.label}</span>
     </div>
   `;
 }
@@ -252,11 +252,24 @@ document.querySelectorAll("[data-tab-target]").forEach((button) => {
 });
 
 // Render current posts
-function renderCurrentPosts(posts) {
+function renderCurrentPosts(posts = []) {
   const currentPosts = document.querySelector(".recent-post-list");
-  currentPosts.innerHTML = "";
+  if (!currentPosts) return;
 
-  if (!posts.length) return;
+  if (!posts.length) {
+    currentPosts.innerHTML = `
+      <div class="empty-state mt-3">
+        <div class="empty-icon">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="empty-title">Chưa có bài đăng nào</div>
+        <div class="empty-text">
+          Công ty của bạn chưa có bài đăng tuyển dụng.
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   currentPosts.innerHTML = posts.map((post) => renderPostCard(post)).join("");
 }
@@ -527,7 +540,17 @@ function renderJobs(jobs) {
   if (!jobList) return;
 
   if (!jobs || jobs.length === 0) {
-    jobList.innerHTML = `<p>Không có công việc nào.</p>`;
+    jobList.innerHTML = `
+    <div class="empty-state mt-4">
+      <div class="empty-icon">
+        <i class="bi bi-briefcase"></i>
+      </div>
+      <div class="empty-title">Không có bài đăng phù hợp</div>
+      <div class="empty-text">
+        Không tìm thấy bài đăng nào theo bộ lọc hiện tại.
+      </div>
+    </div>
+  `;
     return;
   }
 
@@ -1114,30 +1137,59 @@ function initApprovalFilters(jobs) {
   applyApprovalFilters(true);
 }
 
-async function initPage() {
-  bindEvents();
+function showPageLoading() {
+  document.body.classList.add("page-loading");
 
-  dataCompany = await loadMyCompany();
-  setManagePostsMenuDisabled(!dataCompany?._id);
-
-  if (!dataCompany?._id) {
-    showToast("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.", "warning");
-
-    setTimeout(() => {
-      window.location.href = "./companyManagement.html";
-    }, 1200);
-
-    return;
+  const pageLoader = document.getElementById("pageLoader");
+  if (pageLoader) {
+    pageLoader.classList.remove("is-hidden");
   }
+}
 
-  dataJobs = await loadMyCompanyJobs(dataCompany._id);
+function hidePageLoading() {
+  document.body.classList.remove("page-loading");
 
-  dataSummary = await getJobSummary(dataCompany._id);
-  fillJobSummary(dataSummary);
+  const pageLoader = document.getElementById("pageLoader");
+  if (pageLoader) {
+    pageLoader.classList.add("is-hidden");
+  }
+}
+renderCurrentPosts;
 
-  renderCurrentPosts(dataJobs.slice(0, 5));
+async function initPage() {
+  showPageLoading();
 
-  initPostFilters(dataJobs);
-  initApprovalFilters(dataJobs);
+  try {
+    bindEvents();
+
+    dataCompany = await loadMyCompany();
+    setManagePostsMenuDisabled(!dataCompany?._id);
+
+    if (!dataCompany?._id) {
+      showToast("Bạn chưa có công ty nên không thể truy cập mục Quản lý bài đăng.", "warning");
+
+      setTimeout(() => {
+        window.location.href = "./companyManagement.html";
+      }, 1200);
+
+      return;
+    }
+
+    const [jobs, summary] = await Promise.all([loadMyCompanyJobs(dataCompany._id), getJobSummary(dataCompany._id)]);
+
+    dataJobs = jobs || [];
+    dataSummary = summary;
+
+    fillJobSummary(dataSummary);
+    renderCurrentPosts(dataJobs.slice(0, 5));
+
+    initPostFilters(dataJobs);
+    initApprovalFilters(dataJobs);
+  } catch (error) {
+    console.error("Init job management page failed:", error);
+    showToast("Không thể tải dữ liệu bài đăng. Vui lòng thử lại.", "error");
+  } finally {
+    hidePageLoading();
+  }
 }
 initPage();

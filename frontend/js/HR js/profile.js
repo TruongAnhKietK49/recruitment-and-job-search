@@ -1,5 +1,6 @@
 import URL from "../utils/url.js";
 import Toastify from "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify-es.js";
+import { hidePageLoading, showPageLoading } from "./pageLoader.js";
 
 let user = sessionStorage.getItem("user")
   ? JSON.parse(sessionStorage.getItem("user"))
@@ -112,7 +113,6 @@ function showToast(msg) {
   }).showToast();
 }
 
-
 async function fillInfo() {
   const data = await loadInfo();
   let status = data.profileData?.verifiedStatus || "pending";
@@ -138,7 +138,7 @@ async function fillInfo() {
   document.querySelector(".edit-position").value = data.profileData?.position || "";
   document.querySelector(".edit-email").value = data.user.email;
   document.querySelector(".edit-phone").value = data.user.phone;
-  document.querySelector(".edit-birthday").value = data.user.birthday.split("T")[0] || "";
+  document.querySelector(".edit-birthday").value = data.user.birthday ? data.user.birthday.split("T")[0] : "";
   document.querySelector(".edit-gender").value = data.user.gender;
   document.querySelector(".edit-address").value = data.profileData?.address || "";
   document.querySelector(".edit-header").value = data.profileData?.header || "";
@@ -146,6 +146,15 @@ async function fillInfo() {
 document.getElementById("updateBtn").addEventListener("click", handleUpdate);
 document.getElementById("recoverBtn").addEventListener("click", fillInfo);
 
-document.addEventListener("DOMContentLoaded", () => {
-  fillInfo();
+document.addEventListener("DOMContentLoaded", async () => {
+  showPageLoading();
+
+  try {
+    await fillInfo();
+  } catch (error) {
+    console.error("Init HR profile page failed:", error);
+    showToast("Không thể tải hồ sơ HR. Vui lòng thử lại.");
+  } finally {
+    hidePageLoading();
+  }
 });

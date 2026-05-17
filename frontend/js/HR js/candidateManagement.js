@@ -1,4 +1,5 @@
 import URL from "../utils/url.js";
+import { hidePageLoading, showPageLoading } from "./pageLoader.js";
 
 const token = localStorage.getItem("token") || sessionStorage.getItem("token") || null;
 const user = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user") || "null");
@@ -88,14 +89,23 @@ function showToast(message, type = "info") {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await initCandidateManagement();
-  initBtnOverviewActions();
-  initCandidateDetailActions();
-  initStatusBoardActions();
-  bindFilterEvents();
-  initAIRecommend();
-});
+  showPageLoading();
 
+  try {
+    await initCandidateManagement();
+
+    initBtnOverviewActions();
+    initCandidateDetailActions();
+    initStatusBoardActions();
+    bindFilterEvents();
+    initAIRecommend();
+  } catch (error) {
+    console.error("Init candidate management page failed:", error);
+    showToast("Không thể tải dữ liệu ứng viên. Vui lòng thử lại.", "error");
+  } finally {
+    hidePageLoading();
+  }
+});
 // Load company
 async function loadMyCompany() {
   try {

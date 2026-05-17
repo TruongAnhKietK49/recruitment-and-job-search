@@ -27,6 +27,61 @@ body {
   color: var(--dark);
 }
 
+body.page-loading {
+  overflow: hidden;
+}
+
+body.page-loading .main-content {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #f5f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-loader-card {
+  min-width: 320px;
+  padding: 32px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #d8e6fb;
+  box-shadow: 0 16px 40px rgba(47, 128, 237, 0.12);
+  text-align: center;
+}
+
+.page-loader-title {
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.page-loader-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #667085;
+}
+
+.page-loader.is-hidden {
+  display: none;
+}
+
+.main-content {
+  transition: opacity 0.2s ease;
+}
+
+body:not(.page-loading) .main-content {
+  visibility: visible;
+  opacity: 1;
+}
+
 .dashboard-wrap {
   min-height: 100vh;
   background: var(--bg-page);

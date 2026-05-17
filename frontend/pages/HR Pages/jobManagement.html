@@ -10,11 +10,19 @@
   <link rel="stylesheet" href="../../css/HR css/jobManagement.css" />
 </head>
 
-<body>
+<body class="page-loading">
+  <div class="page-loader" id="pageLoader">
+    <div class="page-loader-card">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div class="page-loader-title">Đang tải dữ liệu bài đăng...</div>
+      <div class="page-loader-text">Vui lòng chờ trong giây lát</div>
+    </div>
+  </div>
+
   <div class="dashboard-wrap">
     <div id="navbar"></div>
 
-    <main class="main-content">
+    <main class="main-content" id="pageContent">
       <div class="topbar">
         <div>
           <h1 class="page-title">Quản lý bài đăng</h1>
