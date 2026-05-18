@@ -1,5 +1,10 @@
 <aside class="sidebar">
-  <div class="brand d-flex flex-column">
+  <div class="brand">
+    <div class="title">
+      <i class="bi bi-briefcase"></i>
+      <span>VIECHUB Website</span>
+    </div>
+
     <div class="notification-wrapper">
       <button class="notification-btn" id="notificationBtn" type="button">
         <i class="bi bi-bell"></i>
@@ -9,7 +14,9 @@
       <div class="notification-dropdown" id="notificationDropdown">
         <div class="notification-header">
           <p class="noti-title mb-0">Thông báo</p>
-          <button type="button" class="mark-all-read-btn" id="markAllReadBtn">Đánh dấu đã đọc</button>
+          <button type="button" class="mark-all-read-btn" id="markAllReadBtn">
+            Đánh dấu đã đọc
+          </button>
         </div>
 
         <ul id="notificationList" class="notification-list">
@@ -17,32 +24,27 @@
         </ul>
       </div>
     </div>
-    <div class="title">
-      <i class="bi bi-briefcase"></i>
-      <span>VIECHUB Website</span>
-    </div>
   </div>
 
-  <nav>
-    <!-- <a href="../HR Pages/dashboard.html" class="menu-link">
-      <i class="bi bi-house-door"></i>
-      <span>Dashboard</span>
-    </a> -->
+  <nav class="sidebar-nav">
     <a href="../HR Pages/jobManagement.html" class="menu-link" id="menu-manage-posts">
       <i class="bi bi-clipboard"></i>
       <span>Quản lý bài đăng</span>
     </a>
+
     <a href="../HR Pages/candidateManagement.html" class="menu-link">
       <i class="bi bi-people"></i>
       <span>Quản lý ứng viên</span>
     </a>
+
     <a href="../HR Pages/companyManagement.html" class="menu-link">
       <i class="bi bi-display"></i>
       <span>Thông tin công ty</span>
     </a>
+
     <a href="../HR Pages/profile.html" class="menu-link">
       <i class="bi bi-person"></i>
-      <span id="userName"></span>
+      <span>Hồ sơ cá nhân</span>
     </a>
   </nav>
 
@@ -81,7 +83,9 @@
       </div>
 
       <div class="ai-chat-body" id="aiChatBody">
-        <div class="ai-message ai">Xin chào. Tôi có thể giúp bạn lọc ứng viên phù hợp với vị trí công việc.</div>
+        <div class="ai-message ai">
+          Xin chào. Tôi có thể giúp bạn lọc ứng viên phù hợp với vị trí công việc.
+        </div>
 
         <div class="ai-quick-prompts" id="aiQuickPrompts">
           <button type="button" class="ai-quick-prompt" data-message="Hướng dẫn sử dụng">
@@ -110,101 +114,78 @@
 <style>
   .sidebar {
     font-family: "Inter", sans-serif;
-    width: var(--sidebar-width);
+    width: var(--sidebar-width, 300px);
+    height: 100vh;
     min-height: 100vh;
-    background: linear-gradient(180deg, var(--primary) 0%, #2b7ae4 100%);
+    background: linear-gradient(180deg, var(--primary, #4b82e8) 0%, #2b7ae4 100%);
     color: #fff;
-    padding: 20px 18px;
+    padding: 20px;
     position: fixed;
     left: 0;
     top: 0;
-    overflow: visible;
     z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 26px;
+    margin-bottom: 30px;
+    min-width: 0;
   }
 
-  .brand i {
+  .brand .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+    padding-right: 8px;
+  }
+
+  .brand .title i {
+    flex: 0 0 auto;
     font-size: 28px;
   }
 
-  .menu-link {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 18px;
-    padding: 14px 16px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    transition: 0.2s ease;
-  }
-
-  .menu-link:hover,
-  .menu-link.active {
-    background: rgba(69, 40, 197, 0.5);
-    color: #fff;
-  }
-
-  .menu-link i {
+  .brand .title span {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
     font-size: 22px;
-  }
-
-  .disabled-menu {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .sidebar-bottom {
-    position: absolute;
-    bottom: 24px;
-    left: 18px;
-    right: 18px;
-  }
-
-  @media (max-width: 991.98px) {
-    .sidebar {
-      position: relative;
-      width: 100%;
-      min-height: auto;
-    }
-
-    .sidebar-bottom {
-      position: static;
-      margin-top: 24px;
-    }
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .notification-wrapper {
     position: relative;
+    flex: 0 0 auto;
   }
 
   .notification-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.18);
-    border: none;
-    border-radius: 50%;
-    color: #fff;
     cursor: pointer;
-    z-index: 20;
   }
 
   .notification-btn i {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .badge {
@@ -225,10 +206,9 @@
 
   .notification-dropdown {
     display: none;
-    position: absolute;
-    top: 52px;
-    left: calc(100% + 12px);
-    /* xổ sang phải sidebar */
+    position: fixed;
+    top: 76px;
+    left: calc(var(--sidebar-width, 300px) + 16px);
     width: 320px;
     max-height: 420px;
     overflow-y: auto;
@@ -248,6 +228,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     margin-bottom: 8px;
   }
 
@@ -259,9 +240,10 @@
   .mark-all-read-btn {
     border: none;
     background: transparent;
-    color: var(--primary);
+    color: var(--primary, #2f80ed);
     font-size: 13px;
     cursor: pointer;
+    white-space: nowrap;
   }
 
   .notification-list {
@@ -307,6 +289,156 @@
     padding: 12px;
     text-align: center;
     color: #777;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .menu-link {
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    transition: 0.2s ease;
+  }
+
+  .menu-link:hover,
+  .menu-link.active {
+    background: rgba(69, 40, 197, 0.5);
+    color: #fff;
+  }
+
+  .menu-link i {
+    flex: 0 0 24px;
+    width: 24px;
+    text-align: center;
+    font-size: 22px;
+  }
+
+  .menu-link span {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .disabled-menu {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .sidebar-bottom {
+    position: static;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  .sidebar-user-card {
+    width: 100%;
+    padding: 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(10px);
+  }
+
+  .sidebar-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+
+  .sidebar-user-info:hover {
+    color: #fff;
+  }
+
+  .sidebar-user-avatar {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff, #dbeafe);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .sidebar-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sidebar-user-meta {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .sidebar-user-name {
+    max-width: 150px;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-user-role {
+    margin-top: 2px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.76);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-logout-btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .sidebar-logout-btn i {
+    font-size: 18px;
+  }
+
+  .sidebar-logout-btn:hover {
+    background: #ffffff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
   }
 
   .ai-chat-widget {
@@ -427,81 +559,6 @@
     cursor: pointer;
   }
 
-  .ai-candidate-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 12px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-  }
-
-  .ai-candidate-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .ai-candidate-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  .ai-candidate-score {
-    background: #eaf2ff;
-    color: #2f80ed;
-    font-weight: 700;
-    font-size: 13px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-
-  .ai-candidate-reason {
-    font-size: 13px;
-    color: #374151;
-    margin-bottom: 8px;
-  }
-
-  .ai-tag-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-
-  .ai-tag {
-    background: #f3f4f6;
-    color: #374151;
-    font-size: 12px;
-    border-radius: 999px;
-    padding: 4px 8px;
-  }
-
-  .ai-candidate-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .ai-candidate-btn {
-    border: none;
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    background: #2f80ed;
-    color: #fff;
-    text-decoration: none;
-  }
-
-  .ai-typing {
-    font-style: italic;
-    opacity: 0.75;
-  }
-
   .ai-quick-prompts {
     display: flex;
     flex-wrap: wrap;
@@ -534,100 +591,24 @@
     transform: none;
   }
 
-  .sidebar-user-card {
-    width: 100%;
-    padding: 14px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
-    backdrop-filter: blur(10px);
-  }
+  @media (max-width: 991.98px) {
+    .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      min-height: auto;
+    }
 
-  .sidebar-user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #fff;
-    text-decoration: none;
-    margin-bottom: 12px;
-  }
+    .notification-dropdown {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      left: auto;
+      width: min(320px, calc(100vw - 40px));
+    }
 
-  .sidebar-user-info:hover {
-    color: #fff;
-  }
-
-  .sidebar-user-avatar {
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: linear-gradient(135deg, #ffffff, #dbeafe);
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 800;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-  }
-
-  .sidebar-user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .sidebar-user-meta {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .sidebar-user-name {
-    max-width: 150px;
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1.25;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .sidebar-user-role {
-    margin-top: 2px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.76);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .sidebar-logout-btn {
-    width: 100%;
-    border: none;
-    border-radius: 14px;
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.95);
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.2s ease;
-  }
-
-  .sidebar-logout-btn i {
-    font-size: 18px;
-  }
-
-  .sidebar-logout-btn:hover {
-    background: #ffffff;
-    color: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+    .sidebar-bottom {
+      margin-top: 24px;
+    }
   }
 </style>
